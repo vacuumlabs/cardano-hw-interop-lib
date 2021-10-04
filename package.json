@@ -1,0 +1,50 @@
+{
+  "name": "cardano-hw-interop-lib",
+  "version": "1.0.0",
+  "files": [
+    "dist"
+  ],
+  "types": "dist/index.d.ts",
+  "description": "Library to make CBOR encoded Cardano transactions comply with CIP-0021",
+  "main": "dist/index.js",
+  "repository": "github:vacuumlabs/cardano-hw-interop-lib",
+  "keywords": [
+    "Cardano",
+    "CIP-0021"
+  ],
+  "author": "VacuumLabs <adalite@vacuumlabs.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/chai": "^4.2.22",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "^16.10.2",
+    "@typescript-eslint/eslint-plugin": "^4.32.0",
+    "@typescript-eslint/parser": "^4.32.0",
+    "bech32": "^2.0.0",
+    "chai": "^4.3.4",
+    "eslint": "^7.32.0",
+    "eslint-import-resolver-typescript": "^2.5.0",
+    "eslint-plugin-import": "^2.24.2",
+    "eslint-plugin-mocha": "^9.0.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-simple-import-sort": "^7.0.0",
+    "mocha": "^9.1.2",
+    "prettier": "^2.4.1",
+    "prettier-eslint": "^13.0.0",
+    "ts-node": "^10.2.1",
+    "typescript": "^4.4.3"
+  },
+  "dependencies": {
+    "cbor": "^8.1.0"
+  },
+  "bugs": {
+    "url": "https://github.com/vacuumlabs/cardano-hw-interop-lib/issues"
+  },
+  "homepage": "https://github.com/vacuumlabs/cardano-hw-interop-lib",
+  "scripts": {
+    "clean": "rm -rf dist/",
+    "build": "tsc -p tsconfig.json",
+    "eslint": "eslint . --max-warnings=0",
+    "test": "mocha -r ts-node/register test/**/*.test.ts"
+  }
+}
