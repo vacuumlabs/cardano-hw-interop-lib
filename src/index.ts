@@ -1,5 +1,7 @@
+import type { ValidationError } from './errors'
 import * as encoders from './txEncoders'
 import * as parsers from './txParsers'
+import { validateTx } from './txValidators'
 import type { RawTransaction, SignedTransaction, TransactionBody } from './types'
 import { decodeCbor, encodeToCbor } from './utils'
 
@@ -37,4 +39,29 @@ export const encodeSignedTx = (signedTx: SignedTransaction): Buffer => encodeToC
 export const encodeRawTx = (rawTx: RawTransaction): Buffer => encodeToCbor(
     encoders.encodeRawTx(rawTx)
 )
+
+/**
+ * Take a Buffer of CBOR encoded transaction body and validates it according to
+ * CIP-0021, returns an array of found validation errors.
+ *
+ * @param {Buffer} txBodyCbor The CBOR encoded transaction body
+ * @returns Found validation errors
+ */
+export const validateTxBody = (txBodyCbor: Buffer): ValidationError[] => {
+    const txBody = parseTxBody(txBodyCbor)
+    const canonicalTxBodyCbor = encodeTxBody(txBody)
+    return validateTx(txBodyCbor, canonicalTxBodyCbor, txBody)
+}
+
+export const validateSignedTx = (signedTxCbor: Buffer): ValidationError[] => {
+    const signedTx = parseSignedTx(signedTxCbor)
+    const canonicalSignedTxCbor = encodeSignedTx(signedTx)
+    return validateTx(signedTxCbor, canonicalSignedTxCbor, signedTx.body)
+}
+
+export const validateRawTx = (rawTxCbor: Buffer): ValidationError[] => {
+    const rawTx = parseRawTx(rawTxCbor)
+    const canonicalRawTxCbor = encodeRawTx(rawTx)
+    return validateTx(rawTxCbor, canonicalRawTxCbor, rawTx.body)
+}
 
