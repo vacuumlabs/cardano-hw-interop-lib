@@ -15,3 +15,5 @@ export const decodeCbor = (buffer: Buffer) => cbor.decode(buffer, {
     },
 })
 
+export const encodeToCbor = (x: any) => cbor.encodeOne(x, {canonical: true})
+
