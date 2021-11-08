@@ -1,6 +1,7 @@
 import type { ValidationError } from './errors'
 import * as encoders from './txEncoders'
 import * as parsers from './txParsers'
+import * as transformers from './txTransformers'
 import { validateTx } from './txValidators'
 import type { RawTransaction, SignedTransaction, TransactionBody } from './types'
 import { decodeCbor, encodeToCbor } from './utils'
@@ -64,4 +65,17 @@ export const validateRawTx = (rawTxCbor: Buffer): ValidationError[] => {
     const canonicalRawTxCbor = encodeRawTx(rawTx)
     return validateTx(rawTxCbor, canonicalRawTxCbor, rawTx.body)
 }
+
+/**
+ * Take a transaction body and apply non-destructive transformations on it
+ * to fix fixable validation errors. Returns a new transformed tx body.
+ *
+ * @param {TransactionBody} txBody
+ * @returns Transformed transaction body
+ */
+export const transformTxBody = transformers.transformTxBody
+
+export const transformSignedTx = transformers.transformSignedTx
+
+export const transformRawTx = transformers.transformRawTx
 
