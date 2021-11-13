@@ -28,6 +28,8 @@ export const DNS_NAME_MAX_LENGTH = 64
 export const PORT_MAX_SIZE = 65535
 
 export type Address = Buffer
+export type AddressKeyHash = FixlenBuffer<typeof ADDRESS_KEY_HASH_LENGTH>
+export type ScriptHash = FixlenBuffer<typeof SCRIPT_HASH_LENGTH>
 export type RewardAccount = FixlenBuffer<typeof REWARD_ACCOUNT_LENGTH>
 export type Coin = Uint
 export type Epoch = Uint
@@ -89,12 +91,12 @@ export enum StakeCredentialType {
 
 export type StakeCredentialAddress = {
     type: StakeCredentialType.ADDRESS_KEY_HASH,
-    hash: FixlenBuffer<typeof ADDRESS_KEY_HASH_LENGTH>,
+    hash: AddressKeyHash,
 }
 
 export type StakeCredentialScript = {
     type: StakeCredentialType.SCRIPT_HASH,
-    hash: FixlenBuffer<typeof SCRIPT_HASH_LENGTH>,
+    hash: ScriptHash,
 }
 
 export type StakeCredential = StakeCredentialAddress | StakeCredentialScript
@@ -159,7 +161,7 @@ export type PoolParams = {
     cost: Coin,
     margin: UnitInterval,
     rewardAccount: RewardAccount,
-    poolOwners: FixlenBuffer<typeof ADDRESS_KEY_HASH_LENGTH>[],
+    poolOwners: AddressKeyHash[],
     relays: Relay[],
     poolMetadata: PoolMetadata | null,
 }
@@ -227,4 +229,3 @@ export type RawTransaction = {
     nativeScriptWitnesses: Unparsed,
     auxiliaryData: Unparsed,
 }
-

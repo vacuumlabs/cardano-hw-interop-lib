@@ -269,14 +269,16 @@ export const parseSignedTx = (unparsedSignedTx: unknown): SignedTransaction => {
 }
 
 export const parseRawTx = (unparsedRawTx: unknown): RawTransaction => {
-    const [body, nativeScriptWitnesses, auxiliaryData] = parseTuple(
+    const [body, item1, item2] = parseTuple(
         unparsedRawTx,
         ParseErrorReason.INVALID_RAW_TX_CBOR,
         parseTxBody,
         dontParse,
         dontParse,
     )
-
-    return {body, nativeScriptWitnesses, auxiliaryData}
+    // older versions of cardano-cli did not include nativeScriptWitnesses
+    if (item2 === undefined) {
+        return {body, nativeScriptWitnesses: [], auxiliaryData: item1}
+    }
+    return {body, nativeScriptWitnesses: item1, auxiliaryData: item2}
 }
-

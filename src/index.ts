@@ -6,7 +6,8 @@ import { validateTx } from './txValidators'
 import type { RawTransaction, SignedTransaction, TransactionBody } from './types'
 import { decodeCbor, encodeToCbor } from './utils'
 
-export type { RawTransaction, SignedTransaction, TransactionBody }
+export type { ValidationError } from './errors'
+export * from './types'
 
 /**
  * Take a Buffer of CBOR encoded transaction body and decodes it and parses it
@@ -78,4 +79,3 @@ export const transformTxBody = transformers.transformTxBody
 export const transformSignedTx = transformers.transformSignedTx
 
 export const transformRawTx = transformers.transformRawTx
-
