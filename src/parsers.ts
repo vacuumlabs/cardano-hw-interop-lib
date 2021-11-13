@@ -117,7 +117,7 @@ export const parseArray = <T>(
  */
 export const parseTuple = <T extends any[]>(data: unknown, errMsg: ParseErrorReason, ...parsers: { [K in keyof T]: Parser<T[K]> }): T => {
     validate(isArray(data), errMsg)
-    validate(data.length == parsers.length, errMsg)
+    validate(data.length <= parsers.length, errMsg)
 
     return parsers.map((parser, index) => parser(data[index])) as T
 }
@@ -145,4 +145,3 @@ export const parseBasedOnType = <T extends number, U extends any[]>(data: unknow
         ...parsers[type](rest),
     }
 }
-
