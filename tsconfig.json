@@ -9,7 +9,7 @@
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
     "inlineSourceMap": true,
-    "lib": ["es2020"],
+    "lib": ["es2019"],
     "module": "commonjs",
     "noImplicitAny": true,
     "noImplicitThis": true,
@@ -22,7 +22,7 @@
     "strict": true,
     "strictFunctionTypes": true,
     "strictNullChecks": true,
-    "target": "ES2020",
+    "target": "ES2019",
     "typeRoots": ["./node_modules/@types", "./types"],
     "noErrorTruncation": true,
     "baseUrl": "src"

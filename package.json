@@ -4,9 +4,9 @@
   "files": [
     "dist"
   ],
-  "types": "dist/index.d.ts",
+  "types": "dist/src/index.d.ts",
   "description": "Library to make CBOR encoded Cardano transactions comply with CIP-0021",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "repository": "github:vacuumlabs/cardano-hw-interop-lib",
   "keywords": [
     "Cardano",
