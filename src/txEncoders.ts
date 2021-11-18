@@ -5,12 +5,16 @@ import { AmountType, CertificateType, RelayType } from './types'
 
 const identity = <T>(x: T): T => x
 
-const encodeTxInput = (input: TransactionInput) => ([
-    input.transactionId, input.index,
-])
+const encodeTxInput = (input: TransactionInput) =>
+    [input.transactionId, input.index]
 
 const encodeMultiasset = <T>(multiasset: Multiasset<T>): Map<PolicyId, Map<AssetName, T>> =>
-    new Map(multiasset.map(({policyId, tokens}) => [policyId, new Map(tokens.map(({assetName, amount}) => [assetName, amount]))]))
+    new Map(
+        multiasset.map(({policyId, tokens}) => [
+            policyId,
+            new Map(tokens.map(({assetName, amount}) => [assetName, amount]))
+        ])
+    )
 
 const encodeAmount = (amount: Amount) => {
     switch (amount.type) {
@@ -22,7 +26,7 @@ const encodeAmount = (amount: Amount) => {
 }
 
 const encodeTxOutput = (output: TransactionOutput) =>
-    ([output.address, encodeAmount(output.amount)])
+    [output.address, encodeAmount(output.amount)]
 
 const encodeWithdrawals = (withdrawals: Withdrawal[]): Map<RewardAccount, Coin> =>
     new Map(withdrawals.map(({rewardAccount, amount}) => [rewardAccount, amount]))
@@ -38,11 +42,10 @@ const encodeRelay = (relay: Relay) => {
     }
 }
 
-const encodePoolMetadata = (poolMetadata: PoolMetadata) => ([
-    poolMetadata.url, poolMetadata.metadataHash,
-])
+const encodePoolMetadata = (poolMetadata: PoolMetadata) =>
+    [poolMetadata.url, poolMetadata.metadataHash]
 
-const enodePoolParams = (poolParams: PoolParams) => ([
+const encodePoolParams = (poolParams: PoolParams) => [
     poolParams.operator,
     poolParams.vrfKeyHash,
     poolParams.pledge,
@@ -52,11 +55,11 @@ const enodePoolParams = (poolParams: PoolParams) => ([
     poolParams.poolOwners,
     poolParams.relays.map(encodeRelay),
     poolParams.poolMetadata && encodePoolMetadata(poolParams.poolMetadata),
-])
+]
 
-const encodeStakeCredential = (stakeCredential: StakeCredential) => ([
+const encodeStakeCredential = (stakeCredential: StakeCredential) => [
     stakeCredential.type, stakeCredential.hash,
-])
+]
 
 const encodeTxCertificate = (certificate: Certificate) => {
     switch (certificate.type) {
@@ -66,7 +69,7 @@ const encodeTxCertificate = (certificate: Certificate) => {
     case CertificateType.STAKE_DELEGATION:
         return [certificate.type, encodeStakeCredential(certificate.stakeCredential), certificate.poolKeyHash]
     case CertificateType.POOL_REGISTRATION:
-        return [certificate.type, ...enodePoolParams(certificate.poolParams)]
+        return [certificate.type, ...encodePoolParams(certificate.poolParams)]
     case CertificateType.POOL_RETIREMENT:
         return [certificate.type, certificate.poolKeyHash, certificate.epoch]
     case CertificateType.GENESIS_KEY_DELEGATION:
@@ -88,14 +91,14 @@ export const encodeTxBody = (txBody: TransactionBody) => new Map(([
     [9, txBody.mint && encodeMultiasset(txBody.mint)],
 ]).filter(([_, value]) => value !== undefined) as [number, unknown][])
 
-export const encodeSignedTx = (signedTx: SignedTransaction) => ([
+export const encodeSignedTx = (signedTx: SignedTransaction) => [
     encodeTxBody(signedTx.body),
     signedTx.witnessSet,
     signedTx.auxiliaryData,
-])
+]
 
-export const encodeRawTx = (rawTx: RawTransaction) => ([
+export const encodeRawTx = (rawTx: RawTransaction) => [
     encodeTxBody(rawTx.body),
     rawTx.nativeScriptWitnesses,
     rawTx.auxiliaryData,
-])
+]

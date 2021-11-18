@@ -1,5 +1,5 @@
 import { ParseErrorReason } from './errors'
-import type { Parser, WithoutType } from './parsers'
+import { isUint, Parser, WithoutType } from './parsers'
 import { isUintOfMaxSize } from './parsers'
 import { createParser, isArray, isMapWithKeysOfType, isNumber, parseArray, parseBasedOnType, parseBuffer, parseBufferOfLength, parseBufferOfMaxLength, parseInt, parseMap, parseNullable, parseOptional, parseStringOfMaxLength, parseTuple, parseUint, validate } from './parsers'
 import type { Amount, GenesisKeyDelegation, MoveInstantaneousRewardsCertificate, Multiasset, PoolMetadata, PoolParams, PoolRegistrationCertificate, PoolRetirementCertificate, Port, RawTransaction, RelayMultiHostName, RelaySingleHostAddress, RelaySingleHostName, SignedTransaction, StakeCredentialAddress, StakeCredentialScript, StakeDelegationCertificate, StakeDeregistrationCertificate, StakeRegistrationCertificate, TransactionBody, TransactionInput, TransactionOutput, Unparsed, Withdrawal } from './types'
@@ -63,9 +63,9 @@ const parseAmountWithoutMultiasset = (unparsedAmount: unknown): Amount => ({
 })
 
 const parseAmount = (unparsedAmount: unknown): Amount =>
-    isArray(unparsedAmount)
-        ? parseAmountWithMultiasset(unparsedAmount)
-        : parseAmountWithoutMultiasset(unparsedAmount)
+    isUint(unparsedAmount)
+        ? parseAmountWithoutMultiasset(unparsedAmount)
+        : parseAmountWithMultiasset(unparsedAmount)
 
 const parseTxOutput = (unparsedTxOutput: unknown): TransactionOutput => {
     const [address, amount] = parseTuple(
@@ -268,9 +268,9 @@ export const parseSignedTx = (unparsedSignedTx: unknown): SignedTransaction => {
     return {body, witnessSet, auxiliaryData}
 }
 
-export const parseRawTx = (unparsedUnsignedTx: unknown): RawTransaction => {
+export const parseRawTx = (unparsedRawTx: unknown): RawTransaction => {
     const [body, nativeScriptWitnesses, auxiliaryData] = parseTuple(
-        unparsedUnsignedTx,
+        unparsedRawTx,
         ParseErrorReason.INVALID_RAW_TX_CBOR,
         parseTxBody,
         dontParse,
