@@ -13,7 +13,7 @@ export enum ValidationErrorReason {
     POOL_REGISTRATION_CERTIFICATE_WITH_WITHDRAWALS = 'If a transaction contains a pool registration certificate, then it must not contain any withdrawal',
     POOL_REGISTRATION_CERTIFICATE_WITH_MINT_ENTRY = 'If a transaction contains a pool registration certificate, then it must not contain mint entry',
 
-    // Fixable valiadation errors
+    // Fixable validation errors
     CBOR_IS_NOT_CANONICAL = 'CBOR is not canonical',
     OPTIONAL_EMPTY_LISTS_AND_MAPS_MUST_NOT_BE_INCLUDED = 'Optional empty lists and maps must not be included as part of the transaction body or its elements',
     OUTPUT_WITHOUT_TOKENS_MUST_BE_A_SIMPLE_TUPLE = 'Outputs containing no multi-asset tokens must be serialized as a simple tuple',

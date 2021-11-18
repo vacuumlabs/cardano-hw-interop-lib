@@ -81,9 +81,9 @@ export type Parser<T> = (data: unknown) => T
  * returns a parser function that only requires the data to execute
  * @see Parser
  */
-export function createParser<L extends number>(paser: (data: unknown, length: L, errMsg: ParseErrorReason) => FixlenBuffer<L>, length: L, errMsg: ParseErrorReason): Parser<FixlenBuffer<L>>
-export function createParser<L extends number>(paser: (data: unknown, maxLength: L, errMsg: ParseErrorReason) => MaxlenBuffer<L>, maxLength: L, errMsg: ParseErrorReason): Parser<MaxlenBuffer<L>>
-export function createParser<L extends number>(paser: (data: unknown, maxLength: L, errMsg: ParseErrorReason) => MaxlenString<L>, maxLength: L, errMsg: ParseErrorReason): Parser<MaxlenString<L>>
+export function createParser<L extends number>(parser: (data: unknown, length: L, errMsg: ParseErrorReason) => FixlenBuffer<L>, length: L, errMsg: ParseErrorReason): Parser<FixlenBuffer<L>>
+export function createParser<L extends number>(parser: (data: unknown, maxLength: L, errMsg: ParseErrorReason) => MaxlenBuffer<L>, maxLength: L, errMsg: ParseErrorReason): Parser<MaxlenBuffer<L>>
+export function createParser<L extends number>(parser: (data: unknown, maxLength: L, errMsg: ParseErrorReason) => MaxlenString<L>, maxLength: L, errMsg: ParseErrorReason): Parser<MaxlenString<L>>
 export function createParser<T, A extends any[]>(parser: (data: unknown, ...args: [...A]) => T, ...args: [...A]): Parser<T>
 export function createParser<T, A extends any[]>(parser: (data: unknown, ...args: [...A]) => T, ...args: [...A]): Parser<T> {
     return (data: unknown) => parser(data, ...args)
@@ -109,20 +109,15 @@ export const parseArray = <T>(
 }
 
 /**
- * Defines a tuple of parsers each for the individual type from tuple `T`
- */
-type Parsers<T extends any[]> = { [K in keyof T]: Parser<T[K]> }
-
-/**
  * Parses the data as an array of length of the provided parsers
  *
  * @example
  *     // returns [123N, -1N]
  *     parseTuple([123, -1], InvalidDataReason.INVALID, parseUint64, parseInt64)
  */
-export const parseTuple = <T extends any[]>(data: unknown, errMsg: ParseErrorReason, ...parsers: [...Parsers<T>]): T => {
+export const parseTuple = <T extends any[]>(data: unknown, errMsg: ParseErrorReason, ...parsers: { [K in keyof T]: Parser<T[K]> }): T => {
     validate(isArray(data), errMsg)
-    validate(data.length <= parsers.length, errMsg)
+    validate(data.length == parsers.length, errMsg)
 
     return parsers.map((parser, index) => parser(data[index])) as T
 }
