@@ -17,6 +17,8 @@ export const REWARD_ACCOUNT_LENGTH = 29
 export const VRF_KEY_HASH_LENGTH = 32
 export const METADATA_HASH_LENGTH = 32
 export const TX_ID_HASH_LENGTH = 32
+export const DATUM_HASH_LENGTH = 32
+export const SCRIPT_DATA_HASH_LENGTH = 32
 
 export const IPV4_LENGTH = 4
 export const IPV6_LENGTH = 16
@@ -68,9 +70,12 @@ export type Amount = {
     multiasset: Multiasset<Uint>,
 }
 
+export type DatumHash = FixlenBuffer<typeof DATUM_HASH_LENGTH>
+
 export type TransactionOutput = {
     address: Address,
     amount: Amount,
+    datumHash?: DatumHash,
 }
 
 // Certificate
@@ -201,8 +206,17 @@ export type Withdrawal = {
     amount: Coin,
 }
 
+// Required signer
+export type RequiredSigner = FixlenBuffer<typeof KEY_HASH_LENGTH>
+
 // Mint
 export type Mint = Multiasset<Int>
+
+// Collateral input
+export type Collateral = {
+    transactionId: FixlenBuffer<typeof TX_ID_HASH_LENGTH>,
+    index: Uint,
+}
 
 // Transaction body
 export type TransactionBody = {
@@ -216,6 +230,10 @@ export type TransactionBody = {
     metadataHash?: FixlenBuffer<typeof METADATA_HASH_LENGTH>,
     validityIntervalStart?: Uint,
     mint?: Mint,
+    scriptDataHash?: FixlenBuffer<typeof SCRIPT_DATA_HASH_LENGTH>,
+    collaterals?: Collateral[],
+    requiredSigners?: RequiredSigner[],
+    networkId?: Uint,
 }
 
 export type Transaction = {
