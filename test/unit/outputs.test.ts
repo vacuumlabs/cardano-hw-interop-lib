@@ -15,6 +15,7 @@ const ValidOutputsTestcases: ValidParseTestcase<TransactionOutput[]>[] = [
                 type: AmountType.WITHOUT_MULTIASSET,
                 coin: toUint(0),
             },
+            datumHash: undefined,
         }],
     },
     {
@@ -26,6 +27,7 @@ const ValidOutputsTestcases: ValidParseTestcase<TransactionOutput[]>[] = [
                 type: AmountType.WITHOUT_MULTIASSET,
                 coin: toUint("18446744073709551616"),
             },
+            datumHash: undefined,
         }],
     },
     {
@@ -44,6 +46,7 @@ const ValidOutputsTestcases: ValidParseTestcase<TransactionOutput[]>[] = [
                     }],
                 }],
             },
+            datumHash: undefined,
         }],
     },
 ]
@@ -56,7 +59,7 @@ const InvalidOutputsTestcases: InvalidParseTestcase[] = [
     },
     {
         testname: 'Invalid output structure',
-        cbor: '8183187b0102',
+        cbor: '8184187b010203',
         errMsg: ParseErrorReason.INVALID_TX_OUTPUT,
     },
     {

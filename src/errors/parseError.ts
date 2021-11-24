@@ -15,6 +15,7 @@ export enum ParseErrorReason {
     INVALID_OUTPUT_ADDRESS = 'Invalid output address',
     INVALID_OUTPUT_AMOUNT = 'Invalid output amount',
     INVALID_OUTPUT_MULTIASSET = 'Invalid output multiasset',
+    INVALID_OUTPUT_DATUM_HASH = 'Invalid output datum hash',
     INVALID_TX_OUTPUT = 'Invalid transaction output',
 
     INVALID_CERTIFICATE_TYPE = 'Invalid certificate type',
@@ -56,6 +57,10 @@ export enum ParseErrorReason {
     INVALID_TX_METADATA_HASH = 'Invalid transaction metadata hash',
     INVALID_TX_VALIDITY_INTERVAL_START = 'Invalid transaction validity interval start',
     INVALID_TX_MINT = 'Invalid transaction mint',
+    INVALID_TX_SCRIPT_DATA_HASH = 'Invalid transaction script data hash',
+    INVALID_TX_COLLATERALS = 'Invalid transaction collateral inputs',
+    INVALID_TX_REQUIRED_SIGNERS = 'Invalid transaction required signers',
+    INVALID_TX_NETWORK_ID = 'Invalid transaction network id',
 
     INVALID_TX_CBOR = 'Invalid transaction CBOR',
     INVALID_RAW_TX_CBOR = 'Invalid raw transaction CBOR',
