@@ -8,7 +8,7 @@ describe("Serialize", () => {
         for (const { testname, txBody, expectedTxBodyCbor } of TxBodyTestcases) {
             it(testname, () => {
                 const txBodyCbor = encodeTxBody(txBody)
-                expect(txBodyCbor.equals(Buffer.from(expectedTxBodyCbor, 'hex'))).to.be.true
+                expect(txBodyCbor).to.deep.equal(Buffer.from(expectedTxBodyCbor, 'hex'))
             })
         }
     })

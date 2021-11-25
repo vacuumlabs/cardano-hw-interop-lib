@@ -1,6 +1,6 @@
 import { Tagged } from 'cbor'
 
-import type { Amount, AssetName, Certificate, Coin, Multiasset, PolicyId, PoolMetadata, PoolParams, RawTransaction, Relay, RewardAccount, StakeCredential, Transaction, TransactionBody, TransactionInput, TransactionOutput, Withdrawal } from './types'
+import type { Amount, AssetName, Certificate, Coin, Collateral, Multiasset, PolicyId, PoolMetadata, PoolParams, RawTransaction, Relay, RewardAccount, StakeCredential, Transaction, TransactionBody, TransactionInput, TransactionOutput, Withdrawal } from './types'
 import { AmountType, CertificateType, RelayType } from './types'
 
 const identity = <T>(x: T): T => x
@@ -26,7 +26,9 @@ const serializeAmount = (amount: Amount) => {
 }
 
 const serializeTxOutput = (output: TransactionOutput) =>
-    [output.address, serializeAmount(output.amount)]
+    output.datumHash
+        ? [output.address, serializeAmount(output.amount), output.datumHash]
+        : [output.address, serializeAmount(output.amount)]
 
 const serializeWithdrawals = (withdrawals: Withdrawal[]): Map<RewardAccount, Coin> =>
     new Map(withdrawals.map(({rewardAccount, amount}) => [rewardAccount, amount]))
@@ -77,6 +79,9 @@ const serializeTxCertificate = (certificate: Certificate) => {
     }
 }
 
+const serializeCollateral = (collateral: Collateral) =>
+    [collateral.transactionId, collateral.index]
+
 export const serializeTxBody = (txBody: TransactionBody) => new Map(([
     [0, txBody.inputs.map(serializeTxInput)],
     [1, txBody.outputs.map(serializeTxOutput)],
@@ -88,6 +93,10 @@ export const serializeTxBody = (txBody: TransactionBody) => new Map(([
     [7, identity(txBody.metadataHash)],
     [8, identity(txBody.validityIntervalStart)],
     [9, txBody.mint && serializeMultiasset(txBody.mint)],
+    [11, txBody.scriptDataHash],
+    [13, txBody.collaterals?.map(serializeCollateral)],
+    [14, txBody.requiredSigners],
+    [15, txBody.networkId],
 ]).filter(([_, value]) => value !== undefined) as [number, unknown][])
 
 export const serializeTx = (tx: Transaction) => [

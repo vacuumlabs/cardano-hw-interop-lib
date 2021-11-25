@@ -205,4 +205,34 @@ export const TxBodyTestcases: TxBodyTestcase[] = [
         },
         expectedTxBodyCbor: 'a40081825820b64ae44e1195b04663ab863b62337e626c65b0c9855a9fbb9ef4458f81a6f5ee182a0181825839019b3a93b321ff8d65d6df1c6d845d54dbbf2cb34105fdb44ece1b7d312c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d01021a0012fc51048582008200581c2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d82018201581cc1d58a7602c3bd8104cd2a871a2d1cb68f6f6669bd37a7688618ee5583028200581c2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d581c001337292eec9b3eefc6802f71cb34c21a7963eb12466d52836aa3908a03581c4dfbc0559b2e1d6af62c447f0a0d6290a8b05e075ef08db38c1b81a8582067c5c0b45db55e8c82752263207b9a92c2d5fa6c671aceed9df451cad3fac7a31a0001e2401a05f5e100d81e82031819581de1d7d8a321633b3d1ab1651eeb258ad898ebcef1d348b54148f18e15da82581c2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d581cf699c6400f85bdca54e44d0cad1f6141ce049a411c0d695fc30c3f7384840019029af650004706260000004700000000111100008301f676616464726573732e76616375756d6c6162732e636f6d8202781e616e6f746865722e616464726573732e76616375756d6c6162732e636f6d840019ffff447f0000fff682782468747470733a2f2f706f6f6c2d6d657461646174612e76616375756d6c6162732e636f6d5820e318d62e3d5cc3cc23ca1123438e439d7aac6c6c423320f670d159726ac9d11f8304581c4dfbc0559b2e1d6af62c447f0a0d6290a8b05e075ef08db38c1b81a81a0001dfbe',
     },
+    {
+        testname: 'Tx body with script data hash, collaterals, required signers and datum hash',
+        txBody: {
+            inputs: [{
+                transactionId: toFixlenBuffer('3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7', 32),
+                index: toUint(0),
+            }],
+            outputs: [{
+                address: fromBech32('addr_test1zp0z7zqwhya6mpk5q929ur897g3pp9kkgalpreny8y304rfw6j2jxnwq6enuzvt0lp89wgcsufj7mvcnxpzgkd4hz70z3h2pnc8lhq8r'),
+                amount: {
+                    type: AmountType.WITHOUT_MULTIASSET,
+                    coin: toUint(7120787),
+                },
+                datumHash: toFixlenBuffer('ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188', 32),
+            }],
+            fee: toUint(42),
+            ttl: toUint(10),
+            scriptDataHash: toFixlenBuffer('ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188', 32),
+            collaterals: [{
+                transactionId: toFixlenBuffer('3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7', 32),
+                index: toUint(0),
+            }],
+            requiredSigners: [
+                toFixlenBuffer('fea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a', 28),
+                toFixlenBuffer('eea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a', 28),
+            ],
+            networkId: toUint(1),
+        },
+        expectedTxBodyCbor: 'a800818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018183583d105e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e28dd419e1a006ca7935820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce18802182a030a0b5820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce1880d818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000e82581cfea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a581ceea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a0f01',
+    },
 ]
