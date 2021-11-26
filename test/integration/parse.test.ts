@@ -2,7 +2,7 @@ import { expect } from 'chai'
 
 import { ParseError, ParseErrorReason } from '../../src/errors'
 import { parseRawTx,parseTx, parseTxBody } from '../../src/index'
-import { ValidRawTransactionTestcases, ValidTransactionTestcases, ValidTransactionBodyTestcases } from './__fixtures__/parse'
+import { ValidRawTransactionTestcases, ValidTransactionBodyTestcases,ValidTransactionTestcases } from './__fixtures__/parse'
 
 describe("Decode and parse", () => {
     describe("Valid transaction bodies", () => {
