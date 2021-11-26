@@ -1,6 +1,6 @@
 import { Tagged } from 'cbor'
 
-import type { Amount, AssetName, Certificate, Coin, Multiasset, PolicyId, PoolMetadata, PoolParams, RawTransaction, Relay, RewardAccount, Transaction, StakeCredential, TransactionBody, TransactionInput, TransactionOutput, Withdrawal } from './types'
+import type { Amount, AssetName, Certificate, Coin, Multiasset, PolicyId, PoolMetadata, PoolParams, RawTransaction, Relay, RewardAccount, StakeCredential, Transaction, TransactionBody, TransactionInput, TransactionOutput, Withdrawal } from './types'
 import { AmountType, CertificateType, RelayType } from './types'
 
 const identity = <T>(x: T): T => x
