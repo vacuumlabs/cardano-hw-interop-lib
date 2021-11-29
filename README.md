@@ -10,12 +10,12 @@ The provided functions operate on either a:
 * raw transaction - transaction outputted by `cardano-cli transaction build-raw`
 
 
-### `parse`
+### `decode`
 Parses a CBOR encoded input into a `TransactionBody`, `Transaction` or `RawTransaction`, respectively. If the CBOR is malformed the parser will throw an error. Available methods:
 ```ts
-parseTxBody(txBodyCbor: Buffer) => TransactionBody
-parseTx(txCbor: Buffer) => Transaction
-parseRawTx(rawTxCbor: Buffer) => RawTransaction
+decodeTxBody(txBodyCbor: Buffer) => TransactionBody
+decodeTx(txCbor: Buffer) => Transaction
+decodeRawTx(rawTxCbor: Buffer) => RawTransaction
 ```
 The `TransactionBody` object mostly follows the CDDL, but sometimes makes small deviations for better developer experience, such as parsing certain tuples as objects, or maps as arrays because working with maps is cumbersome in JavaScript.
 
