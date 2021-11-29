@@ -1,6 +1,6 @@
 import type { ValidationError } from './errors'
-import * as encoders from './txEncoders'
 import * as parsers from './txParsers'
+import * as serializers from './txSerializers'
 import * as transformers from './txTransformers'
 import { validateTxCommon } from './txValidators'
 import type { RawTransaction, Transaction, TransactionBody } from './types'
@@ -11,33 +11,33 @@ export * from './types'
 
 
 /**
- * Takes a Buffer of CBOR encoded transaction body and decodes it and parses it
+ * Takes a Buffer of CBOR encoded transaction body and decodes it
  * to a TransactionBody object
  *
  * @param {Buffer} txBodyCbor The CBOR encoded input
- * @returns Parsed TransactionBody object
+ * @returns Decoded TransactionBody object
  */
-export const parseTxBody = (txBodyCbor: Buffer): TransactionBody =>
+export const decodeTxBody = (txBodyCbor: Buffer): TransactionBody =>
     parsers.parseTxBody(decodeCbor(txBodyCbor))
 
 /**
- * Takes a Buffer of CBOR encoded transaction and decodes it and parses it
+ * Takes a Buffer of CBOR encoded transaction and decodes it
  * to a Transaction object
  *
  * @param {Buffer} txCbor The CBOR encoded input
- * @returns Parsed Transaction object
+ * @returns Decoded Transaction object
  */
-export const parseTx = (txCbor: Buffer): Transaction =>
+export const decodeTx = (txCbor: Buffer): Transaction =>
     parsers.parseTx(decodeCbor(txCbor))
 
 /**
- * Takes a Buffer of CBOR encoded raw transaction and decodes it and parses it
+ * Takes a Buffer of CBOR encoded raw transaction and decodes it
  * to a RawTransaction object
  *
  * @param {Buffer} rawTxCbor The CBOR encoded input
- * @returns Parsed RawTransaction object
+ * @returns Decoded RawTransaction object
  */
-export const parseRawTx = (rawTxCbor: Buffer): RawTransaction =>
+export const decodeRawTx = (rawTxCbor: Buffer): RawTransaction =>
     parsers.parseRawTx(decodeCbor(rawTxCbor))
 
 
@@ -50,7 +50,7 @@ export const parseRawTx = (rawTxCbor: Buffer): RawTransaction =>
  * @returns Buffer containing the CBOR encoded `txBody`
  */
 export const encodeTxBody = (txBody: TransactionBody): Buffer =>
-    encodeToCbor(encoders.encodeTxBody(txBody))
+    encodeToCbor(serializers.serializeTxBody(txBody))
 
 /**
  * Takes a transaction and encodes it back to it's CBOR representation.
@@ -61,7 +61,7 @@ export const encodeTxBody = (txBody: TransactionBody): Buffer =>
  * @returns Buffer containing the CBOR encoded `tx`
  */
 export const encodeTx = (tx: Transaction): Buffer =>
-    encodeToCbor(encoders.encodeTx(tx))
+    encodeToCbor(serializers.serializeTx(tx))
 
 /**
  * Takes a raw transaction and encodes it back to it's CBOR representation.
@@ -72,7 +72,7 @@ export const encodeTx = (tx: Transaction): Buffer =>
  * @returns Buffer containing the CBOR encoded `rawTx`
  */
 export const encodeRawTx = (rawTx: RawTransaction): Buffer =>
-    encodeToCbor(encoders.encodeRawTx(rawTx))
+    encodeToCbor(serializers.serializeRawTx(rawTx))
 
 
 /**
@@ -83,7 +83,7 @@ export const encodeRawTx = (rawTx: RawTransaction): Buffer =>
  * @returns Found validation errors
  */
 export const validateTxBody = (txBodyCbor: Buffer): ValidationError[] => {
-    const txBody = parseTxBody(txBodyCbor)
+    const txBody = decodeTxBody(txBodyCbor)
     const canonicalTxBodyCbor = encodeTxBody(txBody)
     return validateTxCommon(txBodyCbor, canonicalTxBodyCbor, txBody)
 }
@@ -96,7 +96,7 @@ export const validateTxBody = (txBodyCbor: Buffer): ValidationError[] => {
  * @returns Found validation errors
  */
 export const validateTx = (txCbor: Buffer): ValidationError[] => {
-    const tx = parseTx(txCbor)
+    const tx = decodeTx(txCbor)
     const canonicalTxCbor = encodeTx(tx)
     return validateTxCommon(txCbor, canonicalTxCbor, tx.body)
 }
@@ -109,7 +109,7 @@ export const validateTx = (txCbor: Buffer): ValidationError[] => {
  * @returns Found validation errors
  */
 export const validateRawTx = (rawTxCbor: Buffer): ValidationError[] => {
-    const rawTx = parseRawTx(rawTxCbor)
+    const rawTx = decodeRawTx(rawTxCbor)
     const canonicalRawTxCbor = encodeRawTx(rawTx)
     return validateTxCommon(rawTxCbor, canonicalRawTxCbor, rawTx.body)
 }

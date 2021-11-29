@@ -5,10 +5,10 @@ import { AmountType, CertificateType, RelayType } from './types'
 
 const identity = <T>(x: T): T => x
 
-const encodeTxInput = (input: TransactionInput) =>
+const serializeTxInput = (input: TransactionInput) =>
     [input.transactionId, input.index]
 
-const encodeMultiasset = <T>(multiasset: Multiasset<T>): Map<PolicyId, Map<AssetName, T>> =>
+const serializeMultiasset = <T>(multiasset: Multiasset<T>): Map<PolicyId, Map<AssetName, T>> =>
     new Map(
         multiasset.map(({policyId, tokens}) => [
             policyId,
@@ -16,22 +16,22 @@ const encodeMultiasset = <T>(multiasset: Multiasset<T>): Map<PolicyId, Map<Asset
         ])
     )
 
-const encodeAmount = (amount: Amount) => {
+const serializeAmount = (amount: Amount) => {
     switch (amount.type) {
     case AmountType.WITHOUT_MULTIASSET:
         return amount.coin
     case AmountType.WITH_MULTIASSET:
-        return [amount.coin, encodeMultiasset(amount.multiasset)]
+        return [amount.coin, serializeMultiasset(amount.multiasset)]
     }
 }
 
-const encodeTxOutput = (output: TransactionOutput) =>
-    [output.address, encodeAmount(output.amount)]
+const serializeTxOutput = (output: TransactionOutput) =>
+    [output.address, serializeAmount(output.amount)]
 
-const encodeWithdrawals = (withdrawals: Withdrawal[]): Map<RewardAccount, Coin> =>
+const serializeWithdrawals = (withdrawals: Withdrawal[]): Map<RewardAccount, Coin> =>
     new Map(withdrawals.map(({rewardAccount, amount}) => [rewardAccount, amount]))
 
-const encodeRelay = (relay: Relay) => {
+const serializeRelay = (relay: Relay) => {
     switch (relay.type) {
     case RelayType.SINGLE_HOST_ADDRESS:
         return [relay.type, relay.port, relay.ipv4, relay.ipv6]
@@ -42,10 +42,10 @@ const encodeRelay = (relay: Relay) => {
     }
 }
 
-const encodePoolMetadata = (poolMetadata: PoolMetadata) =>
+const serializePoolMetadata = (poolMetadata: PoolMetadata) =>
     [poolMetadata.url, poolMetadata.metadataHash]
 
-const encodePoolParams = (poolParams: PoolParams) => [
+const serializePoolParams = (poolParams: PoolParams) => [
     poolParams.operator,
     poolParams.vrfKeyHash,
     poolParams.pledge,
@@ -53,22 +53,22 @@ const encodePoolParams = (poolParams: PoolParams) => [
     new Tagged(30, poolParams.margin),
     poolParams.rewardAccount,
     poolParams.poolOwners,
-    poolParams.relays.map(encodeRelay),
-    poolParams.poolMetadata && encodePoolMetadata(poolParams.poolMetadata),
+    poolParams.relays.map(serializeRelay),
+    poolParams.poolMetadata && serializePoolMetadata(poolParams.poolMetadata),
 ]
 
-const encodeStakeCredential = (stakeCredential: StakeCredential) =>
+const serializeStakeCredential = (stakeCredential: StakeCredential) =>
     [stakeCredential.type, stakeCredential.hash]
 
-const encodeTxCertificate = (certificate: Certificate) => {
+const serializeTxCertificate = (certificate: Certificate) => {
     switch (certificate.type) {
     case CertificateType.STAKE_REGISTRATION:
     case CertificateType.STAKE_DEREGISTRATION:
-        return [certificate.type, encodeStakeCredential(certificate.stakeCredential)]
+        return [certificate.type, serializeStakeCredential(certificate.stakeCredential)]
     case CertificateType.STAKE_DELEGATION:
-        return [certificate.type, encodeStakeCredential(certificate.stakeCredential), certificate.poolKeyHash]
+        return [certificate.type, serializeStakeCredential(certificate.stakeCredential), certificate.poolKeyHash]
     case CertificateType.POOL_REGISTRATION:
-        return [certificate.type, ...encodePoolParams(certificate.poolParams)]
+        return [certificate.type, ...serializePoolParams(certificate.poolParams)]
     case CertificateType.POOL_RETIREMENT:
         return [certificate.type, certificate.poolKeyHash, certificate.epoch]
     case CertificateType.GENESIS_KEY_DELEGATION:
@@ -77,35 +77,35 @@ const encodeTxCertificate = (certificate: Certificate) => {
     }
 }
 
-export const encodeTxBody = (txBody: TransactionBody) => new Map(([
-    [0, txBody.inputs.map(encodeTxInput)],
-    [1, txBody.outputs.map(encodeTxOutput)],
+export const serializeTxBody = (txBody: TransactionBody) => new Map(([
+    [0, txBody.inputs.map(serializeTxInput)],
+    [1, txBody.outputs.map(serializeTxOutput)],
     [2, identity(txBody.fee)],
     [3, identity(txBody.ttl)],
-    [4, txBody.certificates?.map(encodeTxCertificate)],
-    [5, txBody.withdrawals && encodeWithdrawals(txBody.withdrawals)],
+    [4, txBody.certificates?.map(serializeTxCertificate)],
+    [5, txBody.withdrawals && serializeWithdrawals(txBody.withdrawals)],
     [6, identity(txBody.update)],
     [7, identity(txBody.metadataHash)],
     [8, identity(txBody.validityIntervalStart)],
-    [9, txBody.mint && encodeMultiasset(txBody.mint)],
+    [9, txBody.mint && serializeMultiasset(txBody.mint)],
 ]).filter(([_, value]) => value !== undefined) as [number, unknown][])
 
-export const encodeTx = (tx: Transaction) => [
-    encodeTxBody(tx.body),
+export const serializeTx = (tx: Transaction) => [
+    serializeTxBody(tx.body),
     tx.witnessSet,
     tx.auxiliaryData,
 ]
 
-export const encodeRawTx = (rawTx: RawTransaction) => {
+export const serializeRawTx = (rawTx: RawTransaction) => {
     // older versions of cardano-cli did not include nativeScriptWitnesses
     if (rawTx.nativeScriptWitnesses === undefined) {
         return [
-            encodeTxBody(rawTx.body),
+            serializeTxBody(rawTx.body),
             rawTx.auxiliaryData,
         ]
     }
     return [
-        encodeTxBody(rawTx.body),
+        serializeTxBody(rawTx.body),
         rawTx.nativeScriptWitnesses,
         rawTx.auxiliaryData,
     ]
