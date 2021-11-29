@@ -1,3 +1,5 @@
+import { Encoder } from 'cbor'
+
 import { ParseErrorReason } from './errors'
 import type { Parser, WithoutType } from './parsers'
 import { isUint } from './parsers'
@@ -279,7 +281,9 @@ export const parseRawTx = (unparsedRawTx: unknown): RawTransaction => {
     )
     // older versions of cardano-cli did not include nativeScriptWitnesses
     if (item2 === undefined) {
-        return {body, nativeScriptWitnesses: [], auxiliaryData: item1}
+        return {body, nativeScriptWitnesses: undefined, auxiliaryData: item1}
     }
+    // cardano-cli expects indefinite-length nativeScriptWitnesses
+    (item1 as any).encodeCBOR = Encoder.encodeIndefinite
     return {body, nativeScriptWitnesses: item1, auxiliaryData: item2}
 }
