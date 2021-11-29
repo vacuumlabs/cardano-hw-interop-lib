@@ -32,4 +32,3 @@ export const getRewardAccountStakeCredentialType = (rewardAccount: RewardAccount
         throw Error('Invalid reward account type')
     }
 }
-

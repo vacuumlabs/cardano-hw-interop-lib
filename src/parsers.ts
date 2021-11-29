@@ -132,7 +132,9 @@ export type WithoutType<T> = Omit<T, 'type'>
 type ArrayParser<T> = (data: unknown[]) => T
 type ParsersWithoutType<T> = { [K in keyof T]: ArrayParser<WithoutType<T[K]>> }
 
-export const parseBasedOnType = <T extends number, U extends any[]>(data: unknown, errMsg: ParseErrorReason, typeParser: Parser<T>, ...parsers: [...ParsersWithoutType<U>]): U[T] => {
+export const parseBasedOnType = <T extends number, U extends any[]>(
+    data: unknown, errMsg: ParseErrorReason, typeParser: Parser<T>, ...parsers: [...ParsersWithoutType<U>]
+): U[T] => {
     validate(isArray(data), errMsg)
     validate(data.length >= 1, errMsg)
 

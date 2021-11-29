@@ -57,9 +57,8 @@ const encodePoolParams = (poolParams: PoolParams) => [
     poolParams.poolMetadata && encodePoolMetadata(poolParams.poolMetadata),
 ]
 
-const encodeStakeCredential = (stakeCredential: StakeCredential) => [
-    stakeCredential.type, stakeCredential.hash,
-]
+const encodeStakeCredential = (stakeCredential: StakeCredential) =>
+    [stakeCredential.type, stakeCredential.hash]
 
 const encodeTxCertificate = (certificate: Certificate) => {
     switch (certificate.type) {
