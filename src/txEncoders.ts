@@ -97,8 +97,17 @@ export const encodeTx = (tx: Transaction) => [
     tx.auxiliaryData,
 ]
 
-export const encodeRawTx = (rawTx: RawTransaction) => [
-    encodeTxBody(rawTx.body),
-    rawTx.nativeScriptWitnesses,
-    rawTx.auxiliaryData,
-]
+export const encodeRawTx = (rawTx: RawTransaction) => {
+    // older versions of cardano-cli did not include nativeScriptWitnesses
+    if (rawTx.nativeScriptWitnesses === undefined) {
+        return [
+            encodeTxBody(rawTx.body),
+            rawTx.auxiliaryData,
+        ]
+    }
+    return [
+        encodeTxBody(rawTx.body),
+        rawTx.nativeScriptWitnesses,
+        rawTx.auxiliaryData,
+    ]
+}
