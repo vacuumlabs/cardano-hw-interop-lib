@@ -1,4 +1,4 @@
-import type { Amount, Multiasset, RawTransaction, SignedTransaction, TransactionBody, TransactionOutput } from './types'
+import type { Amount, Multiasset, RawTransaction, Transaction, TransactionBody, TransactionOutput } from './types'
 import { AmountType } from './types'
 
 const transformOptionalList = <T>(optionalList?: T[]): T[] | undefined =>
@@ -49,9 +49,9 @@ export const transformTxBody = (txBody: TransactionBody): TransactionBody => ({
     withdrawals: transformOptionalList(txBody.withdrawals),
 })
 
-export const transformSignedTx = (signedTx: SignedTransaction): SignedTransaction => ({
-    ...signedTx,
-    body: transformTxBody(signedTx.body),
+export const transformTx = (tx: Transaction): Transaction => ({
+    ...tx,
+    body: transformTxBody(tx.body),
 })
 
 export const transformRawTx = (rawTx: RawTransaction): RawTransaction => ({

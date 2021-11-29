@@ -1,4 +1,4 @@
-import type { MaxlenBuffer, Port, RawTransaction, SignedTransaction, TransactionBody } from '../../../src/types'
+import type { MaxlenBuffer, Port, RawTransaction, Transaction, TransactionBody } from '../../../src/types'
 import { AmountType } from '../../../src/types'
 import { CertificateType, RelayType, StakeCredentialType } from '../../../src/types'
 import { fromBech32, ipv4ToBuffer, rewardAccount, toFixlenBuffer, toInt, toMaxLenString, toUint } from '../../test_utils'
@@ -37,19 +37,19 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
     },
 ]
 
-type ValidSignedTransactionTestcase = {
+type ValidTransactionTestcase = {
     testname: string,
     cbor: string,
-    expectedSignedTx: SignedTransaction,
+    expectedTx: Transaction,
 }
 
-export const ValidSignedTransactionTestcases: ValidSignedTransactionTestcase[] = []
+export const ValidTransactionTestcases: ValidTransactionTestcase[] = []
 
 
 type ValidRawTransactionTestcase = {
     testname: string,
     cbor: string,
-    expectedUnsignedTx: RawTransaction,
+    expectedRawTx: RawTransaction,
 }
 
 export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
@@ -64,7 +64,7 @@ export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
     */
         testname: 'Simple transaction',
         cbor: '83a30081825820ba638246bd9be05aa46e865320c354efea75cf5796e88b763faaa30c9fbb78de000181825839000743d16cfe3c4fcc0c11c2403bbc10dbc7ecdd4477e053481a368e7a06e2ae44dff6770dc0f4ada3cf4cf2605008e27aecdb332ad349fda700021a0001e2409ffff6',
-        expectedUnsignedTx: {
+        expectedRawTx: {
             body: {
                 inputs: [{
                     transactionId: toFixlenBuffer('ba638246bd9be05aa46e865320c354efea75cf5796e88b763faaa30c9fbb78de', 32),
@@ -122,7 +122,7 @@ export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
         */
         testname: 'Complex transaction',
         cbor: '83a9008382582094461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d00825820b64ae44e1195b04663ab863b62337e626c65b0c9855a9fbb9ef4458f81a6f5ee00825820b64ae44e1195b04663ab863b62337e626c65b0c9855a9fbb9ef4458f81a6f5ee1bffffffffffffffff0183825839019b3a93b321ff8d65d6df1c6d845d54dbbf2cb34105fdb44ece1b7d312c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d821a0001e91fa1581c4a7fc1c3490c30e23961d24f345c81f2dd1105643776098530f06cffa146546f6b656e3101825839000743d16cfe3c4fcc0c11c2403bbc10dbc7ecdd4477e053481a368e7a06e2ae44dff6770dc0f4ada3cf4cf2605008e27aecdb332ad349fda71a3dbb8b2182583930167f6dbf610ae030f043adb1f3af78754ed9595ad4ac1f7ed9ff6466760fb6955d1217b1f1f208df6d45ab23c9e17b0c984a2d3a22bbbfb8821a3dbb8b21a1581c4a7fc1c3490c30e23961d24f345c81f2dd1105643776098530f06cffa246546f6b656e311a00155d975820546f6b656e546f6b656e546f6b656e546f6b656e546f6b656e546f6b656e31321a00beeff1021a0012fc51031a000a5176048582008200581c2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d82018201581cc1d58a7602c3bd8104cd2a871a2d1cb68f6f6669bd37a7688618ee5583028200581c2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d581c001337292eec9b3eefc6802f71cb34c21a7963eb12466d52836aa3908a03581c4dfbc0559b2e1d6af62c447f0a0d6290a8b05e075ef08db38c1b81a8582067c5c0b45db55e8c82752263207b9a92c2d5fa6c671aceed9df451cad3fac7a31a0001e2401a05f5e100d81e82031819581de1d7d8a321633b3d1ab1651eeb258ad898ebcef1d348b54148f18e15da82581c2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d581cf699c6400f85bdca54e44d0cad1f6141ce049a411c0d695fc30c3f7384840019029af650004706260000004700000000111100008301f676616464726573732e76616375756d6c6162732e636f6d8202781e616e6f746865722e616464726573732e76616375756d6c6162732e636f6d840019ffff447f0000fff682782468747470733a2f2f706f6f6c2d6d657461646174612e76616375756d6c6162732e636f6d5820e318d62e3d5cc3cc23ca1123438e439d7aac6c6c423320f670d159726ac9d11f8304581c4dfbc0559b2e1d6af62c447f0a0d6290a8b05e075ef08db38c1b81a81a0001dfbe05a2581df0760fb6955d1217b1f1f208df6d45ab23c9e17b0c984a2d3a22bbbfb81a07b914d0581de12c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d1a00bd979c075820af0c57b5a82f10a5d87e3145612b7d9a812d1470a932d182e46c39623107294108187c09a1581c4a7fc1c3490c30e23961d24f345c81f2dd1105643776098530f06cffa246546f6b656e311a009896805820546f6b656e546f6b656e546f6b656e546f6b656e546f6b656e546f6b656e31321b7fffffffffffffff9f8200581c2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d8200581c47bebb24d73f10f876926192f9bcba280727f51c128926a9eaa6fdadff82a11904d2a163666f6f6362617280',
-        expectedUnsignedTx: {
+        expectedRawTx: {
             body: {
                 inputs: [
                     {

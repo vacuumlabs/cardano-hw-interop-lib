@@ -1,6 +1,6 @@
 import { Tagged } from 'cbor'
 
-import type { Amount, AssetName, Certificate, Coin, Multiasset, PolicyId, PoolMetadata, PoolParams, RawTransaction, Relay, RewardAccount, SignedTransaction, StakeCredential, TransactionBody, TransactionInput, TransactionOutput, Withdrawal } from './types'
+import type { Amount, AssetName, Certificate, Coin, Multiasset, PolicyId, PoolMetadata, PoolParams, RawTransaction, Relay, RewardAccount, Transaction, StakeCredential, TransactionBody, TransactionInput, TransactionOutput, Withdrawal } from './types'
 import { AmountType, CertificateType, RelayType } from './types'
 
 const identity = <T>(x: T): T => x
@@ -12,7 +12,7 @@ const encodeMultiasset = <T>(multiasset: Multiasset<T>): Map<PolicyId, Map<Asset
     new Map(
         multiasset.map(({policyId, tokens}) => [
             policyId,
-            new Map(tokens.map(({assetName, amount}) => [assetName, amount]))
+            new Map(tokens.map(({assetName, amount}) => [assetName, amount])),
         ])
     )
 
@@ -91,10 +91,10 @@ export const encodeTxBody = (txBody: TransactionBody) => new Map(([
     [9, txBody.mint && encodeMultiasset(txBody.mint)],
 ]).filter(([_, value]) => value !== undefined) as [number, unknown][])
 
-export const encodeSignedTx = (signedTx: SignedTransaction) => [
-    encodeTxBody(signedTx.body),
-    signedTx.witnessSet,
-    signedTx.auxiliaryData,
+export const encodeTx = (tx: Transaction) => [
+    encodeTxBody(tx.body),
+    tx.witnessSet,
+    tx.auxiliaryData,
 ]
 
 export const encodeRawTx = (rawTx: RawTransaction) => [
