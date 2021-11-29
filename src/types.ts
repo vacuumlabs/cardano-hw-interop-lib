@@ -218,7 +218,7 @@ export type TransactionBody = {
     mint?: Mint,
 }
 
-export type SignedTransaction = {
+export type Transaction = {
     body: TransactionBody,
     witnessSet: Unparsed,
     auxiliaryData: Unparsed,
