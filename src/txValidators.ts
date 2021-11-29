@@ -197,7 +197,7 @@ function *validateTxBody(txBody: TransactionBody): ValidatorReturnType {
  * Runs a series of validators against the given input, returning all the
  * validation errors found.
  */
-export const validateTx = (inputCbor: Buffer, canonicalCbor: Buffer, txBody: TransactionBody): ValidationError[] => ([
+export const validateTxCommon = (inputCbor: Buffer, canonicalCbor: Buffer, txBody: TransactionBody): ValidationError[] => ([
     // Collect the errors from all the validations
     ...validate(inputCbor.equals(canonicalCbor), err(ValidationErrorReason.CBOR_IS_NOT_CANONICAL, 'transaction')),
     ...validateTxBody(txBody),

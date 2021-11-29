@@ -57,7 +57,7 @@ export enum ParseErrorReason {
     INVALID_TX_VALIDITY_INTERVAL_START = 'Invalid transaction validity interval start',
     INVALID_TX_MINT = 'Invalid transaction mint',
 
-    INVALID_SIGNED_TX_CBOR = 'Invalid signed transaction CBOR',
+    INVALID_TX_CBOR = 'Invalid transaction CBOR',
     INVALID_RAW_TX_CBOR = 'Invalid raw transaction CBOR',
 }
 
@@ -67,4 +67,3 @@ export class ParseError extends Error {
         this.name = 'ParseError'
     }
 }
-
