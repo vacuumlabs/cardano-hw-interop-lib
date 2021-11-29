@@ -1,6 +1,6 @@
-import type { ValidationError} from './errors'
+import type { ValidationError } from './errors'
 import { err, ValidationErrorReason } from './errors'
-import type { Certificate, Int, Mint, Multiasset, StakeCredentialType, StakeDelegationCertificate, StakeDeregistrationCertificate, StakeRegistrationCertificate, TransactionBody, TransactionInput, TransactionOutput, Uint, Withdrawal } from './types'
+import type { Certificate, Collateral, Int, Mint, Multiasset, RequiredSigner, StakeCredentialType, StakeDelegationCertificate, StakeDeregistrationCertificate, StakeRegistrationCertificate, TransactionBody, TransactionInput, TransactionOutput, Uint, Withdrawal } from './types'
 import { AmountType, CertificateType } from './types'
 import { bind, getRewardAccountStakeCredentialType } from './utils'
 
@@ -155,6 +155,18 @@ function *validateStakeCredentials(certificates: Certificate[] | undefined, with
 
 const validateMint = (mint: Mint) => validateMultiasset(mint, validateInt64, 'transaction_body.mint')
 
+function *validateCollaterals(txCollaterals: Collateral[]): ValidatorReturnType {
+    yield* validateListConstraints(txCollaterals, 'transaction_body.collaterals')
+
+    for (const [index, collateral] of txCollaterals.entries()) {
+        yield* validateUint64(collateral.index, `transaction_body.collaterals[${index}].index`)
+    }
+}
+
+function *validateRequiredSigners(txRequiredSigners: RequiredSigner[]): ValidatorReturnType {
+    yield* validateListConstraints(txRequiredSigners, 'transaction_body.required_signers')
+}
+
 /**
  * Checks if a transaction contains pool registration certificate, if it does
  * runs a series of validators for pool registration transactions.
@@ -190,6 +202,9 @@ function *validateTxBody(txBody: TransactionBody): ValidatorReturnType {
     yield* validate(txBody.update === undefined, err(ValidationErrorReason.UNSUPPORTED_TX_UPDATE, 'transaction_body.update'))
     yield* validateOptional(txBody.validityIntervalStart, bind(validateUint64, 'transaction_body.validity_interval_start'))
     yield* validateOptional(txBody.mint, validateMint)
+    yield* validateOptional(txBody.collaterals, validateCollaterals)
+    yield* validateOptional(txBody.requiredSigners, validateRequiredSigners)
+    yield* validateOptional(txBody.networkId, bind(validateUint64, 'transaction_body.network_id'))
     yield* validatePoolRegistrationTransaction(txBody)
 }
 
