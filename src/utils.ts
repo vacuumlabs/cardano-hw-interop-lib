@@ -25,7 +25,7 @@ export const bind = <A, R, T extends any[]>(fn: (x: A, ...args: T) => R, ...args
 export const getRewardAccountStakeCredentialType = (rewardAccount: RewardAccount) => {
     switch(rewardAccount[0] >> 4 & 1) {
     case 0:
-        return StakeCredentialType.ADDRESS_KEY_HASH
+        return StakeCredentialType.KEY_HASH
     case 1:
         return StakeCredentialType.SCRIPT_HASH
     default:

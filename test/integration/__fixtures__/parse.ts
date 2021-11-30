@@ -187,7 +187,7 @@ export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
                     {
                         type: CertificateType.STAKE_REGISTRATION,
                         stakeCredential: {
-                            type: StakeCredentialType.ADDRESS_KEY_HASH,
+                            type: StakeCredentialType.KEY_HASH,
                             hash: toFixlenBuffer('2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d', 28),
                         },
                     },
@@ -201,7 +201,7 @@ export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
                     {
                         type: CertificateType.STAKE_DELEGATION,
                         stakeCredential: {
-                            type: StakeCredentialType.ADDRESS_KEY_HASH,
+                            type: StakeCredentialType.KEY_HASH,
                             hash: toFixlenBuffer('2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d', 28),
                         },
                         poolKeyHash: toFixlenBuffer('001337292eec9b3eefc6802f71cb34c21a7963eb12466d52836aa390', 28),

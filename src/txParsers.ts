@@ -5,10 +5,10 @@ import type { Parser, WithoutType } from './parsers'
 import { isUint } from './parsers'
 import { isUintOfMaxSize } from './parsers'
 import { createParser, isMapWithKeysOfType, isNumber, parseArray, parseBasedOnType, parseBuffer, parseBufferOfLength, parseBufferOfMaxLength, parseInt, parseMap, parseNullable, parseOptional, parseStringOfMaxLength, parseTuple, parseUint, validate } from './parsers'
-import type { Amount, GenesisKeyDelegation, MoveInstantaneousRewardsCertificate, Multiasset, PoolMetadata, PoolParams, PoolRegistrationCertificate, PoolRetirementCertificate, Port, RawTransaction, RelayMultiHostName, RelaySingleHostAddress, RelaySingleHostName, StakeCredentialAddress, StakeCredentialScript, StakeDelegationCertificate, StakeDeregistrationCertificate, StakeRegistrationCertificate, Transaction, TransactionBody, TransactionInput, TransactionOutput, Unparsed, Withdrawal } from './types'
+import type { Amount, GenesisKeyDelegation, MoveInstantaneousRewardsCertificate, Multiasset, PoolMetadata, PoolParams, PoolRegistrationCertificate, PoolRetirementCertificate, Port, RawTransaction, RelayMultiHostName, RelaySingleHostAddress, RelaySingleHostName, StakeCredentialKey, StakeCredentialScript, StakeDelegationCertificate, StakeDeregistrationCertificate, StakeRegistrationCertificate, Transaction, TransactionBody, TransactionInput, TransactionOutput, Unparsed, Withdrawal } from './types'
 import { PORT_MAX_SIZE, REWARD_ACCOUNT_LENGTH } from './types'
 import { AmountType } from './types'
-import { ADDRESS_KEY_HASH_LENGTH, ASSET_NAME_MAX_LENGTH, CertificateType,  DNS_NAME_MAX_LENGTH, IPV4_LENGTH, IPV6_LENGTH, METADATA_HASH_LENGTH, POOL_KEY_HASH_LENGTH, RelayType, SCRIPT_HASH_LENGTH, StakeCredentialType,TX_ID_HASH_LENGTH,  URL_MAX_LENGTH, VRF_KEY_HASH_LENGTH} from './types'
+import { ASSET_NAME_MAX_LENGTH, CertificateType,  DNS_NAME_MAX_LENGTH, IPV4_LENGTH, IPV6_LENGTH, KEY_HASH_LENGTH, METADATA_HASH_LENGTH, POOL_KEY_HASH_LENGTH, RelayType, SCRIPT_HASH_LENGTH, StakeCredentialType,TX_ID_HASH_LENGTH,  URL_MAX_LENGTH, VRF_KEY_HASH_LENGTH} from './types'
 
 const dontParse: Parser<Unparsed> = (data: unknown) => data
 
@@ -93,8 +93,8 @@ const parseStakeCredentialType = (unparsedStakeCredentialType: unknown): StakeCr
     return unparsedStakeCredentialType
 }
 
-const parseStakeCredentialAddr = (data: unknown[]): WithoutType<StakeCredentialAddress> => ({
-    hash: parseBufferOfLength(data[0], ADDRESS_KEY_HASH_LENGTH, ParseErrorReason.INVALID_STAKE_CREDENTIAL_ADDRESS_KEY_HASH),
+const parseStakeCredentialKey = (data: unknown[]): WithoutType<StakeCredentialKey> => ({
+    hash: parseBufferOfLength(data[0], KEY_HASH_LENGTH, ParseErrorReason.INVALID_STAKE_CREDENTIAL_KEY_HASH),
 })
 
 const parseStakeCredentialScript = (data: unknown[]): WithoutType<StakeCredentialScript> => ({
@@ -105,7 +105,7 @@ const parseStakeCredential = createParser(
     parseBasedOnType,
     ParseErrorReason.INVALID_STAKE_CREDENTIAL,
     parseStakeCredentialType,
-    parseStakeCredentialAddr,
+    parseStakeCredentialKey,
     parseStakeCredentialScript,
 )
 
@@ -176,7 +176,7 @@ const parsePoolParams = (unparsedPoolParams: unknown): PoolParams => {
         parseCoin,
         parseUnitInterval,
         parseRewardAccount,
-        createParser(parseArray, createParser(parseBufferOfLength, ADDRESS_KEY_HASH_LENGTH, ParseErrorReason.INVALID_POOL_OWNER), ParseErrorReason.INVALID_POOL_OWNERS),
+        createParser(parseArray, createParser(parseBufferOfLength, KEY_HASH_LENGTH, ParseErrorReason.INVALID_POOL_OWNER), ParseErrorReason.INVALID_POOL_OWNERS),
         createParser(parseArray, parseRelay, ParseErrorReason.INVALID_RELAYS),
         createParser(parseNullable, parsePoolMetadata),
     )
