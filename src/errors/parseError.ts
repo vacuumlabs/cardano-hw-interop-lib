@@ -19,7 +19,7 @@ export enum ParseErrorReason {
 
     INVALID_CERTIFICATE_TYPE = 'Invalid certificate type',
     INVALID_STAKE_CREDENTIAL_TYPE = 'Invalid stake credential type',
-    INVALID_STAKE_CREDENTIAL_ADDRESS_KEY_HASH = 'Invalid stake credential address key hash',
+    INVALID_STAKE_CREDENTIAL_KEY_HASH = 'Invalid stake credential key hash',
     INVALID_STAKE_CREDENTIAL_SCRIPT_HASH = 'Invalid stake credential script hash',
     INVALID_STAKE_CREDENTIAL = 'Invalid stake credential',
     INVALID_POOL_KEY_HASH = 'Invalid pool key hash',

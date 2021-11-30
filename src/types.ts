@@ -8,7 +8,7 @@ export type FixlenBuffer<N> = Buffer & { __length: N }
 export type MaxlenBuffer<N> = Buffer & { __maxLength: N }
 export type MaxsizeUint<N> = Uint & { __maxSize: N }
 
-export const ADDRESS_KEY_HASH_LENGTH = 28
+export const KEY_HASH_LENGTH = 28
 export const SCRIPT_HASH_LENGTH = 28
 export const GENESIS_DELEGATE_HASH_LENGTH = 28
 export const POOL_KEY_HASH_LENGTH = 28
@@ -28,7 +28,7 @@ export const DNS_NAME_MAX_LENGTH = 64
 export const PORT_MAX_SIZE = 65535
 
 export type Address = Buffer
-export type AddressKeyHash = FixlenBuffer<typeof ADDRESS_KEY_HASH_LENGTH>
+export type KeyHash = FixlenBuffer<typeof KEY_HASH_LENGTH>
 export type ScriptHash = FixlenBuffer<typeof SCRIPT_HASH_LENGTH>
 export type RewardAccount = FixlenBuffer<typeof REWARD_ACCOUNT_LENGTH>
 export type Coin = Uint
@@ -85,13 +85,13 @@ export enum CertificateType {
 }
 
 export enum StakeCredentialType {
-    ADDRESS_KEY_HASH = 0,
+    KEY_HASH = 0,
     SCRIPT_HASH = 1,
 }
 
-export type StakeCredentialAddress = {
-    type: StakeCredentialType.ADDRESS_KEY_HASH,
-    hash: AddressKeyHash,
+export type StakeCredentialKey = {
+    type: StakeCredentialType.KEY_HASH,
+    hash: KeyHash,
 }
 
 export type StakeCredentialScript = {
@@ -99,7 +99,7 @@ export type StakeCredentialScript = {
     hash: ScriptHash,
 }
 
-export type StakeCredential = StakeCredentialAddress | StakeCredentialScript
+export type StakeCredential = StakeCredentialKey | StakeCredentialScript
 
 export type StakeRegistrationCertificate = {
     type: CertificateType.STAKE_REGISTRATION,
@@ -161,7 +161,7 @@ export type PoolParams = {
     cost: Coin,
     margin: UnitInterval,
     rewardAccount: RewardAccount,
-    poolOwners: AddressKeyHash[],
+    poolOwners: KeyHash[],
     relays: Relay[],
     poolMetadata: PoolMetadata | null,
 }
