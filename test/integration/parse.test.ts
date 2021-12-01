@@ -47,14 +47,14 @@ describe("Parse", () => {
             expect(() => decodeTx(Buffer.from('00', 'hex'))).to.throw(ParseError, ParseErrorReason.INVALID_TX_CBOR)
         })
         it("Transaction array is too big", () => {
-            expect(() => decodeTx(Buffer.from('8401020304', 'hex'))).to.throw(ParseError, ParseErrorReason.INVALID_TX_CBOR)
+            expect(() => decodeTx(Buffer.from('850102030405', 'hex'))).to.throw(ParseError, ParseErrorReason.INVALID_TX_CBOR)
         })
 
         it("Raw transaction is not an array", () => {
             expect(() => decodeRawTx(Buffer.from('00', 'hex'))).to.throw(ParseError, ParseErrorReason.INVALID_RAW_TX_CBOR)
         })
         it("Raw transaction array is too big", () => {
-            expect(() => decodeRawTx(Buffer.from('8401020304', 'hex'))).to.throw(ParseError, ParseErrorReason.INVALID_RAW_TX_CBOR)
+            expect(() => decodeRawTx(Buffer.from('8701020304050607', 'hex'))).to.throw(ParseError, ParseErrorReason.INVALID_RAW_TX_CBOR)
         })
     })
 })

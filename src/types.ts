@@ -239,11 +239,17 @@ export type TransactionBody = {
 export type Transaction = {
     body: TransactionBody,
     witnessSet: Unparsed,
+    scriptValidity?: Unparsed,
     auxiliaryData: Unparsed,
 }
 
+// raw tx items
+// https://github.com/input-output-hk/cardano-node/blob/54119c80057f88af5acdd7d54969dd461e4cf26e/cardano-api/src/Cardano/Api/TxBody.hs#L1591-L1598
 export type RawTransaction = {
     body: TransactionBody,
-    scriptWitnesses: Unparsed,
-    auxiliaryData: Unparsed,
+    scriptWitnesses?: Unparsed,    // indefinite-length array
+    datumWitnesses?: Unparsed,     // array
+    redeemerWitnesses?: Unparsed,  // array
+    scriptValidity?: Unparsed,     // bool
+    auxiliaryData: Unparsed,       // null / obj
 }
