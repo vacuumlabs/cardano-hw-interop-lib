@@ -286,30 +286,67 @@ export const parseTxBody = (unparsedTxBody: unknown): TransactionBody => {
 }
 
 export const parseTx = (unparsedTx: unknown): Transaction => {
-    const [body, witnessSet, auxiliaryData] = parseTuple(
+    const [body, ...otherItems] = parseTuple(
         unparsedTx,
         ParseErrorReason.INVALID_TX_CBOR,
         parseTxBody,
-        dontParse,
-        dontParse,
+        //             | shelley era:  | alonzo era:
+        dontParse,  // | witnessSet    | witnessSet
+        dontParse,  // | auxiliaryData | scriptValidity
+        dontParse,  // | `undefined`   | auxiliaryData
     )
+    const presentItems = otherItems.filter((item) => item !== undefined)
 
-    return {body, witnessSet, auxiliaryData}
+    // cardano-cli with --shelley-era, --allegra-era and --mary-era
+    // includes only txBody, witnessSet and auxiliaryData
+    if (presentItems.length === 2) {
+        return { body, witnessSet: presentItems[0], auxiliaryData: presentItems[1] }
+    }
+
+    // cardano-cli with --alonzo-era includes all tx items
+    return {
+        body,
+        witnessSet: presentItems[0],
+        scriptValidity: presentItems[1],
+        auxiliaryData: presentItems[2],
+    }
 }
 
 export const parseRawTx = (unparsedRawTx: unknown): RawTransaction => {
-    const [body, item1, item2] = parseTuple(
+    const [body, ...otherItems] = parseTuple(
         unparsedRawTx,
         ParseErrorReason.INVALID_RAW_TX_CBOR,
         parseTxBody,
-        dontParse,
-        dontParse,
+        //             | old cli:      | shelley era:    | alonzo era:
+        dontParse,  // | auxiliaryData | scriptWitnesses | scriptWitnesses
+        dontParse,  // | `undefined`   | auxiliaryData   | datumWitnesses
+        dontParse,  // | `undefined`   | `undefined`     | redeemerWitnesses
+        dontParse,  // | `undefined`   | `undefined`     | scriptValidity
+        dontParse,  // | `undefined`   | `undefined`     | auxiliaryData
     )
-    // older versions of cardano-cli did not include scriptWitnesses
-    if (item2 === undefined) {
-        return {body, scriptWitnesses: undefined, auxiliaryData: item1}
+    const presentItems = otherItems.filter((item) => item !== undefined)
+
+    // older versions of cardano-cli included only txBody and auxiliaryData
+    if (presentItems.length === 1) {
+        return { body, auxiliaryData: presentItems[0] }
     }
+
     // cardano-cli expects indefinite-length scriptWitnesses
-    (item1 as any).encodeCBOR = Encoder.encodeIndefinite
-    return {body, scriptWitnesses: item1, auxiliaryData: item2}
+    (presentItems[0] as any).encodeCBOR = Encoder.encodeIndefinite
+
+    // newer versions of cardano-cli with --shelley-era, --allegra-era and --mary-era
+    // include txBody, scriptWitnesses and auxiliaryData
+    if (presentItems.length === 2) {
+        return { body, scriptWitnesses: presentItems[0], auxiliaryData: presentItems[1] }
+    }
+
+    // newer versions of cardano-cli with --alonzo-era include all rawTx items
+    return {
+        body,
+        scriptWitnesses: presentItems[0],
+        datumWitnesses: presentItems[1],
+        redeemerWitnesses: presentItems[2],
+        scriptValidity: presentItems[3],
+        auxiliaryData: presentItems[4],
+    }
 }

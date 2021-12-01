@@ -99,23 +99,22 @@ export const serializeTxBody = (txBody: TransactionBody) => new Map(([
     [15, txBody.networkId],
 ]).filter(([_, value]) => value !== undefined) as [number, unknown][])
 
-export const serializeTx = (tx: Transaction) => [
-    serializeTxBody(tx.body),
-    tx.witnessSet,
-    tx.auxiliaryData,
-]
+export const serializeTx = (tx: Transaction) => {
+    return [
+        serializeTxBody(tx.body),
+        tx.witnessSet,
+        tx.scriptValidity,
+        tx.auxiliaryData,
+    ].filter((item) => item !== undefined)
+}
 
 export const serializeRawTx = (rawTx: RawTransaction) => {
-    // older versions of cardano-cli did not include scriptWitnesses
-    if (rawTx.scriptWitnesses === undefined) {
-        return [
-            serializeTxBody(rawTx.body),
-            rawTx.auxiliaryData,
-        ]
-    }
     return [
         serializeTxBody(rawTx.body),
         rawTx.scriptWitnesses,
+        rawTx.datumWitnesses,
+        rawTx.redeemerWitnesses,
+        rawTx.scriptValidity,
         rawTx.auxiliaryData,
-    ]
+    ].filter((item) => item !== undefined)
 }
