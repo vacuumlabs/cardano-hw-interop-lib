@@ -86,7 +86,7 @@ export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
                 validityIntervalStart: undefined,
                 mint: undefined,
             },
-            nativeScriptWitnesses: [],
+            scriptWitnesses: [],
             auxiliaryData: null,
         },
     },
@@ -281,7 +281,7 @@ export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
                     ],
                 }],
             },
-            nativeScriptWitnesses: [
+            scriptWitnesses: [
                 [0, Buffer.from('2C049DFED8BC41EDEFBBC835CA0A739CAC961557950262EF48BCFF1D', 'hex')],
                 [0, Buffer.from('47BEBB24D73F10F876926192F9BCBA280727F51C128926A9EAA6FDAD', 'hex')],
             ],

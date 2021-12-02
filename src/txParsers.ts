@@ -279,11 +279,11 @@ export const parseRawTx = (unparsedRawTx: unknown): RawTransaction => {
         dontParse,
         dontParse,
     )
-    // older versions of cardano-cli did not include nativeScriptWitnesses
+    // older versions of cardano-cli did not include scriptWitnesses
     if (item2 === undefined) {
-        return {body, nativeScriptWitnesses: undefined, auxiliaryData: item1}
+        return {body, scriptWitnesses: undefined, auxiliaryData: item1}
     }
-    // cardano-cli expects indefinite-length nativeScriptWitnesses
+    // cardano-cli expects indefinite-length scriptWitnesses
     (item1 as any).encodeCBOR = Encoder.encodeIndefinite
-    return {body, nativeScriptWitnesses: item1, auxiliaryData: item2}
+    return {body, scriptWitnesses: item1, auxiliaryData: item2}
 }

@@ -97,8 +97,8 @@ export const serializeTx = (tx: Transaction) => [
 ]
 
 export const serializeRawTx = (rawTx: RawTransaction) => {
-    // older versions of cardano-cli did not include nativeScriptWitnesses
-    if (rawTx.nativeScriptWitnesses === undefined) {
+    // older versions of cardano-cli did not include scriptWitnesses
+    if (rawTx.scriptWitnesses === undefined) {
         return [
             serializeTxBody(rawTx.body),
             rawTx.auxiliaryData,
@@ -106,7 +106,7 @@ export const serializeRawTx = (rawTx: RawTransaction) => {
     }
     return [
         serializeTxBody(rawTx.body),
-        rawTx.nativeScriptWitnesses,
+        rawTx.scriptWitnesses,
         rawTx.auxiliaryData,
     ]
 }
