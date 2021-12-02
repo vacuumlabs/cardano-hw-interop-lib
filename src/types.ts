@@ -226,6 +226,6 @@ export type Transaction = {
 
 export type RawTransaction = {
     body: TransactionBody,
-    nativeScriptWitnesses: Unparsed,
+    scriptWitnesses: Unparsed,
     auxiliaryData: Unparsed,
 }
