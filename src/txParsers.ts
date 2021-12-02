@@ -235,11 +235,11 @@ const parseCertificate = createParser(
 
 export const parseInputs = createParser(parseArray, parseTxInput, ParseErrorReason.INVALID_TX_INPUTS)
 export const parseOutputs = createParser(parseArray, parseTxOutput, ParseErrorReason.INVALID_TX_OUTPUTS)
-const parseFee = createParser(parseUint, ParseErrorReason.INVALID_TX_FEE)
-const parseTtl = createParser(parseUint, ParseErrorReason.INVALID_TX_TTL)
+export const parseFee = createParser(parseUint, ParseErrorReason.INVALID_TX_FEE)
+export const parseTtl = createParser(parseUint, ParseErrorReason.INVALID_TX_TTL)
 export const parseCertificates = createParser(parseArray, parseCertificate, ParseErrorReason.INVALID_TX_CERTIFICATES)
-const parseMetadataHash = createParser(parseBufferOfLength, METADATA_HASH_LENGTH, ParseErrorReason.INVALID_TX_METADATA_HASH)
-const parseValidityIntervalStart = createParser(parseUint, ParseErrorReason.INVALID_TX_VALIDITY_INTERVAL_START)
+export const parseMetadataHash = createParser(parseBufferOfLength, METADATA_HASH_LENGTH, ParseErrorReason.INVALID_TX_METADATA_HASH)
+export const parseValidityIntervalStart = createParser(parseUint, ParseErrorReason.INVALID_TX_VALIDITY_INTERVAL_START)
 export const parseMint = createParser(parseMultiasset, createParser(parseInt, ParseErrorReason.INVALID_MINT_AMOUNT), ParseErrorReason.INVALID_TX_MINT)
 
 export const parseTxBody = (unparsedTxBody: unknown): TransactionBody => {
