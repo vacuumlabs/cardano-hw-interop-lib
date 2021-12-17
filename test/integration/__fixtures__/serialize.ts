@@ -1,5 +1,5 @@
 import type { TransactionBody } from '../../../src/index'
-import type { MaxlenBuffer, Port} from '../../../src/types'
+import type { MaxlenBuffer, Port } from '../../../src/types'
 import { AmountType, CertificateType, RelayType, StakeCredentialType } from '../../../src/types'
 import { fromBech32, ipv4ToBuffer, rewardAccount, toFixlenBuffer, toInt, toMaxLenString, toUint } from '../../test_utils'
 
