@@ -5,6 +5,7 @@ import type { Parser, WithoutType } from './parsers'
 import { createParser, isMapWithKeysOfType, isNumber, isUint, isUintOfMaxSize, parseArray, parseBasedOnType, parseBuffer, parseBufferOfLength, parseBufferOfMaxLength, parseInt, parseMap, parseNullable, parseOptional, parseStringOfMaxLength, parseTuple, parseUint, validate } from './parsers'
 import type { Amount, Collateral, DatumHash, GenesisKeyDelegation, MoveInstantaneousRewardsCertificate, Multiasset, PoolMetadata, PoolParams, PoolRegistrationCertificate, PoolRetirementCertificate, Port, RawTransaction, RelayMultiHostName, RelaySingleHostAddress, RelaySingleHostName, RequiredSigner, StakeCredentialKey, StakeCredentialScript, StakeDelegationCertificate, StakeDeregistrationCertificate, StakeRegistrationCertificate, Transaction, TransactionBody, TransactionInput, TransactionOutput, Unparsed, Withdrawal } from './types'
 import { AmountType, ASSET_NAME_MAX_LENGTH, CertificateType, DATUM_HASH_LENGTH, DNS_NAME_MAX_LENGTH, IPV4_LENGTH, IPV6_LENGTH, KEY_HASH_LENGTH, METADATA_HASH_LENGTH, POOL_KEY_HASH_LENGTH, PORT_MAX_SIZE, RelayType, REWARD_ACCOUNT_LENGTH, SCRIPT_DATA_HASH_LENGTH, SCRIPT_HASH_LENGTH, StakeCredentialType, TX_ID_HASH_LENGTH, URL_MAX_LENGTH, VRF_KEY_HASH_LENGTH } from './types'
+import { TransactionBodyKeys } from './utils'
 
 const dontParse: Parser<Unparsed> = (data: unknown) => data
 
@@ -268,20 +269,20 @@ export const parseTxBody = (unparsedTxBody: unknown): TransactionBody => {
     validate(isMapWithKeysOfType(unparsedTxBody, isNumber), ParseErrorReason.INVALID_TX_BODY_CBOR)
 
     return {
-        inputs: parseInputs(unparsedTxBody.get(0)),
-        outputs: parseOutputs(unparsedTxBody.get(1)),
-        fee: parseFee(unparsedTxBody.get(2)),
-        ttl: parseOptional(unparsedTxBody.get(3), parseTtl),
-        certificates: parseOptional(unparsedTxBody.get(4), parseCertificates),
-        withdrawals: parseOptional(unparsedTxBody.get(5), parseWithdrawals),
-        update: unparsedTxBody.get(6),
-        metadataHash: parseOptional(unparsedTxBody.get(7), parseMetadataHash),
-        validityIntervalStart: parseOptional(unparsedTxBody.get(8), parseValidityIntervalStart),
-        mint: parseOptional(unparsedTxBody.get(9), parseMint),
-        scriptDataHash: parseOptional(unparsedTxBody.get(11), parseScriptDataHash),
-        collaterals: parseOptional(unparsedTxBody.get(13), parseCollaterals),
-        requiredSigners: parseOptional(unparsedTxBody.get(14), parseRequiredSigners),
-        networkId: parseOptional(unparsedTxBody.get(15), parseNetworkId),
+        inputs: parseInputs(unparsedTxBody.get(TransactionBodyKeys.INPUTS)),
+        outputs: parseOutputs(unparsedTxBody.get(TransactionBodyKeys.OUTPUTS)),
+        fee: parseFee(unparsedTxBody.get(TransactionBodyKeys.FEE)),
+        ttl: parseOptional(unparsedTxBody.get(TransactionBodyKeys.TTL), parseTtl),
+        certificates: parseOptional(unparsedTxBody.get(TransactionBodyKeys.CERTIFICATES), parseCertificates),
+        withdrawals: parseOptional(unparsedTxBody.get(TransactionBodyKeys.WITHDRAWALS), parseWithdrawals),
+        update: unparsedTxBody.get(TransactionBodyKeys.UPDATE),
+        metadataHash: parseOptional(unparsedTxBody.get(TransactionBodyKeys.METADATA_HASH), parseMetadataHash),
+        validityIntervalStart: parseOptional(unparsedTxBody.get(TransactionBodyKeys.VALIDITY_INTERVAL_START), parseValidityIntervalStart),
+        mint: parseOptional(unparsedTxBody.get(TransactionBodyKeys.MINT), parseMint),
+        scriptDataHash: parseOptional(unparsedTxBody.get(TransactionBodyKeys.SCRIPT_DATA_HASH), parseScriptDataHash),
+        collaterals: parseOptional(unparsedTxBody.get(TransactionBodyKeys.COLLATERAL_INPUTS), parseCollaterals),
+        requiredSigners: parseOptional(unparsedTxBody.get(TransactionBodyKeys.REQUIRED_SIGNERS), parseRequiredSigners),
+        networkId: parseOptional(unparsedTxBody.get(TransactionBodyKeys.NETWORK_ID), parseNetworkId),
     }
 }
 
