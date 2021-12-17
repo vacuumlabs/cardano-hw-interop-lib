@@ -2,6 +2,7 @@ import { Tagged } from 'cbor'
 
 import type { Amount, AssetName, Certificate, Coin, Collateral, Multiasset, PolicyId, PoolMetadata, PoolParams, RawTransaction, Relay, RewardAccount, StakeCredential, Transaction, TransactionBody, TransactionInput, TransactionOutput, Withdrawal } from './types'
 import { AmountType, CertificateType, RelayType } from './types'
+import { TransactionBodyKeys } from './utils'
 
 const identity = <T>(x: T): T => x
 
@@ -83,20 +84,20 @@ const serializeCollateral = (collateral: Collateral) =>
     [collateral.transactionId, collateral.index]
 
 export const serializeTxBody = (txBody: TransactionBody) => new Map(([
-    [0, txBody.inputs.map(serializeTxInput)],
-    [1, txBody.outputs.map(serializeTxOutput)],
-    [2, identity(txBody.fee)],
-    [3, identity(txBody.ttl)],
-    [4, txBody.certificates?.map(serializeTxCertificate)],
-    [5, txBody.withdrawals && serializeWithdrawals(txBody.withdrawals)],
-    [6, identity(txBody.update)],
-    [7, identity(txBody.metadataHash)],
-    [8, identity(txBody.validityIntervalStart)],
-    [9, txBody.mint && serializeMultiasset(txBody.mint)],
-    [11, txBody.scriptDataHash],
-    [13, txBody.collaterals?.map(serializeCollateral)],
-    [14, txBody.requiredSigners],
-    [15, txBody.networkId],
+    [TransactionBodyKeys.INPUTS, txBody.inputs.map(serializeTxInput)],
+    [TransactionBodyKeys.OUTPUTS, txBody.outputs.map(serializeTxOutput)],
+    [TransactionBodyKeys.FEE, identity(txBody.fee)],
+    [TransactionBodyKeys.TTL, identity(txBody.ttl)],
+    [TransactionBodyKeys.CERTIFICATES, txBody.certificates?.map(serializeTxCertificate)],
+    [TransactionBodyKeys.WITHDRAWALS, txBody.withdrawals && serializeWithdrawals(txBody.withdrawals)],
+    [TransactionBodyKeys.UPDATE, identity(txBody.update)],
+    [TransactionBodyKeys.METADATA_HASH, identity(txBody.metadataHash)],
+    [TransactionBodyKeys.VALIDITY_INTERVAL_START, identity(txBody.validityIntervalStart)],
+    [TransactionBodyKeys.MINT, txBody.mint && serializeMultiasset(txBody.mint)],
+    [TransactionBodyKeys.SCRIPT_DATA_HASH, txBody.scriptDataHash],
+    [TransactionBodyKeys.COLLATERAL_INPUTS, txBody.collaterals?.map(serializeCollateral)],
+    [TransactionBodyKeys.REQUIRED_SIGNERS, txBody.requiredSigners],
+    [TransactionBodyKeys.NETWORK_ID, txBody.networkId],
 ]).filter(([_, value]) => value !== undefined) as [number, unknown][])
 
 export const serializeTx = (tx: Transaction) => {
