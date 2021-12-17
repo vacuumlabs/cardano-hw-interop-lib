@@ -32,3 +32,20 @@ export const getRewardAccountStakeCredentialType = (rewardAccount: RewardAccount
         throw Error('Invalid reward account type')
     }
 }
+
+export enum TransactionBodyKeys {
+    INPUTS = 0,
+    OUTPUTS = 1,
+    FEE = 2,
+    TTL = 3,
+    CERTIFICATES = 4,
+    WITHDRAWALS = 5,
+    UPDATE = 6,
+    METADATA_HASH = 7,
+    VALIDITY_INTERVAL_START = 8,
+    MINT = 9,
+    SCRIPT_DATA_HASH = 11,
+    COLLATERAL_INPUTS = 13,
+    REQUIRED_SIGNERS = 14,
+    NETWORK_ID = 15,
+}
