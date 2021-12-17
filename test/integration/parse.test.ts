@@ -2,9 +2,9 @@ import { expect } from 'chai'
 
 import { ParseError, ParseErrorReason } from '../../src/errors'
 import { decodeRawTx, decodeTx, decodeTxBody } from '../../src/index'
-import { ValidRawTransactionTestcases, ValidTransactionBodyTestcases,ValidTransactionTestcases } from './__fixtures__/parse'
+import { ValidRawTransactionTestcases, ValidTransactionBodyTestcases, ValidTransactionTestcases } from './__fixtures__/parse'
 
-describe("Decode and parse", () => {
+describe("Parse", () => {
     describe("Valid transaction bodies", () => {
         for (const { testname, cbor, expectedTxBody } of ValidTransactionBodyTestcases) {
             it(testname, () => {
