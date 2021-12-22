@@ -2,7 +2,7 @@ import { ParseErrorReason } from '../../src/errors'
 import { parseInputs } from '../../src/txParsers'
 import type { TransactionInput } from '../../src/types'
 import type { InvalidParseTestcase, ValidParseTestcase } from '../test_utils'
-import { registerTests, toFixlenBuffer,toUint } from '../test_utils'
+import { registerTests, toFixlenBuffer, toUint } from '../test_utils'
 
 const ValidInputsTestcases: ValidParseTestcase<TransactionInput[]>[] = [
     {

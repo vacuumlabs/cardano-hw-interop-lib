@@ -2,8 +2,7 @@ import { ParseErrorReason } from '../../src/errors'
 import { parseMint } from '../../src/txParsers'
 import type { MaxlenBuffer, Mint } from '../../src/types'
 import type { InvalidParseTestcase, ValidParseTestcase } from '../test_utils'
-import { toFixlenBuffer } from '../test_utils'
-import { registerTests, toInt } from '../test_utils'
+import { registerTests, toFixlenBuffer, toInt } from '../test_utils'
 
 const ValidMintTestcases: ValidParseTestcase<Mint>[] = [
     {
