@@ -1,4 +1,4 @@
-# cardano-hw-interoperability-lib
+# Cardano HW Interoperability Library
 
 JavaScript library to validate and transform Cardano transactions accroding to [CIP-0021](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/CIP-0021.md).
 
