@@ -29,11 +29,13 @@ function *validateOptional<T>(x: T | undefined | null, validateFn: (x: T) => Val
 
 /**
  * Validates a list according to the constraints in CIP-0021:
- *  * an empty list is not accepted and must not be included
+ *  * an empty optional list is not accepted and must not be included
  *  * the length of a list must not exceed `UINT16_MAX`, i.e. 65535
  */
-function *validateListConstraints(list: any[], position: string): ValidatorReturnType {
-    yield* validate(list.length > 0, err(ValidationErrorReason.OPTIONAL_EMPTY_LISTS_AND_MAPS_MUST_NOT_BE_INCLUDED, position))
+function *validateListConstraints(list: any[], position: string, requiredList: boolean): ValidatorReturnType {
+    if (!requiredList) {
+        yield* validate(list.length > 0, err(ValidationErrorReason.OPTIONAL_EMPTY_LISTS_AND_MAPS_MUST_NOT_BE_INCLUDED, position))
+    }
     yield* validate(list.length <= UINT16_MAX, err(ValidationErrorReason.NUMBER_OF_ELEMENTS_EXCEEDS_UINT16, position))
 }
 
@@ -44,7 +46,7 @@ const validateInt64 = (n: Int, position: string) =>
     validate(n >= BigInt(MIN_INT_64_STR) && n <= BigInt(MAX_INT_64_STR), err(ValidationErrorReason.INTEGER_NOT_INT64, position))
 
 function *validateTxInputs(txInputs: TransactionInput[]): ValidatorReturnType {
-    yield* validateListConstraints(txInputs, 'transaction_body.inputs')
+    yield* validateListConstraints(txInputs, 'transaction_body.inputs', true)
 
     for (const [index, input] of txInputs.entries()) {
         yield* validateUint64(input.index, `transaction_body.inputs[${index}].index`)
@@ -52,10 +54,10 @@ function *validateTxInputs(txInputs: TransactionInput[]): ValidatorReturnType {
 }
 
 function *validateMultiasset<T>(multiasset: Multiasset<T>, validateAmount: (n: T, position: string) => ValidatorReturnType, position: string): ValidatorReturnType {
-    yield* validateListConstraints(multiasset, position)
+    yield* validateListConstraints(multiasset, position, false)
 
     for (const {policyId, tokens} of multiasset) {
-        yield* validateListConstraints(tokens, `${position}[${policyId.toString('hex')}]`)
+        yield* validateListConstraints(tokens, `${position}[${policyId.toString('hex')}]`, false)
 
         for (const {assetName, amount} of tokens) {
             yield* validateAmount(amount, `${position}[${policyId.toString('hex')}][${assetName.toString('hex')}]`)
@@ -64,7 +66,7 @@ function *validateMultiasset<T>(multiasset: Multiasset<T>, validateAmount: (n: T
 }
 
 function *validateTxOutputs(txOutputs: TransactionOutput[]): ValidatorReturnType {
-    yield* validateListConstraints(txOutputs, 'transaction_body.outputs')
+    yield* validateListConstraints(txOutputs, 'transaction_body.outputs', true)
 
     for (const [index, {amount}] of txOutputs.entries()) {
         switch (amount.type) {
@@ -85,7 +87,7 @@ function *validateTxOutputs(txOutputs: TransactionOutput[]): ValidatorReturnType
 }
 
 function *validateCertificates(certificates: Certificate[]): ValidatorReturnType {
-    yield* validateListConstraints(certificates, 'transaction_body.certificates')
+    yield* validateListConstraints(certificates, 'transaction_body.certificates', false)
 
     for (const [index, certificate] of certificates.entries()) {
         switch (certificate.type) {
@@ -111,7 +113,7 @@ function *validateCertificates(certificates: Certificate[]): ValidatorReturnType
 }
 
 function *validateWithdrawals(withdrawals: Withdrawal[]): ValidatorReturnType {
-    yield* validateListConstraints(withdrawals, 'transaction_body.withdrawals')
+    yield* validateListConstraints(withdrawals, 'transaction_body.withdrawals', false)
 
     for (const {rewardAccount, amount} of withdrawals) {
         yield* validateUint64(amount, `transaction_body.withdrawals[${rewardAccount.toString('hex')}]`)
@@ -156,7 +158,7 @@ function *validateStakeCredentials(certificates: Certificate[] | undefined, with
 const validateMint = (mint: Mint) => validateMultiasset(mint, validateInt64, 'transaction_body.mint')
 
 function *validateCollaterals(txCollaterals: Collateral[]): ValidatorReturnType {
-    yield* validateListConstraints(txCollaterals, 'transaction_body.collaterals')
+    yield* validateListConstraints(txCollaterals, 'transaction_body.collaterals', false)
 
     for (const [index, collateral] of txCollaterals.entries()) {
         yield* validateUint64(collateral.index, `transaction_body.collaterals[${index}].index`)
@@ -164,7 +166,7 @@ function *validateCollaterals(txCollaterals: Collateral[]): ValidatorReturnType 
 }
 
 function *validateRequiredSigners(txRequiredSigners: RequiredSigner[]): ValidatorReturnType {
-    yield* validateListConstraints(txRequiredSigners, 'transaction_body.required_signers')
+    yield* validateListConstraints(txRequiredSigners, 'transaction_body.required_signers', false)
 }
 
 /**
