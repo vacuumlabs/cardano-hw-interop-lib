@@ -331,6 +331,7 @@ export const parseRawTx = (unparsedRawTx: unknown): RawTransaction => {
     }
 
     // cardano-cli expects indefinite-length scriptWitnesses
+    // we add the flag here right after parsing so that validators can encode the witnesses correctly
     addIndefiniteLengthFlag(presentItems[0])
 
     // newer versions of cardano-cli with --shelley-era, --allegra-era and --mary-era

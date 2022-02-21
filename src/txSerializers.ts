@@ -2,7 +2,7 @@ import { Tagged } from 'cbor'
 
 import type { Amount, AssetName, Certificate, Coin, Collateral, Multiasset, PolicyId, PoolMetadata, PoolParams, RawTransaction, Relay, RewardAccount, StakeCredential, Transaction, TransactionBody, TransactionInput, TransactionOutput, Withdrawal } from './types'
 import { AmountType, CertificateType, RelayType } from './types'
-import { TransactionBodyKeys } from './utils'
+import { addIndefiniteLengthFlag, TransactionBodyKeys } from './utils'
 
 const identity = <T>(x: T): T => x
 
@@ -110,6 +110,11 @@ export const serializeTx = (tx: Transaction) => {
 }
 
 export const serializeRawTx = (rawTx: RawTransaction) => {
+    if (rawTx.scriptWitnesses !== undefined) {
+        // cardano-cli expects indefinite-length scriptWitnesses
+        addIndefiniteLengthFlag(rawTx.scriptWitnesses)
+    }
+
     return [
         serializeTxBody(rawTx.body),
         rawTx.scriptWitnesses,
