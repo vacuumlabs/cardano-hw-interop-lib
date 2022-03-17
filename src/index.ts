@@ -32,7 +32,10 @@ export const decodeTx = (txCbor: Buffer): Transaction =>
 
 /**
  * Takes a Buffer of CBOR encoded raw transaction and decodes it
- * to a RawTransaction object
+ * to a RawTransaction object.
+ *
+ * Note: This function is DEPRECATED and will probably be REMOVED.
+ * Use Transaction and decodeTx instead.
  *
  * @param {Buffer} rawTxCbor The CBOR encoded input
  * @returns Decoded RawTransaction object
@@ -68,6 +71,9 @@ export const encodeTx = (tx: Transaction): Buffer =>
  * Uses canonical CBOR serialization format as specified in
  * {@link https://datatracker.ietf.org/doc/html/rfc7049#section-3.9 Section 3.9 of CBOR specification RFC}
  *
+ * Note: This function is DEPRECATED and will probably be REMOVED.
+ * Use Transaction and encodeTx instead.
+ *
  * @param {RawTransaction} rawTx
  * @returns Buffer containing the CBOR encoded `rawTx`
  */
@@ -91,6 +97,9 @@ export const validateTxBody = (txBodyCbor: Buffer): ValidationError[] => {
 /**
  * Takes a Buffer of CBOR encoded transaction and validates it according to
  * CIP-0021, returns an array of found validation errors.
+ *
+ * Note: This function is DEPRECATED and will probably be REMOVED.
+ * Use Transaction and validateTx instead.
  *
  * @param {Buffer} txCbor The CBOR encoded transaction
  * @returns Found validation errors
@@ -146,6 +155,10 @@ export const transformTx = transformers.transformTx
  * input, but the size of the serialized transaction body might decrease
  * (or even increase in some very rare cases).
  * Returns a new transformed raw transaction.
+ *
+ *
+ * Note: This function is DEPRECATED and will probably be REMOVED.
+ * Use Transaction and transformTx instead.
  *
  * @param {RawTransaction} rawTx
  * @returns Transformed raw transaction
