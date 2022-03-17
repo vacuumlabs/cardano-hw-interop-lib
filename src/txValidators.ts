@@ -193,6 +193,10 @@ function *validatePoolRegistrationTransaction(txBody: TransactionBody): Validato
     yield* validate(!txBody.mint || txBody.mint.length === 0 || txBody.mint.every(({tokens}) => tokens.length === 0), err(ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_MINT_ENTRY, 'transaction_body.mint') )
 }
 
+/**
+ * Validates tx body according to CIP-0021. Properties that are enforced during parsing (e.g. hash
+ * lengths) are not validated.
+ */
 function *validateTxBody(txBody: TransactionBody): ValidatorReturnType {
     yield* validateTxInputs(txBody.inputs)
     yield* validateTxOutputs(txBody.outputs)

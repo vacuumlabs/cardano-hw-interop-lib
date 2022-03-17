@@ -94,10 +94,11 @@ export const serializeTxBody = (txBody: TransactionBody) => new Map(([
     [TransactionBodyKeys.METADATA_HASH, identity(txBody.metadataHash)],
     [TransactionBodyKeys.VALIDITY_INTERVAL_START, identity(txBody.validityIntervalStart)],
     [TransactionBodyKeys.MINT, txBody.mint && serializeMultiasset(txBody.mint)],
-    [TransactionBodyKeys.SCRIPT_DATA_HASH, txBody.scriptDataHash],
+    [TransactionBodyKeys.SCRIPT_DATA_HASH, identity(txBody.scriptDataHash)],
     [TransactionBodyKeys.COLLATERAL_INPUTS, txBody.collaterals?.map(serializeCollateral)],
-    [TransactionBodyKeys.REQUIRED_SIGNERS, txBody.requiredSigners],
-    [TransactionBodyKeys.NETWORK_ID, txBody.networkId],
+    [TransactionBodyKeys.REQUIRED_SIGNERS, identity(txBody.requiredSigners)],
+    [TransactionBodyKeys.NETWORK_ID, identity(txBody.networkId)],
+// return only the items that are present (so that no undefined appears in CBOR)
 ]).filter(([_, value]) => value !== undefined) as [number, unknown][])
 
 export const serializeTx = (tx: Transaction) => {

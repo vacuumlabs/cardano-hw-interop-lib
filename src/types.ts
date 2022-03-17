@@ -245,6 +245,7 @@ export type Transaction = {
 
 // raw tx items
 // https://github.com/input-output-hk/cardano-node/blob/54119c80057f88af5acdd7d54969dd461e4cf26e/cardano-api/src/Cardano/Api/TxBody.hs#L1591-L1598
+// Note that we will probably want to remove this type and support only Transaction.
 export type RawTransaction = {
     body: TransactionBody,
     scriptWitnesses?: Unparsed,    // indefinite-length array
