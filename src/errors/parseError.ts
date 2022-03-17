@@ -12,6 +12,9 @@ export enum ParseErrorReason {
     INVALID_TX_INPUT_INDEX = 'Invalid transaction input index',
     INVALID_TX_INPUT = 'Invalid transaction input',
 
+    INVALID_TX_COLLATERAL_INPUT_INDEX = 'Invalid transaction collateral input index',
+    INVALID_TX_COLLATERAL_INPUT = 'Invalid transaction collateral input',
+
     INVALID_OUTPUT_ADDRESS = 'Invalid output address',
     INVALID_OUTPUT_AMOUNT = 'Invalid output amount',
     INVALID_OUTPUT_MULTIASSET = 'Invalid output multiasset',
@@ -58,7 +61,7 @@ export enum ParseErrorReason {
     INVALID_TX_VALIDITY_INTERVAL_START = 'Invalid transaction validity interval start',
     INVALID_TX_MINT = 'Invalid transaction mint',
     INVALID_TX_SCRIPT_DATA_HASH = 'Invalid transaction script data hash',
-    INVALID_TX_COLLATERALS = 'Invalid transaction collateral inputs',
+    INVALID_TX_COLLATERAL_INPUTS = 'Invalid transaction collateral inputs',
     INVALID_TX_REQUIRED_SIGNERS = 'Invalid transaction required signers',
     INVALID_TX_NETWORK_ID = 'Invalid transaction network id',
 
