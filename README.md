@@ -8,6 +8,7 @@ The provided functions operate on either a:
 * transaction body - only the transaction body as defined in the [shelley-ma.cddl#49](https://github.com/input-output-hk/cardano-ledger/blob/master/eras/shelley-ma/test-suite/cddl-files/shelley-ma.cddl#L49)
 * transaction - transaction as defined in the [shelley-ma.cddl#13](https://github.com/input-output-hk/cardano-ledger/blob/master/eras/shelley-ma/test-suite/cddl-files/shelley-ma.cddl#L13)
 * raw transaction - transaction outputted by `cardano-cli transaction build-raw`
+  * This type and the related functions are DEPRECATED and will probably be REMOVED. Use transaction instead.
 
 
 ### `decode`
@@ -15,7 +16,7 @@ Parses a CBOR encoded input into a `TransactionBody`, `Transaction` or `RawTrans
 ```ts
 decodeTxBody(txBodyCbor: Buffer) => TransactionBody
 decodeTx(txCbor: Buffer) => Transaction
-decodeRawTx(rawTxCbor: Buffer) => RawTransaction
+decodeRawTx(rawTxCbor: Buffer) => RawTransaction  // DEPRECATED
 ```
 The `TransactionBody` object mostly follows the CDDL, but sometimes makes small deviations for better developer experience, such as parsing certain tuples as objects, or maps as arrays because working with maps is cumbersome in JavaScript.
 
@@ -26,7 +27,7 @@ Takes a `TransactionBody`, `Transaction` or `RawTransaction` object and encodes 
 ```ts
 encodeTxBody(txBody: TransactionBody) => Buffer
 encodeTx(tx: Transaction) => Buffer
-encodeRawTx(rawTx: RawTransaction) => Buffer
+encodeRawTx(rawTx: RawTransaction) => Buffer  // DEPRECATED
 ```
 
 ### `validate`
@@ -40,7 +41,7 @@ Available methods:
 ```ts
 validateTxBody(txBodyCbor: Buffer) => ValidationError[]
 validateTx(txCbor: Buffer) => ValidationError[]
-validateRawTx(rawTxCbor: Buffer) => ValidationError[]
+validateRawTx(rawTxCbor: Buffer) => ValidationError[]  // DEPRECATED
 ```
 
 The list of all possible validation errors can be found [here](./src/errors/validationError.ts)
@@ -50,6 +51,6 @@ Takes a `TransactionBody`, `Transaction` or `RawTransaction` object and applies 
 ```ts
 transformTxBody(txBody: TransactionBody) => TransactionBody
 transformTx(tx: Transaction) => Transaction
-transformRawTx(rawTx: RawTransaction) => RawTransaction
+transformRawTx(rawTx: RawTransaction) => RawTransaction  // DEPRECATED
 ```
 Note: the length of the resulting CBOR might be increased or decreased which might affect the minimum required fee. An increase in CBOR length should be very rare.
