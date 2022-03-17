@@ -48,8 +48,8 @@ const validateInt64 = (n: Int, position: string) =>
 function *validateTxInputs(txInputs: TransactionInput[]): ValidatorReturnType {
     yield* validateListConstraints(txInputs, 'transaction_body.inputs', true)
 
-    for (const [index, input] of txInputs.entries()) {
-        yield* validateUint64(input.index, `transaction_body.inputs[${index}].index`)
+    for (const [i, input] of txInputs.entries()) {
+        yield* validateUint64(input.index, `transaction_body.inputs[${i}].index`)
     }
 }
 
@@ -68,19 +68,19 @@ function *validateMultiasset<T>(multiasset: Multiasset<T>, validateAmount: (n: T
 function *validateTxOutputs(txOutputs: TransactionOutput[]): ValidatorReturnType {
     yield* validateListConstraints(txOutputs, 'transaction_body.outputs', true)
 
-    for (const [index, {amount}] of txOutputs.entries()) {
+    for (const [i, {amount}] of txOutputs.entries()) {
         switch (amount.type) {
         case AmountType.WITHOUT_MULTIASSET:
-            yield* validateUint64(amount.coin, `transaction_body.outputs[${index}].amount`)
+            yield* validateUint64(amount.coin, `transaction_body.outputs[${i}].amount`)
             break
         case AmountType.WITH_MULTIASSET:
-            yield* validateUint64(amount.coin, `transaction_body.outputs[${index}].amount`)
+            yield* validateUint64(amount.coin, `transaction_body.outputs[${i}].amount`)
             // Although this check is also preformed by the `validateMultiasset`
             // function, this is a very specific check for the output format
             // that it is okay that they are defacto preformed twice with
             // different ValidationErrors, and both errors are marked as fixable
-            yield* validate(amount.multiasset.length > 0, err(ValidationErrorReason.OUTPUT_WITHOUT_TOKENS_MUST_BE_A_SIMPLE_TUPLE, `transaction_body.outputs[${index}].amount`))
-            yield* validateMultiasset(amount.multiasset, validateUint64, `transaction_body.ouputs[${index}]`)
+            yield* validate(amount.multiasset.length > 0, err(ValidationErrorReason.OUTPUT_WITHOUT_TOKENS_MUST_BE_A_SIMPLE_TUPLE, `transaction_body.outputs[${i}].amount`))
+            yield* validateMultiasset(amount.multiasset, validateUint64, `transaction_body.ouputs[${i}]`)
             break
         }
     }
@@ -89,22 +89,22 @@ function *validateTxOutputs(txOutputs: TransactionOutput[]): ValidatorReturnType
 function *validateCertificates(certificates: Certificate[]): ValidatorReturnType {
     yield* validateListConstraints(certificates, 'transaction_body.certificates', false)
 
-    for (const [index, certificate] of certificates.entries()) {
+    for (const [i, certificate] of certificates.entries()) {
         switch (certificate.type) {
         case CertificateType.POOL_REGISTRATION:
-            yield* validateUint64(certificate.poolParams.pledge, `transaction_body.certificates[${index}].pool_params.pledge`)
-            yield* validateUint64(certificate.poolParams.cost, `transaction_body.certificates[${index}].pool_params.cost`)
-            yield* validateUint64(certificate.poolParams.margin[0], `transaction_body.certificates[${index}].pool_params.margin[0]`)
-            yield* validateUint64(certificate.poolParams.margin[1], `transaction_body.certificates[${index}].pool_params.margin[1]`)
+            yield* validateUint64(certificate.poolParams.pledge, `transaction_body.certificates[${i}].pool_params.pledge`)
+            yield* validateUint64(certificate.poolParams.cost, `transaction_body.certificates[${i}].pool_params.cost`)
+            yield* validateUint64(certificate.poolParams.margin[0], `transaction_body.certificates[${i}].pool_params.margin[0]`)
+            yield* validateUint64(certificate.poolParams.margin[1], `transaction_body.certificates[${i}].pool_params.margin[1]`)
             break
         case CertificateType.POOL_RETIREMENT:
-            yield* validateUint64(certificate.epoch, `transaction_body.certificates[${index}].epoch`)
+            yield* validateUint64(certificate.epoch, `transaction_body.certificates[${i}].epoch`)
             break
         case CertificateType.GENESIS_KEY_DELEGATION:
-            yield* validate(false, err(ValidationErrorReason.UNSUPPORTED_CERTIFICATE_GENESIS_KEY_DELEGATION, `transaction_body.certificates[${index}]`))
+            yield* validate(false, err(ValidationErrorReason.UNSUPPORTED_CERTIFICATE_GENESIS_KEY_DELEGATION, `transaction_body.certificates[${i}]`))
             break
         case CertificateType.MOVE_INSTANTANEOUS_REWARDS_CERT:
-            yield* validate(false, err(ValidationErrorReason.UNSUPPORTED_CERTIFICATE_MOVE_INSTANTANEOUS_REWARDS_CERT, `transaction_body.certificates[${index}]`))
+            yield* validate(false, err(ValidationErrorReason.UNSUPPORTED_CERTIFICATE_MOVE_INSTANTANEOUS_REWARDS_CERT, `transaction_body.certificates[${i}]`))
             break
         default:
             break
@@ -160,8 +160,8 @@ const validateMint = (mint: Mint) => validateMultiasset(mint, validateInt64, 'tr
 function *validateCollaterals(txCollaterals: Collateral[]): ValidatorReturnType {
     yield* validateListConstraints(txCollaterals, 'transaction_body.collaterals', false)
 
-    for (const [index, collateral] of txCollaterals.entries()) {
-        yield* validateUint64(collateral.index, `transaction_body.collaterals[${index}].index`)
+    for (const [i, collateral] of txCollaterals.entries()) {
+        yield* validateUint64(collateral.index, `transaction_body.collaterals[${i}].index`)
     }
 }
 
