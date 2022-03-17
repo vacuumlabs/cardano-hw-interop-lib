@@ -36,7 +36,7 @@ const parseMultiasset = <T>(unparsedMultiasset: unknown, parseAssetValue: Parser
 const parseTxInput = (unparsedTxInput: unknown): TransactionInput => {
     const [transactionId, index] = parseTuple(
         unparsedTxInput,
-        ParseErrorReason.INVALID_TX_INPUTS,
+        ParseErrorReason.INVALID_TX_INPUT,
         createParser(parseBufferOfLength, TX_ID_HASH_LENGTH, ParseErrorReason.INVALID_TRANSACTION_ID),
         createParser(parseUint, ParseErrorReason.INVALID_TX_INPUT_INDEX),
     )
@@ -238,9 +238,9 @@ const parseCertificate = createParser(
 const parseCollateral = (unparsedTxCollateral: unknown): Collateral => {
     const [transactionId, index] = parseTuple(
         unparsedTxCollateral,
-        ParseErrorReason.INVALID_TX_COLLATERALS,
+        ParseErrorReason.INVALID_TX_COLLATERAL_INPUT,
         createParser(parseBufferOfLength, TX_ID_HASH_LENGTH, ParseErrorReason.INVALID_TRANSACTION_ID),
-        createParser(parseUint, ParseErrorReason.INVALID_TX_INPUT_INDEX),
+        createParser(parseUint, ParseErrorReason.INVALID_TX_COLLATERAL_INPUT_INDEX),
     )
 
     return {transactionId, index}
@@ -259,7 +259,7 @@ export const parseMetadataHash = createParser(parseBufferOfLength, METADATA_HASH
 export const parseValidityIntervalStart = createParser(parseUint, ParseErrorReason.INVALID_TX_VALIDITY_INTERVAL_START)
 export const parseMint = createParser(parseMultiasset, createParser(parseInt, ParseErrorReason.INVALID_MINT_AMOUNT), ParseErrorReason.INVALID_TX_MINT)
 const parseScriptDataHash = createParser(parseBufferOfLength, SCRIPT_DATA_HASH_LENGTH, ParseErrorReason.INVALID_TX_SCRIPT_DATA_HASH)
-const parseCollaterals = createParser(parseArray, parseCollateral, ParseErrorReason.INVALID_TX_COLLATERALS)
+const parseCollaterals = createParser(parseArray, parseCollateral, ParseErrorReason.INVALID_TX_COLLATERAL_INPUTS)
 const parseRequiredSigners = createParser(parseArray, parseRequiredSigner, ParseErrorReason.INVALID_TX_REQUIRED_SIGNERS)
 const parseNetworkId = createParser(parseUint, ParseErrorReason.INVALID_TX_NETWORK_ID)
 
