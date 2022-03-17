@@ -111,7 +111,7 @@ export const parseArray = <T>(
 /**
  * Parses the data as an array of length of the provided parsers.
  * If the number of provided parsers exceeds the length of parsed array,
- * the missing elements are feeded to the parsers as `undefined`.
+ * the missing elements are fed to the parsers as `undefined`.
  *
  * @example
  *     // returns [123N, -1N]
