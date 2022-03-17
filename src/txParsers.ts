@@ -295,6 +295,7 @@ export const parseTx = (unparsedTx: unknown): Transaction => {
         dontParse,  // | `undefined`   | auxiliaryData
     )
     const presentItems = otherItems.filter((item) => item !== undefined)
+    validate([2, 3].includes(presentItems.length), ParseErrorReason.INVALID_TX_CBOR)
 
     // cardano-cli with --shelley-era, --allegra-era and --mary-era
     // includes only txBody, witnessSet and auxiliaryData
@@ -324,6 +325,7 @@ export const parseRawTx = (unparsedRawTx: unknown): RawTransaction => {
         dontParse,  // | `undefined`   | `undefined`     | auxiliaryData
     )
     const presentItems = otherItems.filter((item) => item !== undefined)
+    validate([1, 2, 5].includes(presentItems.length), ParseErrorReason.INVALID_RAW_TX_CBOR)
 
     // older versions of cardano-cli included only txBody and auxiliaryData
     if (presentItems.length === 1) {
