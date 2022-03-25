@@ -3,7 +3,7 @@ import type { Parser, WithoutType } from './parsers'
 import { createParser, isMapWithKeysOfType, isNumber, isUint, isUintOfMaxSize, parseArray, parseBasedOnType, parseBuffer, parseBufferOfLength, parseBufferOfMaxLength, parseInt, parseMap, parseNullable, parseOptional, parseStringOfMaxLength, parseTuple, parseUint, validate } from './parsers'
 import type { Amount, Collateral, DatumHash, GenesisKeyDelegation, MoveInstantaneousRewardsCertificate, Multiasset, PoolMetadata, PoolParams, PoolRegistrationCertificate, PoolRetirementCertificate, Port, RawTransaction, RelayMultiHostName, RelaySingleHostAddress, RelaySingleHostName, RequiredSigner, StakeCredentialKey, StakeCredentialScript, StakeDelegationCertificate, StakeDeregistrationCertificate, StakeRegistrationCertificate, Transaction, TransactionBody, TransactionInput, TransactionOutput, Unparsed, Withdrawal } from './types'
 import { AmountType, ASSET_NAME_MAX_LENGTH, CertificateType, DATUM_HASH_LENGTH, DNS_NAME_MAX_LENGTH, IPV4_LENGTH, IPV6_LENGTH, KEY_HASH_LENGTH, METADATA_HASH_LENGTH, POOL_KEY_HASH_LENGTH, PORT_MAX_SIZE, RelayType, REWARD_ACCOUNT_LENGTH, SCRIPT_DATA_HASH_LENGTH, SCRIPT_HASH_LENGTH, StakeCredentialType, TX_ID_HASH_LENGTH, URL_MAX_LENGTH, VRF_KEY_HASH_LENGTH } from './types'
-import { addIndefiniteLengthFlag, TransactionBodyKeys } from './utils'
+import { addIndefiniteLengthFlag, TransactionBodyKeys, undefinedOnlyAtTheEnd } from './utils'
 
 const dontParse: Parser<Unparsed> = (data: unknown) => data
 
@@ -294,6 +294,7 @@ export const parseTx = (unparsedTx: unknown): Transaction => {
         dontParse,  // | auxiliaryData | scriptValidity
         dontParse,  // | `undefined`   | auxiliaryData
     )
+    validate(undefinedOnlyAtTheEnd(otherItems), ParseErrorReason.INVALID_TX_CBOR)
     const presentItems = otherItems.filter((item) => item !== undefined)
     validate([2, 3].includes(presentItems.length), ParseErrorReason.INVALID_TX_CBOR)
 
@@ -324,6 +325,7 @@ export const parseRawTx = (unparsedRawTx: unknown): RawTransaction => {
         dontParse,  // | `undefined`   | `undefined`     | scriptValidity
         dontParse,  // | `undefined`   | `undefined`     | auxiliaryData
     )
+    validate(undefinedOnlyAtTheEnd(otherItems), ParseErrorReason.INVALID_RAW_TX_CBOR)
     const presentItems = otherItems.filter((item) => item !== undefined)
     validate([1, 2, 5].includes(presentItems.length), ParseErrorReason.INVALID_RAW_TX_CBOR)
 

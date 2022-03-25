@@ -27,6 +27,14 @@ export const addIndefiniteLengthFlag = (x: any) => {
 
 export const bind = <A, R, T extends any[]>(fn: (x: A, ...args: T) => R, ...args: T): (x: A) => R => (x: A) => fn(x, ...args)
 
+export const undefinedOnlyAtTheEnd = (xs: any[]): boolean => {
+    const firstUndefined = xs.indexOf(undefined)
+    if (firstUndefined === -1) {
+        return true
+    }
+    return xs.slice(firstUndefined).every((x) => x === undefined)
+}
+
 export const getRewardAccountStakeCredentialType = (rewardAccount: RewardAccount) => {
     switch(rewardAccount[0] >> 4 & 1) {
     case 0:
