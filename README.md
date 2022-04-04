@@ -5,8 +5,8 @@ JavaScript library to validate and transform Cardano transactions accroding to [
 ## Available methods
 
 The provided functions operate on either a:
-* transaction body - only the transaction body as defined in the [shelley-ma.cddl#49](https://github.com/input-output-hk/cardano-ledger/blob/master/eras/shelley-ma/test-suite/cddl-files/shelley-ma.cddl#L49)
-* transaction - transaction as defined in the [shelley-ma.cddl#13](https://github.com/input-output-hk/cardano-ledger/blob/master/eras/shelley-ma/test-suite/cddl-files/shelley-ma.cddl#L13)
+* transaction body - only the transaction body as defined in the [CDDL](https://github.com/input-output-hk/cardano-ledger/blob/master/eras/alonzo/test-suite/cddl-files/alonzo.cddl#L50-L65)
+* transaction - transaction as defined in the [CDDL](https://github.com/input-output-hk/cardano-ledger/blob/master/eras/alonzo/test-suite/cddl-files/alonzo.cddl#L13-L18)
 * raw transaction - transaction outputted by `cardano-cli transaction build-raw`
   * This type and the related functions are DEPRECATED and will probably be REMOVED. Use transaction instead.
 
