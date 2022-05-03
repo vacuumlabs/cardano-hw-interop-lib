@@ -1,7 +1,7 @@
 import { ParseErrorReason } from './errors'
 import type { Parser, WithoutType } from './parsers'
 import { createParser, isMapWithKeysOfType, isNumber, isUint, isUintOfMaxSize, parseArray, parseBasedOnType, parseBuffer, parseBufferOfLength, parseBufferOfMaxLength, parseInt, parseMap, parseNullable, parseOptional, parseStringOfMaxLength, parseTuple, parseUint, validate } from './parsers'
-import type { Amount, Collateral, DatumHash, GenesisKeyDelegation, MoveInstantaneousRewardsCertificate, Multiasset, PoolMetadata, PoolParams, PoolRegistrationCertificate, PoolRetirementCertificate, Port, RawTransaction, RelayMultiHostName, RelaySingleHostAddress, RelaySingleHostName, RequiredSigner, StakeCredentialKey, StakeCredentialScript, StakeDelegationCertificate, StakeDeregistrationCertificate, StakeRegistrationCertificate, Transaction, TransactionBody, TransactionInput, TransactionOutput, Unparsed, Withdrawal } from './types'
+import type { Amount, CollateralInput, DatumHash, GenesisKeyDelegation, MoveInstantaneousRewardsCertificate, Multiasset, PoolMetadata, PoolParams, PoolRegistrationCertificate, PoolRetirementCertificate, Port, RawTransaction, RelayMultiHostName, RelaySingleHostAddress, RelaySingleHostName, RequiredSigner, StakeCredentialKey, StakeCredentialScript, StakeDelegationCertificate, StakeDeregistrationCertificate, StakeRegistrationCertificate, Transaction, TransactionBody, TransactionInput, TransactionOutput, Unparsed, Withdrawal } from './types'
 import { AmountType, ASSET_NAME_MAX_LENGTH, CertificateType, DATUM_HASH_LENGTH, DNS_NAME_MAX_LENGTH, IPV4_LENGTH, IPV6_LENGTH, KEY_HASH_LENGTH, METADATA_HASH_LENGTH, POOL_KEY_HASH_LENGTH, PORT_MAX_SIZE, RelayType, REWARD_ACCOUNT_LENGTH, SCRIPT_DATA_HASH_LENGTH, SCRIPT_HASH_LENGTH, StakeCredentialType, TX_ID_HASH_LENGTH, URL_MAX_LENGTH, VRF_KEY_HASH_LENGTH } from './types'
 import { addIndefiniteLengthFlag, TransactionBodyKeys, undefinedOnlyAtTheEnd } from './utils'
 
@@ -235,9 +235,9 @@ const parseCertificate = createParser(
     parseMoveInstantaneousRewardsCertificate,
 )
 
-const parseCollateral = (unparsedTxCollateral: unknown): Collateral => {
+const parseCollateralInput = (unparsedTxCollateralInput: unknown): CollateralInput => {
     const [transactionId, index] = parseTuple(
-        unparsedTxCollateral,
+        unparsedTxCollateralInput,
         ParseErrorReason.INVALID_TX_COLLATERAL_INPUT,
         createParser(parseBufferOfLength, TX_ID_HASH_LENGTH, ParseErrorReason.INVALID_TRANSACTION_ID),
         createParser(parseUint, ParseErrorReason.INVALID_TX_COLLATERAL_INPUT_INDEX),
@@ -259,7 +259,7 @@ export const parseMetadataHash = createParser(parseBufferOfLength, METADATA_HASH
 export const parseValidityIntervalStart = createParser(parseUint, ParseErrorReason.INVALID_TX_VALIDITY_INTERVAL_START)
 export const parseMint = createParser(parseMultiasset, createParser(parseInt, ParseErrorReason.INVALID_MINT_AMOUNT), ParseErrorReason.INVALID_TX_MINT)
 const parseScriptDataHash = createParser(parseBufferOfLength, SCRIPT_DATA_HASH_LENGTH, ParseErrorReason.INVALID_TX_SCRIPT_DATA_HASH)
-const parseCollaterals = createParser(parseArray, parseCollateral, ParseErrorReason.INVALID_TX_COLLATERAL_INPUTS)
+const parseCollateralInputs = createParser(parseArray, parseCollateralInput, ParseErrorReason.INVALID_TX_COLLATERAL_INPUTS)
 const parseRequiredSigners = createParser(parseArray, parseRequiredSigner, ParseErrorReason.INVALID_TX_REQUIRED_SIGNERS)
 const parseNetworkId = createParser(parseUint, ParseErrorReason.INVALID_TX_NETWORK_ID)
 
@@ -278,7 +278,7 @@ export const parseTxBody = (unparsedTxBody: unknown): TransactionBody => {
         validityIntervalStart: parseOptional(unparsedTxBody.get(TransactionBodyKeys.VALIDITY_INTERVAL_START), parseValidityIntervalStart),
         mint: parseOptional(unparsedTxBody.get(TransactionBodyKeys.MINT), parseMint),
         scriptDataHash: parseOptional(unparsedTxBody.get(TransactionBodyKeys.SCRIPT_DATA_HASH), parseScriptDataHash),
-        collaterals: parseOptional(unparsedTxBody.get(TransactionBodyKeys.COLLATERAL_INPUTS), parseCollaterals),
+        collateralInputs: parseOptional(unparsedTxBody.get(TransactionBodyKeys.COLLATERAL_INPUTS), parseCollateralInputs),
         requiredSigners: parseOptional(unparsedTxBody.get(TransactionBodyKeys.REQUIRED_SIGNERS), parseRequiredSigners),
         networkId: parseOptional(unparsedTxBody.get(TransactionBodyKeys.NETWORK_ID), parseNetworkId),
     }
