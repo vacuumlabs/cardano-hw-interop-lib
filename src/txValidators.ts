@@ -1,6 +1,6 @@
 import type { ValidationError } from './errors'
 import { err, ValidationErrorReason } from './errors'
-import type { Certificate, Collateral, Int, Mint, Multiasset, RequiredSigner, StakeCredentialType, StakeDelegationCertificate, StakeDeregistrationCertificate, StakeRegistrationCertificate, TransactionBody, TransactionInput, TransactionOutput, Uint, Withdrawal } from './types'
+import type { Certificate, CollateralInput, Int, Mint, Multiasset, RequiredSigner, StakeCredentialType, StakeDelegationCertificate, StakeDeregistrationCertificate, StakeRegistrationCertificate, TransactionBody, TransactionInput, TransactionOutput, Uint, Withdrawal } from './types'
 import { AmountType, CertificateType } from './types'
 import { bind, getRewardAccountStakeCredentialType } from './utils'
 
@@ -157,11 +157,11 @@ function *validateStakeCredentials(certificates: Certificate[] | undefined, with
 
 const validateMint = (mint: Mint) => validateMultiasset(mint, validateInt64, 'transaction_body.mint')
 
-function *validateCollaterals(txCollaterals: Collateral[]): ValidatorReturnType {
-    yield* validateListConstraints(txCollaterals, 'transaction_body.collaterals', false)
+function *validateCollateralInputs(txCollateralInputs: CollateralInput[]): ValidatorReturnType {
+    yield* validateListConstraints(txCollateralInputs, 'transaction_body.collateral_inputs', false)
 
-    for (const [i, collateral] of txCollaterals.entries()) {
-        yield* validateUint64(collateral.index, `transaction_body.collaterals[${i}].index`)
+    for (const [i, collateralInput] of txCollateralInputs.entries()) {
+        yield* validateUint64(collateralInput.index, `transaction_body.collateral_inputs[${i}].index`)
     }
 }
 
@@ -208,7 +208,7 @@ function *validateTxBody(txBody: TransactionBody): ValidatorReturnType {
     yield* validate(txBody.update === undefined, err(ValidationErrorReason.UNSUPPORTED_TX_UPDATE, 'transaction_body.update'))
     yield* validateOptional(txBody.validityIntervalStart, bind(validateUint64, 'transaction_body.validity_interval_start'))
     yield* validateOptional(txBody.mint, validateMint)
-    yield* validateOptional(txBody.collaterals, validateCollaterals)
+    yield* validateOptional(txBody.collateralInputs, validateCollateralInputs)
     yield* validateOptional(txBody.requiredSigners, validateRequiredSigners)
     yield* validateOptional(txBody.networkId, bind(validateUint64, 'transaction_body.network_id'))
     yield* validatePoolRegistrationTransaction(txBody)

@@ -48,7 +48,7 @@ export const transformTxBody = (txBody: TransactionBody): TransactionBody => ({
     outputs: transformOutputs(txBody.outputs),
     certificates: transformOptionalList(txBody.certificates),
     withdrawals: transformOptionalList(txBody.withdrawals),
-    collaterals: transformOptionalList(txBody.collaterals),
+    collateralInputs: transformOptionalList(txBody.collateralInputs),
     requiredSigners: transformOptionalList(txBody.requiredSigners),
 })
 

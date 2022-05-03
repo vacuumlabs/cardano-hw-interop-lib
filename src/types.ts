@@ -213,7 +213,7 @@ export type RequiredSigner = FixlenBuffer<typeof KEY_HASH_LENGTH>
 export type Mint = Multiasset<Int>
 
 // Collateral input
-export type Collateral = {
+export type CollateralInput = {
     transactionId: FixlenBuffer<typeof TX_ID_HASH_LENGTH>,
     index: Uint,
 }
@@ -231,7 +231,7 @@ export type TransactionBody = {
     validityIntervalStart?: Uint,
     mint?: Mint,
     scriptDataHash?: FixlenBuffer<typeof SCRIPT_DATA_HASH_LENGTH>,
-    collaterals?: Collateral[],
+    collateralInputs?: CollateralInput[],
     requiredSigners?: RequiredSigner[],
     networkId?: Uint,
 }

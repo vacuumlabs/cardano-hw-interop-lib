@@ -1,6 +1,6 @@
 import { Tagged } from 'cbor'
 
-import type { Amount, AssetName, Certificate, Coin, Collateral, Multiasset, PolicyId, PoolMetadata, PoolParams, RawTransaction, Relay, RewardAccount, StakeCredential, Transaction, TransactionBody, TransactionInput, TransactionOutput, Withdrawal } from './types'
+import type { Amount, AssetName, Certificate, Coin, CollateralInput, Multiasset, PolicyId, PoolMetadata, PoolParams, RawTransaction, Relay, RewardAccount, StakeCredential, Transaction, TransactionBody, TransactionInput, TransactionOutput, Withdrawal } from './types'
 import { AmountType, CertificateType, RelayType } from './types'
 import { addIndefiniteLengthFlag, TransactionBodyKeys } from './utils'
 
@@ -80,8 +80,8 @@ const serializeTxCertificate = (certificate: Certificate) => {
     }
 }
 
-const serializeCollateral = (collateral: Collateral) =>
-    [collateral.transactionId, collateral.index]
+const serializeCollateralInput = (collateralInput: CollateralInput) =>
+    [collateralInput.transactionId, collateralInput.index]
 
 export const serializeTxBody = (txBody: TransactionBody) => new Map(([
     [TransactionBodyKeys.INPUTS, txBody.inputs.map(serializeTxInput)],
@@ -95,7 +95,7 @@ export const serializeTxBody = (txBody: TransactionBody) => new Map(([
     [TransactionBodyKeys.VALIDITY_INTERVAL_START, identity(txBody.validityIntervalStart)],
     [TransactionBodyKeys.MINT, txBody.mint && serializeMultiasset(txBody.mint)],
     [TransactionBodyKeys.SCRIPT_DATA_HASH, identity(txBody.scriptDataHash)],
-    [TransactionBodyKeys.COLLATERAL_INPUTS, txBody.collaterals?.map(serializeCollateral)],
+    [TransactionBodyKeys.COLLATERAL_INPUTS, txBody.collateralInputs?.map(serializeCollateralInput)],
     [TransactionBodyKeys.REQUIRED_SIGNERS, identity(txBody.requiredSigners)],
     [TransactionBodyKeys.NETWORK_ID, identity(txBody.networkId)],
 // return only the items that are present (so that no undefined appears in CBOR)

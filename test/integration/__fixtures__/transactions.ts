@@ -35,7 +35,7 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
             validityIntervalStart: undefined,
             mint: undefined,
             scriptDataHash: undefined,
-            collaterals: undefined,
+            collateralInputs: undefined,
             requiredSigners: undefined,
             networkId: undefined,
         },
@@ -74,7 +74,7 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
             validityIntervalStart: undefined,
             mint: undefined,
             scriptDataHash: undefined,
-            collaterals: undefined,
+            collateralInputs: undefined,
             requiredSigners: undefined,
             networkId: undefined,
         },
@@ -146,7 +146,7 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
                 ],
             }],
             scriptDataHash: undefined,
-            collaterals: undefined,
+            collateralInputs: undefined,
             requiredSigners: undefined,
             networkId: undefined,
         },
@@ -246,13 +246,13 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
             validityIntervalStart: undefined,
             mint: undefined,
             scriptDataHash: undefined,
-            collaterals: undefined,
+            collateralInputs: undefined,
             requiredSigners: undefined,
             networkId: undefined,
         },
     },
     {
-        testname: 'Tx body with output datum hash, script data hash, collaterals, required signers and network id',
+        testname: 'Tx body with output datum hash, script data hash, collateral inputs, required signers and network id',
         cbor: 'a800818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018283583d105e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e28dd419e1a006ca7935820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce18883583930167f6dbf610ae030f043adb1f3af78754ed9595ad4ac1f7ed9ff6466760fb6955d1217b1f1f208df6d45ab23c9e17b0c984a2d3a22bbbfb8821a0001e91fa1581cd7a7c6999786354b6dbee181a2f562a628a75fce126f4da40ce5d9b2a146546f6b656e3101582000ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce102182a030a0b5820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce1880d818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000e82581cfea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a581ceea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a0f01',
         txBody: {
             inputs: [{
@@ -293,7 +293,7 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
             validityIntervalStart: undefined,
             mint: undefined,
             scriptDataHash: toFixlenBuffer('ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188', 32),
-            collaterals: [{
+            collateralInputs: [{
                 transactionId: toFixlenBuffer('3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7', 32),
                 index: toUint(0),
             }],
@@ -348,7 +348,7 @@ export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
                 validityIntervalStart: undefined,
                 mint: undefined,
                 scriptDataHash: undefined,
-                collaterals: undefined,
+                collateralInputs: undefined,
                 requiredSigners: undefined,
                 networkId: undefined,
             },
@@ -545,7 +545,7 @@ export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
                     ],
                 }],
                 scriptDataHash: undefined,
-                collaterals: undefined,
+                collateralInputs: undefined,
                 requiredSigners: undefined,
                 networkId: undefined,
             },
@@ -613,7 +613,7 @@ export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
                 validityIntervalStart: undefined,
                 mint: undefined,
                 scriptDataHash: toFixlenBuffer('2d1c584b45751ab66d924c4a47f7fe7ea5831e0b485f8d9d290e69eb809c013b', 32),
-                collaterals: [
+                collateralInputs: [
                     {
                         transactionId: toFixlenBuffer('94461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d', 32),
                         index: toUint(3),
@@ -700,7 +700,7 @@ export const ValidTransactionTestcases: ValidTransactionTestcase[] = [
                 validityIntervalStart: undefined,
                 mint: undefined,
                 scriptDataHash: undefined,
-                collaterals: undefined,
+                collateralInputs: undefined,
                 requiredSigners: undefined,
                 networkId: undefined,
             },
@@ -750,7 +750,7 @@ export const ValidTransactionTestcases: ValidTransactionTestcase[] = [
                 validityIntervalStart: undefined,
                 mint: undefined,
                 scriptDataHash: undefined,
-                collaterals: undefined,
+                collateralInputs: undefined,
                 requiredSigners: undefined,
                 networkId: undefined,
             },
@@ -829,7 +829,7 @@ export const ValidTransactionTestcases: ValidTransactionTestcase[] = [
                 validityIntervalStart: undefined,
                 mint: undefined,
                 scriptDataHash: toFixlenBuffer('2d1c584b45751ab66d924c4a47f7fe7ea5831e0b485f8d9d290e69eb809c013b', 32),
-                collaterals: [
+                collateralInputs: [
                     {
                         transactionId: toFixlenBuffer('94461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d', 32),
                         index: toUint(3),
