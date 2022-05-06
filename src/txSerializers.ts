@@ -53,7 +53,7 @@ const serializePoolParams = (poolParams: PoolParams) => [
     poolParams.vrfKeyHash,
     poolParams.pledge,
     poolParams.cost,
-    new Tagged(30, poolParams.margin),
+    new Tagged(CborTag.TUPLE, poolParams.margin),
     poolParams.rewardAccount,
     poolParams.poolOwners,
     poolParams.relays.map(serializeRelay),
