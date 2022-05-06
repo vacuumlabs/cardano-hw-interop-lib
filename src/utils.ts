@@ -39,6 +39,14 @@ export const undefinedOnlyAtTheEnd = (xs: any[]): boolean => {
     return xs.slice(firstUndefined).every((x) => x === undefined)
 }
 
+/**
+ * Creates a map from the input `entries`.
+ * If a value is `undefined`, the key-value pair is omitted entirely.
+ */
+export const filteredMap = <K, V>(entries: [K, V | undefined][]): Map<K, V> => new Map<K, V>(
+    entries.filter(([_, value]) => value !== undefined) as [K, V][]
+)
+
 export const getRewardAccountStakeCredentialType = (rewardAccount: RewardAccount) => {
     switch(rewardAccount[0] >> 4 & 1) {
     case 0:

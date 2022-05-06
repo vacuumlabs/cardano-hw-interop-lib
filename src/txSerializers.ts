@@ -83,7 +83,7 @@ const serializeTxCertificate = (certificate: Certificate) => {
 const serializeCollateralInput = (collateralInput: CollateralInput) =>
     [collateralInput.transactionId, collateralInput.index]
 
-export const serializeTxBody = (txBody: TransactionBody) => new Map(([
+export const serializeTxBody = (txBody: TransactionBody) => filteredMap<TransactionBodyKeys, unknown>([
     [TransactionBodyKeys.INPUTS, txBody.inputs.map(serializeTxInput)],
     [TransactionBodyKeys.OUTPUTS, txBody.outputs.map(serializeTxOutput)],
     [TransactionBodyKeys.FEE, identity(txBody.fee)],
@@ -98,8 +98,7 @@ export const serializeTxBody = (txBody: TransactionBody) => new Map(([
     [TransactionBodyKeys.COLLATERAL_INPUTS, txBody.collateralInputs?.map(serializeCollateralInput)],
     [TransactionBodyKeys.REQUIRED_SIGNERS, identity(txBody.requiredSigners)],
     [TransactionBodyKeys.NETWORK_ID, identity(txBody.networkId)],
-// return only the items that are present (so that no undefined appears in CBOR)
-]).filter(([_, value]) => value !== undefined) as [number, unknown][])
+])
 
 export const serializeTx = (tx: Transaction) => {
     return [
