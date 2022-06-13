@@ -1,6 +1,7 @@
 import { ParseErrorReason } from '../../src/errors'
 import { parseOutputs } from '../../src/txParsers'
 import type { MaxlenBuffer, TransactionOutput } from '../../src/types'
+import { OutputType } from '../../src/types'
 import { AmountType } from '../../src/types'
 import type {InvalidParseTestcase, ValidParseTestcase } from '../test_utils'
 import { fromBech32, registerTests, toFixlenBuffer, toUint } from '../test_utils'
@@ -10,6 +11,7 @@ const ValidOutputsTestcases: ValidParseTestcase<TransactionOutput[]>[] = [
         testname: 'Simple',
         cbor: '81825839019b3a93b321ff8d65d6df1c6d845d54dbbf2cb34105fdb44ece1b7d312c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d00',
         parsed: [{
+            type: OutputType.LEGACY,
             address: fromBech32('addr1qxdn4yany8lc6ewkmuwxmpza2ndm7t9ngyzlmdzwecdh6vfvqjwlak9ug8k7lw7gxh9q5uuu4jtp24u4qf3w7j9uluwssp092m'),
             amount: {
                 type: AmountType.WITHOUT_MULTIASSET,
@@ -22,6 +24,7 @@ const ValidOutputsTestcases: ValidParseTestcase<TransactionOutput[]>[] = [
         testname: 'Big output',
         cbor: '81825839019B3A93B321FF8D65D6DF1C6D845D54DBBF2CB34105FDB44ECE1B7D312C049DFED8BC41EDEFBBC835CA0A739CAC961557950262EF48BCFF1DC249010000000000000000',
         parsed: [{
+            type: OutputType.LEGACY,
             address: fromBech32('addr1qxdn4yany8lc6ewkmuwxmpza2ndm7t9ngyzlmdzwecdh6vfvqjwlak9ug8k7lw7gxh9q5uuu4jtp24u4qf3w7j9uluwssp092m'),
             amount: {
                 type: AmountType.WITHOUT_MULTIASSET,
@@ -34,6 +37,7 @@ const ValidOutputsTestcases: ValidParseTestcase<TransactionOutput[]>[] = [
         testname: 'One output with multiasset',
         cbor: '8182583930167f6dbf610ae030f043adb1f3af78754ed9595ad4ac1f7ed9ff6466760fb6955d1217b1f1f208df6d45ab23c9e17b0c984a2d3a22bbbfb8821a3b7625dea1581cd7a7c6999786354b6dbee181a2f562a628a75fce126f4da40ce5d9b2a14c56616363756d546f6b656e731a000f4240',
         parsed: [{
+            type: OutputType.LEGACY,
             address: fromBech32('addr_test1xqt87mdlvy9wqv8sgwkmrua00p65ak2ett22c8m7m8lkgenkp7mf2hgjz7clrusgmak5t2ere8shkrycfgkn5g4mh7uqvcq039'),
             amount: {
                 type: AmountType.WITH_MULTIASSET,

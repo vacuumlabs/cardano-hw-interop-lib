@@ -4,6 +4,7 @@ import type { RewardAccount} from './types'
 import { StakeCredentialType } from './types'
 
 export enum CborTag {
+    ENCODED_CBOR = 24,
     TUPLE = 30,
 }
 
@@ -58,6 +59,13 @@ export const getRewardAccountStakeCredentialType = (rewardAccount: RewardAccount
     }
 }
 
+export enum PostAlonzoTransactionOutputKeys {
+    ADDRESS = 0,
+    AMOUNT = 1,
+    DATUM = 2,
+    REFERENCE_SCRIPT = 3,
+}
+
 export enum TransactionBodyKeys {
     INPUTS = 0,
     OUTPUTS = 1,
@@ -73,4 +81,7 @@ export enum TransactionBodyKeys {
     COLLATERAL_INPUTS = 13,
     REQUIRED_SIGNERS = 14,
     NETWORK_ID = 15,
+    COLLATERAL_RETURN_OUTPUT = 16,
+    TOTAL_COLLATERAL = 17,
+    REFERENCE_INPUTS = 18,
 }

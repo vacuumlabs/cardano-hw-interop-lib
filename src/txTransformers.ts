@@ -36,20 +36,20 @@ const transformAmount = (amount: Amount): Amount => {
     }
 }
 
-const transformOutputs = (txOutputs: TransactionOutput[]): TransactionOutput[] =>
-    txOutputs.map(({address, amount, datumHash}) => ({
-        address,
-        amount: transformAmount(amount),
-        datumHash,
-    }))
+const transformTxOutput = (output: TransactionOutput): TransactionOutput => ({
+    ...output,
+    amount: transformAmount(output.amount),
+})
 
 export const transformTxBody = (txBody: TransactionBody): TransactionBody => ({
     ...txBody,
-    outputs: transformOutputs(txBody.outputs),
+    outputs: txBody.outputs.map(transformTxOutput),
     certificates: transformOptionalList(txBody.certificates),
     withdrawals: transformOptionalList(txBody.withdrawals),
     collateralInputs: transformOptionalList(txBody.collateralInputs),
     requiredSigners: transformOptionalList(txBody.requiredSigners),
+    collateralReturnOutput: txBody.collateralReturnOutput && transformTxOutput(txBody.collateralReturnOutput),
+    referenceInputs: transformOptionalList(txBody.referenceInputs),
 })
 
 export const transformTx = (tx: Transaction): Transaction => ({
