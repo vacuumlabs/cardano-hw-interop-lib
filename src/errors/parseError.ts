@@ -12,13 +12,14 @@ export enum ParseErrorReason {
     INVALID_TX_INPUT_INDEX = 'Invalid transaction input index',
     INVALID_TX_INPUT = 'Invalid transaction input',
 
-    INVALID_TX_COLLATERAL_INPUT_INDEX = 'Invalid transaction collateral input index',
-    INVALID_TX_COLLATERAL_INPUT = 'Invalid transaction collateral input',
-
     INVALID_OUTPUT_ADDRESS = 'Invalid output address',
     INVALID_OUTPUT_AMOUNT = 'Invalid output amount',
     INVALID_OUTPUT_MULTIASSET = 'Invalid output multiasset',
+    INVALID_OUTPUT_DATUM_TYPE = 'Invalid output datum type',
     INVALID_OUTPUT_DATUM_HASH = 'Invalid output datum hash',
+    INVALID_OUTPUT_DATUM_INLINE = 'Invalid output inline datum',
+    INVALID_OUTPUT_DATUM = 'Invalid output datum',
+    INVALID_OUTPUT_REFERENCE_SCRIPT = 'Invalid output reference script',
     INVALID_TX_OUTPUT = 'Invalid transaction output',
 
     INVALID_CERTIFICATE_TYPE = 'Invalid certificate type',
@@ -50,6 +51,12 @@ export enum ParseErrorReason {
 
     INVALID_MINT_AMOUNT = 'Invalid mint amount',
 
+    INVALID_TX_COLLATERAL_INPUT_INDEX = 'Invalid transaction collateral input index',
+    INVALID_TX_COLLATERAL_INPUT = 'Invalid transaction collateral input',
+
+    INVALID_TX_REFERENCE_INPUT_INDEX = 'Invalid transaction reference input index',
+    INVALID_TX_REFERENCE_INPUT = 'Invalid transaction reference input',
+
     INVALID_TX_BODY_CBOR = 'Invalid transaction body CBOR',
     INVALID_TX_INPUTS = 'Invalid transaction inputs',
     INVALID_TX_OUTPUTS = 'Invalid transaction outputs',
@@ -64,6 +71,8 @@ export enum ParseErrorReason {
     INVALID_TX_COLLATERAL_INPUTS = 'Invalid transaction collateral inputs',
     INVALID_TX_REQUIRED_SIGNERS = 'Invalid transaction required signers',
     INVALID_TX_NETWORK_ID = 'Invalid transaction network id',
+    INVALID_TX_TOTAL_COLLATERAL = 'Invalid transaction total collateral',
+    INVALID_TX_REFERENCE_INPUTS = 'Invalid transaction reference inputs',
 
     INVALID_TX_CBOR = 'Invalid transaction CBOR',
     INVALID_RAW_TX_CBOR = 'Invalid raw transaction CBOR',

@@ -1,8 +1,8 @@
 import { Tagged } from 'cbor'
 
-import type { Amount, AssetName, Certificate, Coin, CollateralInput, Multiasset, PolicyId, PoolMetadata, PoolParams, RawTransaction, Relay, RewardAccount, StakeCredential, Transaction, TransactionBody, TransactionInput, TransactionOutput, Withdrawal } from './types'
-import { AmountType, CertificateType, RelayType } from './types'
-import { addIndefiniteLengthFlag, TransactionBodyKeys } from './utils'
+import type { Amount, AssetName, Certificate, Coin, CollateralInput, Datum, LegacyTransactionOutput, Multiasset, PolicyId, PoolMetadata, PoolParams, PostAlonzoTransactionOutput, RawTransaction, ReferenceScript, Relay, RewardAccount, StakeCredential, Transaction, TransactionBody, TransactionInput, TransactionOutput, Withdrawal } from './types'
+import { AmountType, CertificateType, DatumType, OutputType, RelayType } from './types'
+import { addIndefiniteLengthFlag, CborTag, filteredMap, PostAlonzoTransactionOutputKeys, TransactionBodyKeys } from './utils'
 
 const identity = <T>(x: T): T => x
 
@@ -26,10 +26,39 @@ const serializeAmount = (amount: Amount) => {
     }
 }
 
-const serializeTxOutput = (output: TransactionOutput) =>
+const serializeLegacyTxOutput = (output: LegacyTransactionOutput) =>
     output.datumHash
-        ? [output.address, serializeAmount(output.amount), output.datumHash]
+        ? [output.address, serializeAmount(output.amount), output.datumHash.hash]
         : [output.address, serializeAmount(output.amount)]
+
+const serializeDatum = (datum: Datum) => {
+    switch (datum.type) {
+    case DatumType.HASH:
+        return [datum.type, datum.hash]
+    case DatumType.INLINE:
+        return [datum.type, new Tagged(CborTag.ENCODED_CBOR, datum.bytes)]
+    }
+}
+
+const serializeReferenceScript = (referenceScript: ReferenceScript) =>
+    new Tagged(CborTag.ENCODED_CBOR, referenceScript)
+
+const serializePostAlonzoTxOutput = (output: PostAlonzoTransactionOutput) =>
+    filteredMap<PostAlonzoTransactionOutputKeys, unknown>([
+        [PostAlonzoTransactionOutputKeys.ADDRESS, identity(output.address)],
+        [PostAlonzoTransactionOutputKeys.AMOUNT, serializeAmount(output.amount)],
+        [PostAlonzoTransactionOutputKeys.DATUM, output.datum && serializeDatum(output.datum)],
+        [PostAlonzoTransactionOutputKeys.REFERENCE_SCRIPT, output.referenceScript && serializeReferenceScript(output.referenceScript)],
+    ])
+
+const serializeTxOutput = (output: TransactionOutput) => {
+    switch (output.type) {
+    case OutputType.LEGACY:
+        return serializeLegacyTxOutput(output)
+    case OutputType.POST_ALONZO:
+        return serializePostAlonzoTxOutput(output)
+    }
+}
 
 const serializeWithdrawals = (withdrawals: Withdrawal[]): Map<RewardAccount, Coin> =>
     new Map(withdrawals.map(({rewardAccount, amount}) => [rewardAccount, amount]))
@@ -98,6 +127,9 @@ export const serializeTxBody = (txBody: TransactionBody) => filteredMap<Transact
     [TransactionBodyKeys.COLLATERAL_INPUTS, txBody.collateralInputs?.map(serializeCollateralInput)],
     [TransactionBodyKeys.REQUIRED_SIGNERS, identity(txBody.requiredSigners)],
     [TransactionBodyKeys.NETWORK_ID, identity(txBody.networkId)],
+    [TransactionBodyKeys.COLLATERAL_RETURN_OUTPUT, txBody.collateralReturnOutput && serializeTxOutput(txBody.collateralReturnOutput)],
+    [TransactionBodyKeys.TOTAL_COLLATERAL, identity(txBody.totalCollateral)],
+    [TransactionBodyKeys.REFERENCE_INPUTS, txBody.referenceInputs?.map(serializeTxInput)],
 ])
 
 export const serializeTx = (tx: Transaction) => {
