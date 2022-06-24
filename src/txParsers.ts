@@ -135,7 +135,7 @@ const parseTxOutput = (unparsedTxOutput: unknown): TransactionOutput => {
 }
 
 export const parseWithdrawals = (unparsedWithdrawals: unknown): Withdrawal[] => {
-    const withdrawalsMap = parseMap(unparsedWithdrawals, parseRewardAccount, createParser(parseUint, ParseErrorReason.INVALID_WITHDRAWAL_AMOUNT), ParseErrorReason.INVALID_TX_WITHDRAWALS)
+    const withdrawalsMap = parseMap(unparsedWithdrawals, parseRewardAccount, createParser(parseUint, ParseErrorReason.INVALID_WITHDRAWAL_AMOUNT), ParseErrorReason.INVALID_WITHDRAWALS)
 
     return Array.from(withdrawalsMap).map(([rewardAccount, amount]) => ({rewardAccount, amount}))
 }
@@ -286,28 +286,28 @@ const parseCertificate = createParser(
     parseMoveInstantaneousRewardsCertificate,
 )
 
-const parseCollateralInput = (unparsedTxCollateralInput: unknown): TransactionInput => {
+const parseCollateralInput = (unparsedCollateralInput: unknown): TransactionInput => {
     const [transactionId, index] = parseTuple(
-        unparsedTxCollateralInput,
-        ParseErrorReason.INVALID_TX_COLLATERAL_INPUT,
+        unparsedCollateralInput,
+        ParseErrorReason.INVALID_COLLATERAL_INPUT,
         createParser(parseBufferOfLength, TX_ID_HASH_LENGTH, ParseErrorReason.INVALID_TRANSACTION_ID),
-        createParser(parseUint, ParseErrorReason.INVALID_TX_COLLATERAL_INPUT_INDEX),
+        createParser(parseUint, ParseErrorReason.INVALID_COLLATERAL_INPUT_INDEX),
     )
 
     return {transactionId, index}
 }
 
 const parseRequiredSigner = (unparsedRequiredSigner: unknown): RequiredSigner  => (
-    parseBufferOfLength(unparsedRequiredSigner, KEY_HASH_LENGTH, ParseErrorReason.INVALID_TX_REQUIRED_SIGNERS)
+    parseBufferOfLength(unparsedRequiredSigner, KEY_HASH_LENGTH, ParseErrorReason.INVALID_REQUIRED_SIGNERS)
 )
 
 
-const parseReferenceInput = (unparsedTxReferenceInput: unknown): TransactionInput => {
+const parseReferenceInput = (unparsedReferenceInput: unknown): TransactionInput => {
     const [transactionId, index] = parseTuple(
-        unparsedTxReferenceInput,
-        ParseErrorReason.INVALID_TX_REFERENCE_INPUT,
+        unparsedReferenceInput,
+        ParseErrorReason.INVALID_REFERENCE_INPUT,
         createParser(parseBufferOfLength, TX_ID_HASH_LENGTH, ParseErrorReason.INVALID_TRANSACTION_ID),
-        createParser(parseUint, ParseErrorReason.INVALID_TX_REFERENCE_INPUT_INDEX),
+        createParser(parseUint, ParseErrorReason.INVALID_REFERENCE_INPUT_INDEX),
     )
 
     return {transactionId, index}
@@ -315,18 +315,18 @@ const parseReferenceInput = (unparsedTxReferenceInput: unknown): TransactionInpu
 
 export const parseInputs = createParser(parseArray, parseTxInput, ParseErrorReason.INVALID_TX_INPUTS)
 export const parseOutputs = createParser(parseArray, parseTxOutput, ParseErrorReason.INVALID_TX_OUTPUTS)
-export const parseFee = createParser(parseUint, ParseErrorReason.INVALID_TX_FEE)
-export const parseTtl = createParser(parseUint, ParseErrorReason.INVALID_TX_TTL)
-export const parseCertificates = createParser(parseArray, parseCertificate, ParseErrorReason.INVALID_TX_CERTIFICATES)
-export const parseMetadataHash = createParser(parseBufferOfLength, METADATA_HASH_LENGTH, ParseErrorReason.INVALID_TX_METADATA_HASH)
-export const parseValidityIntervalStart = createParser(parseUint, ParseErrorReason.INVALID_TX_VALIDITY_INTERVAL_START)
-export const parseMint = createParser(parseMultiasset, createParser(parseInt, ParseErrorReason.INVALID_MINT_AMOUNT), ParseErrorReason.INVALID_TX_MINT)
-const parseScriptDataHash = createParser(parseBufferOfLength, SCRIPT_DATA_HASH_LENGTH, ParseErrorReason.INVALID_TX_SCRIPT_DATA_HASH)
-const parseCollateralInputs = createParser(parseArray, parseCollateralInput, ParseErrorReason.INVALID_TX_COLLATERAL_INPUTS)
-const parseRequiredSigners = createParser(parseArray, parseRequiredSigner, ParseErrorReason.INVALID_TX_REQUIRED_SIGNERS)
-const parseNetworkId = createParser(parseUint, ParseErrorReason.INVALID_TX_NETWORK_ID)
-const parseTotalCollateral = createParser(parseUint, ParseErrorReason.INVALID_TX_TOTAL_COLLATERAL)
-const parseReferenceInputs = createParser(parseArray, parseReferenceInput, ParseErrorReason.INVALID_TX_REFERENCE_INPUTS)
+export const parseFee = createParser(parseUint, ParseErrorReason.INVALID_FEE)
+export const parseTtl = createParser(parseUint, ParseErrorReason.INVALID_TTL)
+export const parseCertificates = createParser(parseArray, parseCertificate, ParseErrorReason.INVALID_CERTIFICATES)
+export const parseMetadataHash = createParser(parseBufferOfLength, METADATA_HASH_LENGTH, ParseErrorReason.INVALID_METADATA_HASH)
+export const parseValidityIntervalStart = createParser(parseUint, ParseErrorReason.INVALID_VALIDITY_INTERVAL_START)
+export const parseMint = createParser(parseMultiasset, createParser(parseInt, ParseErrorReason.INVALID_MINT_AMOUNT), ParseErrorReason.INVALID_MINT)
+const parseScriptDataHash = createParser(parseBufferOfLength, SCRIPT_DATA_HASH_LENGTH, ParseErrorReason.INVALID_SCRIPT_DATA_HASH)
+const parseCollateralInputs = createParser(parseArray, parseCollateralInput, ParseErrorReason.INVALID_COLLATERAL_INPUTS)
+const parseRequiredSigners = createParser(parseArray, parseRequiredSigner, ParseErrorReason.INVALID_REQUIRED_SIGNERS)
+const parseNetworkId = createParser(parseUint, ParseErrorReason.INVALID_NETWORK_ID)
+const parseTotalCollateral = createParser(parseUint, ParseErrorReason.INVALID_TOTAL_COLLATERAL)
+const parseReferenceInputs = createParser(parseArray, parseReferenceInput, ParseErrorReason.INVALID_REFERENCE_INPUTS)
 
 export const parseTxBody = (unparsedTxBody: unknown): TransactionBody => {
     validate(isMapWithKeysOfType(unparsedTxBody, isNumber), ParseErrorReason.INVALID_TX_BODY_CBOR)

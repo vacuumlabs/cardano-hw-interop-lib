@@ -161,22 +161,22 @@ function *validateStakeCredentials(certificates: Certificate[] | undefined, with
 
 const validateMint = (mint: Mint) => validateMultiasset(mint, validateInt64, 'transaction_body.mint')
 
-function *validateCollateralInputs(txCollateralInputs: TransactionInput[]): ValidatorReturnType {
-    yield* validateListConstraints(txCollateralInputs, 'transaction_body.collateral_inputs', false)
+function *validateCollateralInputs(collateralInputs: TransactionInput[]): ValidatorReturnType {
+    yield* validateListConstraints(collateralInputs, 'transaction_body.collateral_inputs', false)
 
-    for (const [i, collateralInput] of txCollateralInputs.entries()) {
+    for (const [i, collateralInput] of collateralInputs.entries()) {
         yield* validateUint64(collateralInput.index, `transaction_body.collateral_inputs[${i}].index`)
     }
 }
 
-function *validateRequiredSigners(txRequiredSigners: RequiredSigner[]): ValidatorReturnType {
-    yield* validateListConstraints(txRequiredSigners, 'transaction_body.required_signers', false)
+function *validateRequiredSigners(requiredSigners: RequiredSigner[]): ValidatorReturnType {
+    yield* validateListConstraints(requiredSigners, 'transaction_body.required_signers', false)
 }
 
-function *validateTxReferenceInputs(txReferenceInputs: TransactionInput[]): ValidatorReturnType {
-    yield* validateListConstraints(txReferenceInputs, 'transaction_body.reference_inputs', false)
+function *validateReferenceInputs(referenceInputs: TransactionInput[]): ValidatorReturnType {
+    yield* validateListConstraints(referenceInputs, 'transaction_body.reference_inputs', false)
 
-    for (const [i, input] of txReferenceInputs.entries()) {
+    for (const [i, input] of referenceInputs.entries()) {
         yield* validateUint64(input.index, `transaction_body.reference_inputs[${i}].index`)
     }
 }
@@ -226,7 +226,7 @@ function *validateTxBody(txBody: TransactionBody): ValidatorReturnType {
     yield* validatePoolRegistrationTransaction(txBody)
     yield* validateOptional(txBody.collateralReturnOutput, bind(validateTxOutput, 'transaction_body.collateral_return_output'))
     yield* validateOptional(txBody.totalCollateral, bind(validateUint64, 'transaction_body.total_collateral'))
-    yield* validateOptional(txBody.referenceInputs, validateTxReferenceInputs)
+    yield* validateOptional(txBody.referenceInputs, validateReferenceInputs)
 }
 
 /**
