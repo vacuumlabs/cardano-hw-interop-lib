@@ -1,6 +1,6 @@
 import type { ValidationError } from './errors'
 import { err, ValidationErrorReason } from './errors'
-import type { Certificate, CollateralInput, Int, Mint, Multiasset, RequiredSigner, StakeCredentialType, StakeDelegationCertificate, StakeDeregistrationCertificate, StakeRegistrationCertificate, TransactionBody, TransactionInput, TransactionOutput, Uint, Withdrawal } from './types'
+import type { Certificate, Int, Mint, Multiasset, RequiredSigner, StakeCredentialType, StakeDelegationCertificate, StakeDeregistrationCertificate, StakeRegistrationCertificate, TransactionBody, TransactionInput, TransactionOutput, Uint, Withdrawal } from './types'
 import { AmountType, CertificateType } from './types'
 import { bind, getRewardAccountStakeCredentialType } from './utils'
 
@@ -161,7 +161,7 @@ function *validateStakeCredentials(certificates: Certificate[] | undefined, with
 
 const validateMint = (mint: Mint) => validateMultiasset(mint, validateInt64, 'transaction_body.mint')
 
-function *validateCollateralInputs(txCollateralInputs: CollateralInput[]): ValidatorReturnType {
+function *validateCollateralInputs(txCollateralInputs: TransactionInput[]): ValidatorReturnType {
     yield* validateListConstraints(txCollateralInputs, 'transaction_body.collateral_inputs', false)
 
     for (const [i, collateralInput] of txCollateralInputs.entries()) {

@@ -245,20 +245,8 @@ export type Withdrawal = {
 // Mint
 export type Mint = Multiasset<Int>
 
-// Collateral input
-export type CollateralInput = {
-    transactionId: FixlenBuffer<typeof TX_ID_HASH_LENGTH>,
-    index: Uint,
-}
-
 // Required signer
 export type RequiredSigner = FixlenBuffer<typeof KEY_HASH_LENGTH>
-
-// Reference input
-export type ReferenceInput = {
-    transactionId: FixlenBuffer<typeof TX_ID_HASH_LENGTH>,
-    index: Uint,
-}
 
 // Transaction body
 export type TransactionBody = {
@@ -273,12 +261,12 @@ export type TransactionBody = {
     validityIntervalStart?: Uint,
     mint?: Mint,
     scriptDataHash?: FixlenBuffer<typeof SCRIPT_DATA_HASH_LENGTH>,
-    collateralInputs?: CollateralInput[],
+    collateralInputs?: TransactionInput[],
     requiredSigners?: RequiredSigner[],
     networkId?: Uint,
     collateralReturnOutput?: TransactionOutput,
     totalCollateral?: Coin,
-    referenceInputs?: ReferenceInput[],
+    referenceInputs?: TransactionInput[],
 }
 
 export type Transaction = {
