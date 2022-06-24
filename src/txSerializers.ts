@@ -1,6 +1,6 @@
 import { Tagged } from 'cbor'
 
-import type { Amount, AssetName, BabbageTransactionOutput, Certificate, Coin, CollateralInput, Datum, LegacyTransactionOutput, Multiasset, PolicyId, PoolMetadata, PoolParams, RawTransaction, ReferenceScript, Relay, RewardAccount, StakeCredential, Transaction, TransactionBody, TransactionInput, TransactionOutput, Withdrawal } from './types'
+import type { Amount, AssetName, BabbageTransactionOutput, Certificate, Coin, Datum, LegacyTransactionOutput, Multiasset, PolicyId, PoolMetadata, PoolParams, RawTransaction, ReferenceScript, Relay, RewardAccount, StakeCredential, Transaction, TransactionBody, TransactionInput, TransactionOutput, Withdrawal } from './types'
 import { AmountType, CertificateType, DatumType, OutputType, RelayType } from './types'
 import { addIndefiniteLengthFlag, BabbageTransactionOutputKeys, CborTag, filteredMap, TransactionBodyKeys } from './utils'
 
@@ -109,7 +109,7 @@ const serializeTxCertificate = (certificate: Certificate) => {
     }
 }
 
-const serializeCollateralInput = (collateralInput: CollateralInput) =>
+const serializeCollateralInput = (collateralInput: TransactionInput) =>
     [collateralInput.transactionId, collateralInput.index]
 
 export const serializeTxBody = (txBody: TransactionBody) => filteredMap<TransactionBodyKeys, unknown>([
