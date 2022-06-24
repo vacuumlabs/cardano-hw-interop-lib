@@ -92,7 +92,7 @@ const serializePoolParams = (poolParams: PoolParams) => [
 const serializeStakeCredential = (stakeCredential: StakeCredential) =>
     [stakeCredential.type, stakeCredential.hash]
 
-const serializeTxCertificate = (certificate: Certificate) => {
+const serializeCertificate = (certificate: Certificate) => {
     switch (certificate.type) {
     case CertificateType.STAKE_REGISTRATION:
     case CertificateType.STAKE_DEREGISTRATION:
@@ -117,7 +117,7 @@ export const serializeTxBody = (txBody: TransactionBody) => filteredMap<Transact
     [TransactionBodyKeys.OUTPUTS, txBody.outputs.map(serializeTxOutput)],
     [TransactionBodyKeys.FEE, identity(txBody.fee)],
     [TransactionBodyKeys.TTL, identity(txBody.ttl)],
-    [TransactionBodyKeys.CERTIFICATES, txBody.certificates?.map(serializeTxCertificate)],
+    [TransactionBodyKeys.CERTIFICATES, txBody.certificates?.map(serializeCertificate)],
     [TransactionBodyKeys.WITHDRAWALS, txBody.withdrawals && serializeWithdrawals(txBody.withdrawals)],
     [TransactionBodyKeys.UPDATE, identity(txBody.update)],
     [TransactionBodyKeys.METADATA_HASH, identity(txBody.metadataHash)],

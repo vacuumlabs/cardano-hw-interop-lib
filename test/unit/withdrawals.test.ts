@@ -33,7 +33,7 @@ const InvalidWithdrawalsTestcases: InvalidParseTestcase[] = [
     {
         testname: 'Not a map',
         cbor: '83016161f6',
-        errMsg: ParseErrorReason.INVALID_TX_WITHDRAWALS,
+        errMsg: ParseErrorReason.INVALID_WITHDRAWALS,
     },
     {
         testname: 'Invalid reward account as map key',
