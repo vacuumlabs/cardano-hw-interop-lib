@@ -91,12 +91,12 @@ export type Datum = DatumHash | DatumInline
 
 // Transaction output
 export enum OutputType {
-    LEGACY,
-    POST_ALONZO,
+    ARRAY_LEGACY,
+    MAP_BABBAGE,
 }
 
 export type LegacyTransactionOutput = {
-    type: OutputType.LEGACY,
+    type: OutputType.ARRAY_LEGACY,
     address: Address,
     amount: Amount,
     datumHash?: DatumHash,
@@ -104,15 +104,15 @@ export type LegacyTransactionOutput = {
 
 export type ReferenceScript = Buffer
 
-export type PostAlonzoTransactionOutput = {
-    type: OutputType.POST_ALONZO,
+export type BabbageTransactionOutput = {
+    type: OutputType.MAP_BABBAGE,
     address: Address,
     amount: Amount,
     datum?: Datum,
     referenceScript?: ReferenceScript,
 }
 
-export type TransactionOutput = LegacyTransactionOutput | PostAlonzoTransactionOutput
+export type TransactionOutput = LegacyTransactionOutput | BabbageTransactionOutput
 
 // Certificate
 export enum CertificateType {
