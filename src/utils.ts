@@ -59,7 +59,7 @@ export const getRewardAccountStakeCredentialType = (rewardAccount: RewardAccount
     }
 }
 
-export enum PostAlonzoTransactionOutputKeys {
+export enum BabbageTransactionOutputKeys {
     ADDRESS = 0,
     AMOUNT = 1,
     DATUM = 2,

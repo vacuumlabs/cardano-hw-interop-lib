@@ -1,8 +1,8 @@
 import { Tagged } from 'cbor'
 
-import type { Amount, AssetName, Certificate, Coin, CollateralInput, Datum, LegacyTransactionOutput, Multiasset, PolicyId, PoolMetadata, PoolParams, PostAlonzoTransactionOutput, RawTransaction, ReferenceScript, Relay, RewardAccount, StakeCredential, Transaction, TransactionBody, TransactionInput, TransactionOutput, Withdrawal } from './types'
+import type { Amount, AssetName, BabbageTransactionOutput, Certificate, Coin, CollateralInput, Datum, LegacyTransactionOutput, Multiasset, PolicyId, PoolMetadata, PoolParams, RawTransaction, ReferenceScript, Relay, RewardAccount, StakeCredential, Transaction, TransactionBody, TransactionInput, TransactionOutput, Withdrawal } from './types'
 import { AmountType, CertificateType, DatumType, OutputType, RelayType } from './types'
-import { addIndefiniteLengthFlag, CborTag, filteredMap, PostAlonzoTransactionOutputKeys, TransactionBodyKeys } from './utils'
+import { addIndefiniteLengthFlag, BabbageTransactionOutputKeys, CborTag, filteredMap, TransactionBodyKeys } from './utils'
 
 const identity = <T>(x: T): T => x
 
@@ -43,20 +43,20 @@ const serializeDatum = (datum: Datum) => {
 const serializeReferenceScript = (referenceScript: ReferenceScript) =>
     new Tagged(CborTag.ENCODED_CBOR, referenceScript)
 
-const serializePostAlonzoTxOutput = (output: PostAlonzoTransactionOutput) =>
-    filteredMap<PostAlonzoTransactionOutputKeys, unknown>([
-        [PostAlonzoTransactionOutputKeys.ADDRESS, identity(output.address)],
-        [PostAlonzoTransactionOutputKeys.AMOUNT, serializeAmount(output.amount)],
-        [PostAlonzoTransactionOutputKeys.DATUM, output.datum && serializeDatum(output.datum)],
-        [PostAlonzoTransactionOutputKeys.REFERENCE_SCRIPT, output.referenceScript && serializeReferenceScript(output.referenceScript)],
+const serializeBabbageTxOutput = (output: BabbageTransactionOutput) =>
+    filteredMap<BabbageTransactionOutputKeys, unknown>([
+        [BabbageTransactionOutputKeys.ADDRESS, identity(output.address)],
+        [BabbageTransactionOutputKeys.AMOUNT, serializeAmount(output.amount)],
+        [BabbageTransactionOutputKeys.DATUM, output.datum && serializeDatum(output.datum)],
+        [BabbageTransactionOutputKeys.REFERENCE_SCRIPT, output.referenceScript && serializeReferenceScript(output.referenceScript)],
     ])
 
 const serializeTxOutput = (output: TransactionOutput) => {
     switch (output.type) {
-    case OutputType.LEGACY:
+    case OutputType.ARRAY_LEGACY:
         return serializeLegacyTxOutput(output)
-    case OutputType.POST_ALONZO:
-        return serializePostAlonzoTxOutput(output)
+    case OutputType.MAP_BABBAGE:
+        return serializeBabbageTxOutput(output)
     }
 }
 

@@ -1,9 +1,9 @@
 import { ParseErrorReason } from './errors'
 import type { Parser, WithoutType } from './parsers'
 import { createParser, isArray, isMapWithKeysOfType, isNumber, isUint, isUintOfMaxSize, parseArray, parseBasedOnType, parseBuffer, parseBufferOfLength, parseBufferOfMaxLength, parseInt, parseMap, parseNullable, parseOptional, parseStringOfMaxLength, parseTuple, parseUint, validate } from './parsers'
-import type { Amount, CollateralInput, DatumHash, DatumInline, GenesisKeyDelegation, LegacyTransactionOutput, MoveInstantaneousRewardsCertificate, Multiasset, PoolMetadata, PoolParams, PoolRegistrationCertificate, PoolRetirementCertificate, Port, PostAlonzoTransactionOutput, RawTransaction, ReferenceInput, RelayMultiHostName, RelaySingleHostAddress, RelaySingleHostName, RequiredSigner, StakeCredentialKey, StakeCredentialScript, StakeDelegationCertificate, StakeDeregistrationCertificate, StakeRegistrationCertificate, Transaction, TransactionBody, TransactionInput, TransactionOutput, Unparsed, Withdrawal } from './types'
+import type { Amount, BabbageTransactionOutput, CollateralInput, DatumHash, DatumInline, GenesisKeyDelegation, LegacyTransactionOutput, MoveInstantaneousRewardsCertificate, Multiasset, PoolMetadata, PoolParams, PoolRegistrationCertificate, PoolRetirementCertificate, Port, RawTransaction, ReferenceInput, RelayMultiHostName, RelaySingleHostAddress, RelaySingleHostName, RequiredSigner, StakeCredentialKey, StakeCredentialScript, StakeDelegationCertificate, StakeDeregistrationCertificate, StakeRegistrationCertificate, Transaction, TransactionBody, TransactionInput, TransactionOutput, Unparsed, Withdrawal } from './types'
 import { AmountType, ASSET_NAME_MAX_LENGTH, CertificateType, DATUM_HASH_LENGTH, DatumType, DNS_NAME_MAX_LENGTH, IPV4_LENGTH, IPV6_LENGTH, KEY_HASH_LENGTH, METADATA_HASH_LENGTH, OutputType, POOL_KEY_HASH_LENGTH, PORT_MAX_SIZE, RelayType, REWARD_ACCOUNT_LENGTH, SCRIPT_DATA_HASH_LENGTH, SCRIPT_HASH_LENGTH, StakeCredentialType, TX_ID_HASH_LENGTH, URL_MAX_LENGTH, VRF_KEY_HASH_LENGTH } from './types'
-import { addIndefiniteLengthFlag, PostAlonzoTransactionOutputKeys, TransactionBodyKeys, undefinedOnlyAtTheEnd } from './utils'
+import { addIndefiniteLengthFlag, BabbageTransactionOutputKeys, TransactionBodyKeys, undefinedOnlyAtTheEnd } from './utils'
 
 const dontParse: Parser<Unparsed> = (data: unknown) => data
 
@@ -107,7 +107,7 @@ const parseLegacyTxOutput = (unparsedTxOutput: unknown): LegacyTransactionOutput
     )
 
     return {
-        type: OutputType.LEGACY,
+        type: OutputType.ARRAY_LEGACY,
         address,
         amount,
         datumHash,
@@ -116,22 +116,22 @@ const parseLegacyTxOutput = (unparsedTxOutput: unknown): LegacyTransactionOutput
 
 const parseReferenceScript = createParser(parseBuffer, ParseErrorReason.INVALID_OUTPUT_REFERENCE_SCRIPT)
 
-const parsePostAlonzoTxOutput = (unparsedTxOutput: unknown): PostAlonzoTransactionOutput => {
+const parseBabbageTxOutput = (unparsedTxOutput: unknown): BabbageTransactionOutput => {
     validate(isMapWithKeysOfType(unparsedTxOutput, isNumber), ParseErrorReason.INVALID_TX_OUTPUT)
 
     return {
-        type: OutputType.POST_ALONZO,
-        address: parseAddress(unparsedTxOutput.get(PostAlonzoTransactionOutputKeys.ADDRESS)),
-        amount: parseAmount(unparsedTxOutput.get(PostAlonzoTransactionOutputKeys.AMOUNT)),
-        datum: parseOptional(unparsedTxOutput.get(PostAlonzoTransactionOutputKeys.DATUM), parseDatum),
-        referenceScript: parseOptional(unparsedTxOutput.get(PostAlonzoTransactionOutputKeys.REFERENCE_SCRIPT), parseReferenceScript),
+        type: OutputType.MAP_BABBAGE,
+        address: parseAddress(unparsedTxOutput.get(BabbageTransactionOutputKeys.ADDRESS)),
+        amount: parseAmount(unparsedTxOutput.get(BabbageTransactionOutputKeys.AMOUNT)),
+        datum: parseOptional(unparsedTxOutput.get(BabbageTransactionOutputKeys.DATUM), parseDatum),
+        referenceScript: parseOptional(unparsedTxOutput.get(BabbageTransactionOutputKeys.REFERENCE_SCRIPT), parseReferenceScript),
     }
 }
 
 const parseTxOutput = (unparsedTxOutput: unknown): TransactionOutput => {
     return isArray(unparsedTxOutput)
         ? parseLegacyTxOutput(unparsedTxOutput)
-        : parsePostAlonzoTxOutput(unparsedTxOutput)
+        : parseBabbageTxOutput(unparsedTxOutput)
 }
 
 export const parseWithdrawals = (unparsedWithdrawals: unknown): Withdrawal[] => {
