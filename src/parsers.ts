@@ -1,6 +1,9 @@
+import { Tagged } from 'cbor'
+
 import type { ParseErrorReason } from './errors'
 import { ParseError } from './errors'
 import type { FixlenBuffer, Int, MaxlenBuffer, MaxlenString, MaxsizeUint, Uint } from './types'
+import { CborTag } from './utils'
 
 export function validate(cond: boolean, errMsg: ParseErrorReason): asserts cond {
     if (!cond) throw new ParseError(errMsg)
@@ -67,6 +70,13 @@ export const parseBufferOfLength = <L extends number>(data: unknown, length: L, 
 export const parseBufferOfMaxLength = <L extends number>(data: unknown, maxLength: L, errMsg: ParseErrorReason): MaxlenBuffer<L> => {
     validate(isBufferOfMaxLength(data, maxLength), errMsg)
     return data
+}
+
+export const parseEmbeddedCborBytes = (data: unknown, errMsg: ParseErrorReason): Buffer => {
+    validate(data instanceof Tagged, errMsg)
+    validate(data.tag == CborTag.ENCODED_CBOR, errMsg)
+    validate(isBuffer(data.value), errMsg)
+    return data.value
 }
 
 /**

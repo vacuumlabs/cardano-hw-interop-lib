@@ -1,6 +1,6 @@
 import type { ValidationError } from './errors'
 import { err, ValidationErrorReason } from './errors'
-import type { Certificate, Collateral, Int, Mint, Multiasset, RequiredSigner, StakeCredentialType, StakeDelegationCertificate, StakeDeregistrationCertificate, StakeRegistrationCertificate, TransactionBody, TransactionInput, TransactionOutput, Uint, Withdrawal } from './types'
+import type { Certificate, Int, Mint, Multiasset, RequiredSigner, StakeCredentialType, StakeDelegationCertificate, StakeDeregistrationCertificate, StakeRegistrationCertificate, TransactionBody, TransactionInput, TransactionOutput, Uint, Withdrawal } from './types'
 import { AmountType, CertificateType } from './types'
 import { bind, getRewardAccountStakeCredentialType } from './utils'
 
@@ -65,24 +65,28 @@ function *validateMultiasset<T>(multiasset: Multiasset<T>, validateAmount: (n: T
     }
 }
 
-function *validateTxOutputs(txOutputs: TransactionOutput[]): ValidatorReturnType {
-    yield* validateListConstraints(txOutputs, 'transaction_body.outputs', true)
+function *validateTxOutput({amount}: TransactionOutput, position: string): ValidatorReturnType {
+    switch (amount.type) {
+    case AmountType.WITHOUT_MULTIASSET:
+        yield* validateUint64(amount.coin, `${position}.amount`)
+        break
+    case AmountType.WITH_MULTIASSET:
+        yield* validateUint64(amount.coin, `${position}.amount`)
+        // Although this check is also preformed by the `validateMultiasset`
+        // function, this is a very specific check for the output format
+        // that it is okay that they are defacto preformed twice with
+        // different ValidationErrors, and both errors are marked as fixable
+        yield* validate(amount.multiasset.length > 0, err(ValidationErrorReason.OUTPUT_WITHOUT_TOKENS_MUST_BE_A_SIMPLE_TUPLE, `${position}.amount`))
+        yield* validateMultiasset(amount.multiasset, validateUint64, `${position}`)
+        break
+    }
+}
 
-    for (const [i, {amount}] of txOutputs.entries()) {
-        switch (amount.type) {
-        case AmountType.WITHOUT_MULTIASSET:
-            yield* validateUint64(amount.coin, `transaction_body.outputs[${i}].amount`)
-            break
-        case AmountType.WITH_MULTIASSET:
-            yield* validateUint64(amount.coin, `transaction_body.outputs[${i}].amount`)
-            // Although this check is also preformed by the `validateMultiasset`
-            // function, this is a very specific check for the output format
-            // that it is okay that they are defacto preformed twice with
-            // different ValidationErrors, and both errors are marked as fixable
-            yield* validate(amount.multiasset.length > 0, err(ValidationErrorReason.OUTPUT_WITHOUT_TOKENS_MUST_BE_A_SIMPLE_TUPLE, `transaction_body.outputs[${i}].amount`))
-            yield* validateMultiasset(amount.multiasset, validateUint64, `transaction_body.ouputs[${i}]`)
-            break
-        }
+function *validateTxOutputs(outputs: TransactionOutput[]): ValidatorReturnType {
+    yield* validateListConstraints(outputs, 'transaction_body.outputs', true)
+
+    for (const [i, output] of outputs.entries()) {
+        validateTxOutput(output, `transaction_body.outputs[${i}]`)
     }
 }
 
@@ -157,16 +161,24 @@ function *validateStakeCredentials(certificates: Certificate[] | undefined, with
 
 const validateMint = (mint: Mint) => validateMultiasset(mint, validateInt64, 'transaction_body.mint')
 
-function *validateCollaterals(txCollaterals: Collateral[]): ValidatorReturnType {
-    yield* validateListConstraints(txCollaterals, 'transaction_body.collaterals', false)
+function *validateCollateralInputs(collateralInputs: TransactionInput[]): ValidatorReturnType {
+    yield* validateListConstraints(collateralInputs, 'transaction_body.collateral_inputs', false)
 
-    for (const [i, collateral] of txCollaterals.entries()) {
-        yield* validateUint64(collateral.index, `transaction_body.collaterals[${i}].index`)
+    for (const [i, collateralInput] of collateralInputs.entries()) {
+        yield* validateUint64(collateralInput.index, `transaction_body.collateral_inputs[${i}].index`)
     }
 }
 
-function *validateRequiredSigners(txRequiredSigners: RequiredSigner[]): ValidatorReturnType {
-    yield* validateListConstraints(txRequiredSigners, 'transaction_body.required_signers', false)
+function *validateRequiredSigners(requiredSigners: RequiredSigner[]): ValidatorReturnType {
+    yield* validateListConstraints(requiredSigners, 'transaction_body.required_signers', false)
+}
+
+function *validateReferenceInputs(referenceInputs: TransactionInput[]): ValidatorReturnType {
+    yield* validateListConstraints(referenceInputs, 'transaction_body.reference_inputs', false)
+
+    for (const [i, input] of referenceInputs.entries()) {
+        yield* validateUint64(input.index, `transaction_body.reference_inputs[${i}].index`)
+    }
 }
 
 /**
@@ -208,10 +220,13 @@ function *validateTxBody(txBody: TransactionBody): ValidatorReturnType {
     yield* validate(txBody.update === undefined, err(ValidationErrorReason.UNSUPPORTED_TX_UPDATE, 'transaction_body.update'))
     yield* validateOptional(txBody.validityIntervalStart, bind(validateUint64, 'transaction_body.validity_interval_start'))
     yield* validateOptional(txBody.mint, validateMint)
-    yield* validateOptional(txBody.collaterals, validateCollaterals)
+    yield* validateOptional(txBody.collateralInputs, validateCollateralInputs)
     yield* validateOptional(txBody.requiredSigners, validateRequiredSigners)
     yield* validateOptional(txBody.networkId, bind(validateUint64, 'transaction_body.network_id'))
     yield* validatePoolRegistrationTransaction(txBody)
+    yield* validateOptional(txBody.collateralReturnOutput, bind(validateTxOutput, 'transaction_body.collateral_return_output'))
+    yield* validateOptional(txBody.totalCollateral, bind(validateUint64, 'transaction_body.total_collateral'))
+    yield* validateOptional(txBody.referenceInputs, validateReferenceInputs)
 }
 
 /**

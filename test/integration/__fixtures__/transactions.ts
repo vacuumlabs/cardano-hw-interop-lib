@@ -1,5 +1,5 @@
 import type { MaxlenBuffer, Port, RawTransaction, Transaction, TransactionBody } from '../../../src/types'
-import { AmountType, CertificateType, RelayType, StakeCredentialType } from '../../../src/types'
+import { AmountType, CertificateType, DatumType, OutputType, RelayType, StakeCredentialType } from '../../../src/types'
 import { addIndefiniteLengthFlag } from '../../../src/utils'
 import { fromBech32, ipv4ToBuffer, rewardAccount, toFixlenBuffer, toInt, toMaxLenString, toUint } from '../../test_utils'
 
@@ -19,6 +19,7 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
                 index: toUint(0),
             }],
             outputs: [{
+                type: OutputType.ARRAY_LEGACY,
                 address: fromBech32('addr_test1qqr585tvlc7ylnqvz8pyqwauzrdu0mxag3m7q56grgmgu7sxu2hyfhlkwuxupa9d5085eunq2qywy7hvmvej456flknswgndm3'),
                 amount: {
                     type: AmountType.WITHOUT_MULTIASSET,
@@ -35,9 +36,12 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
             validityIntervalStart: undefined,
             mint: undefined,
             scriptDataHash: undefined,
-            collaterals: undefined,
+            collateralInputs: undefined,
             requiredSigners: undefined,
             networkId: undefined,
+            collateralReturnOutput: undefined,
+            totalCollateral: undefined,
+            referenceInputs: undefined,
         },
     },
     {
@@ -49,6 +53,7 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
                 index: toUint(0),
             }],
             outputs: [{
+                type: OutputType.ARRAY_LEGACY,
                 address: fromBech32('addr_test1qqr585tvlc7ylnqvz8pyqwauzrdu0mxag3m7q56grgmgu7sxu2hyfhlkwuxupa9d5085eunq2qywy7hvmvej456flknswgndm3'),
                 amount: {
                     type: AmountType.WITHOUT_MULTIASSET,
@@ -74,9 +79,12 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
             validityIntervalStart: undefined,
             mint: undefined,
             scriptDataHash: undefined,
-            collaterals: undefined,
+            collateralInputs: undefined,
             requiredSigners: undefined,
             networkId: undefined,
+            collateralReturnOutput: undefined,
+            totalCollateral: undefined,
+            referenceInputs: undefined,
         },
     },
     {
@@ -89,6 +97,7 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
             }],
             outputs: [
                 {
+                    type: OutputType.ARRAY_LEGACY,
                     address: fromBech32('addr_test1xqt87mdlvy9wqv8sgwkmrua00p65ak2ett22c8m7m8lkgenkp7mf2hgjz7clrusgmak5t2ere8shkrycfgkn5g4mh7uqvcq039'),
                     amount: {
                         type: AmountType.WITH_MULTIASSET,
@@ -104,6 +113,7 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
                     datumHash: undefined,
                 },
                 {
+                    type: OutputType.ARRAY_LEGACY,
                     address: fromBech32('addr_test1qqr585tvlc7ylnqvz8pyqwauzrdu0mxag3m7q56grgmgu7sxu2hyfhlkwuxupa9d5085eunq2qywy7hvmvej456flknswgndm3'),
                     amount: {
                         type: AmountType.WITH_MULTIASSET,
@@ -146,9 +156,12 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
                 ],
             }],
             scriptDataHash: undefined,
-            collaterals: undefined,
+            collateralInputs: undefined,
             requiredSigners: undefined,
             networkId: undefined,
+            collateralReturnOutput: undefined,
+            totalCollateral: undefined,
+            referenceInputs: undefined,
         },
     },
     {
@@ -160,6 +173,7 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
                 index: toUint(42),
             }],
             outputs: [{
+                type: OutputType.ARRAY_LEGACY,
                 address: fromBech32('addr1qxdn4yany8lc6ewkmuwxmpza2ndm7t9ngyzlmdzwecdh6vfvqjwlak9ug8k7lw7gxh9q5uuu4jtp24u4qf3w7j9uluwssp092m'),
                 amount: {
                     type: AmountType.WITHOUT_MULTIASSET,
@@ -246,13 +260,16 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
             validityIntervalStart: undefined,
             mint: undefined,
             scriptDataHash: undefined,
-            collaterals: undefined,
+            collateralInputs: undefined,
             requiredSigners: undefined,
             networkId: undefined,
+            collateralReturnOutput: undefined,
+            totalCollateral: undefined,
+            referenceInputs: undefined,
         },
     },
     {
-        testname: 'Tx body with output datum hash, script data hash, collaterals, required signers and network id',
+        testname: 'Tx body with output datum hash, script data hash, collateral inputs, required signers and network id',
         cbor: 'a800818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018283583d105e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e28dd419e1a006ca7935820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce18883583930167f6dbf610ae030f043adb1f3af78754ed9595ad4ac1f7ed9ff6466760fb6955d1217b1f1f208df6d45ab23c9e17b0c984a2d3a22bbbfb8821a0001e91fa1581cd7a7c6999786354b6dbee181a2f562a628a75fce126f4da40ce5d9b2a146546f6b656e3101582000ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce102182a030a0b5820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce1880d818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000e82581cfea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a581ceea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a0f01',
         txBody: {
             inputs: [{
@@ -261,14 +278,19 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
             }],
             outputs: [
                 {
+                    type: OutputType.ARRAY_LEGACY,
                     address: fromBech32('addr_test1zp0z7zqwhya6mpk5q929ur897g3pp9kkgalpreny8y304rfw6j2jxnwq6enuzvt0lp89wgcsufj7mvcnxpzgkd4hz70z3h2pnc8lhq8r'),
                     amount: {
                         type: AmountType.WITHOUT_MULTIASSET,
                         coin: toUint(7120787),
                     },
-                    datumHash: toFixlenBuffer('ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188', 32),
+                    datumHash: {
+                        type: DatumType.HASH,
+                        hash: toFixlenBuffer('ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188', 32),
+                    },
                 },
                 {
+                    type: OutputType.ARRAY_LEGACY,
                     address: fromBech32('addr_test1xqt87mdlvy9wqv8sgwkmrua00p65ak2ett22c8m7m8lkgenkp7mf2hgjz7clrusgmak5t2ere8shkrycfgkn5g4mh7uqvcq039'),
                     amount: {
                         type: AmountType.WITH_MULTIASSET,
@@ -281,7 +303,10 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
                             }],
                         }],
                     },
-                    datumHash: toFixlenBuffer('00ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce1', 32),
+                    datumHash: {
+                        type: DatumType.HASH,
+                        hash: toFixlenBuffer('00ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce1', 32),
+                    },
                 },
             ],
             fee: toUint(42),
@@ -293,7 +318,7 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
             validityIntervalStart: undefined,
             mint: undefined,
             scriptDataHash: toFixlenBuffer('ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188', 32),
-            collaterals: [{
+            collateralInputs: [{
                 transactionId: toFixlenBuffer('3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7', 32),
                 index: toUint(0),
             }],
@@ -302,6 +327,68 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
                 toFixlenBuffer('eea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a', 28),
             ],
             networkId: toUint(1),
+            collateralReturnOutput: undefined,
+            totalCollateral: undefined,
+            referenceInputs: undefined,
+        },
+    },
+    {
+        testname: 'Tx body with inline datum, reference script, collateral return, total collateral and reference input',
+        cbor: 'a8008182582094461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d000181a4005839008b3303988371208dd0916cc4548c4eafc2fd3d6205ea8ec180c1b1d9e0820d5929d99bce8aa81e86195fd2b824e6550820a03af325f6ff220100028201d81841a003d8185846820158425840010000332233322222253353004333573466ebc00c00801801440204c98d4c01ccd5ce2481094e6f7420457175616c000084984880084880048004480048004102000b5820853cbe68f7fccdeeeb0fd7b711ea147912190c35ac52d9d94080ae82809b2f840d8182582094461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d0110a2005839008b3303988371208dd0916cc4548c4eafc2fd3d6205ea8ec180c1b1d9e0820d5929d99bce8aa81e86195fd2b824e6550820a03af325f6ff220100110a128182582094461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d02',
+        txBody: {
+            inputs: [
+                {
+                    transactionId: toFixlenBuffer('94461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d', 32),
+                    index: toUint(0),
+                },
+            ],
+            outputs: [{
+                type: OutputType.MAP_BABBAGE,
+                address: fromBech32('addr_test1qz9nxqucsdcjprwsj9kvg4yvf6hu9lfavgz74rkpsrqmrk0qsgx4j2wen08g42q7scv4l54cynn92zpq5qa0xf0klu3qe9xkhw'),
+                amount: {
+                    type: AmountType.WITHOUT_MULTIASSET,
+                    coin: toUint(0),
+                },
+                datum: {
+                    type: DatumType.INLINE,
+                    bytes: Buffer.from('a0', 'hex'),
+                },
+                referenceScript: Buffer.from('820158425840010000332233322222253353004333573466ebc00c00801801440204c98d4c01ccd5ce2481094e6f7420457175616c0000849848800848800480044800480041', 'hex'),
+            }],
+            fee: toUint(0),
+            ttl: undefined,
+            certificates: undefined,
+            withdrawals: undefined,
+            update: undefined,
+            metadataHash: undefined,
+            validityIntervalStart: undefined,
+            mint: undefined,
+            scriptDataHash: toFixlenBuffer('853cbe68f7fccdeeeb0fd7b711ea147912190c35ac52d9d94080ae82809b2f84', 32),
+            collateralInputs: [
+                {
+                    transactionId: toFixlenBuffer('94461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d', 32),
+                    index: toUint(1),
+                },
+            ],
+            requiredSigners: undefined,
+            networkId: undefined,
+            collateralReturnOutput: {
+                type: OutputType.MAP_BABBAGE,
+                address: fromBech32('addr_test1qz9nxqucsdcjprwsj9kvg4yvf6hu9lfavgz74rkpsrqmrk0qsgx4j2wen08g42q7scv4l54cynn92zpq5qa0xf0klu3qe9xkhw'),
+                amount: {
+                    type: AmountType.WITHOUT_MULTIASSET,
+                    coin: toUint(0),
+                },
+                datum: undefined,
+                referenceScript: undefined,
+            },
+            totalCollateral: toUint(10),
+            referenceInputs: [
+                {
+                    transactionId: toFixlenBuffer('94461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d', 32),
+                    index: toUint(2),
+                },
+            ],
         },
     },
 ]
@@ -332,6 +419,7 @@ export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
                     index: toUint(0),
                 }],
                 outputs: [{
+                    type: OutputType.ARRAY_LEGACY,
                     address: fromBech32('addr_test1qqr585tvlc7ylnqvz8pyqwauzrdu0mxag3m7q56grgmgu7sxu2hyfhlkwuxupa9d5085eunq2qywy7hvmvej456flknswgndm3'),
                     amount: {
                         type: AmountType.WITHOUT_MULTIASSET,
@@ -348,9 +436,12 @@ export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
                 validityIntervalStart: undefined,
                 mint: undefined,
                 scriptDataHash: undefined,
-                collaterals: undefined,
+                collateralInputs: undefined,
                 requiredSigners: undefined,
                 networkId: undefined,
+                collateralReturnOutput: undefined,
+                totalCollateral: undefined,
+                referenceInputs: undefined,
             },
             scriptWitnesses: addIndefiniteLengthFlag([]),
             auxiliaryData: null,
@@ -401,6 +492,7 @@ export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
                 ],
                 outputs: [
                     {
+                        type: OutputType.ARRAY_LEGACY,
                         address: fromBech32('addr1qxdn4yany8lc6ewkmuwxmpza2ndm7t9ngyzlmdzwecdh6vfvqjwlak9ug8k7lw7gxh9q5uuu4jtp24u4qf3w7j9uluwssp092m'),
                         amount: {
                             type: AmountType.WITH_MULTIASSET,
@@ -416,6 +508,7 @@ export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
                         datumHash: undefined,
                     },
                     {
+                        type: OutputType.ARRAY_LEGACY,
                         address: fromBech32('addr_test1qqr585tvlc7ylnqvz8pyqwauzrdu0mxag3m7q56grgmgu7sxu2hyfhlkwuxupa9d5085eunq2qywy7hvmvej456flknswgndm3'),
                         amount: {
                             type: AmountType.WITHOUT_MULTIASSET,
@@ -424,6 +517,7 @@ export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
                         datumHash: undefined,
                     },
                     {
+                        type: OutputType.ARRAY_LEGACY,
                         address: fromBech32('addr_test1xqt87mdlvy9wqv8sgwkmrua00p65ak2ett22c8m7m8lkgenkp7mf2hgjz7clrusgmak5t2ere8shkrycfgkn5g4mh7uqvcq039'),
                         amount: {
                             type: AmountType.WITH_MULTIASSET,
@@ -545,9 +639,12 @@ export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
                     ],
                 }],
                 scriptDataHash: undefined,
-                collaterals: undefined,
+                collateralInputs: undefined,
                 requiredSigners: undefined,
                 networkId: undefined,
+                collateralReturnOutput: undefined,
+                totalCollateral: undefined,
+                referenceInputs: undefined,
             },
             scriptWitnesses: addIndefiniteLengthFlag([
                 [0, Buffer.from('2C049DFED8BC41EDEFBBC835CA0A739CAC961557950262EF48BCFF1D', 'hex')],
@@ -597,6 +694,7 @@ export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
                     },
                 ],
                 outputs: [{
+                    type: OutputType.ARRAY_LEGACY,
                     address: fromBech32('addr1x92s6rutty2gpljhaqe2hxwkct7rsly0g9atpyueed6ttc0canazv4x0u8wex9pemdz7g06arfe398wt0e9vcumvwe4qx4ar6m'),
                     amount: {
                         type: AmountType.WITHOUT_MULTIASSET,
@@ -613,7 +711,7 @@ export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
                 validityIntervalStart: undefined,
                 mint: undefined,
                 scriptDataHash: toFixlenBuffer('2d1c584b45751ab66d924c4a47f7fe7ea5831e0b485f8d9d290e69eb809c013b', 32),
-                collaterals: [
+                collateralInputs: [
                     {
                         transactionId: toFixlenBuffer('94461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d', 32),
                         index: toUint(3),
@@ -621,6 +719,9 @@ export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
                 ],
                 requiredSigners: undefined,
                 networkId: undefined,
+                collateralReturnOutput: undefined,
+                totalCollateral: undefined,
+                referenceInputs: undefined,
             },
             scriptWitnesses: addIndefiniteLengthFlag([
                 [
@@ -684,6 +785,7 @@ export const ValidTransactionTestcases: ValidTransactionTestcase[] = [
                     index: toUint(0),
                 }],
                 outputs: [{
+                    type: OutputType.ARRAY_LEGACY,
                     address: fromBech32('addr_test1qqr585tvlc7ylnqvz8pyqwauzrdu0mxag3m7q56grgmgu7sxu2hyfhlkwuxupa9d5085eunq2qywy7hvmvej456flknswgndm3'),
                     amount: {
                         type: AmountType.WITHOUT_MULTIASSET,
@@ -700,9 +802,12 @@ export const ValidTransactionTestcases: ValidTransactionTestcase[] = [
                 validityIntervalStart: undefined,
                 mint: undefined,
                 scriptDataHash: undefined,
-                collaterals: undefined,
+                collateralInputs: undefined,
                 requiredSigners: undefined,
                 networkId: undefined,
+                collateralReturnOutput: undefined,
+                totalCollateral: undefined,
+                referenceInputs: undefined,
             },
             witnessSet: new Map([
                 [
@@ -734,6 +839,7 @@ export const ValidTransactionTestcases: ValidTransactionTestcase[] = [
                     },
                 ],
                 outputs: [{
+                    type: OutputType.ARRAY_LEGACY,
                     address: fromBech32('addr1x92s6rutty2gpljhaqe2hxwkct7rsly0g9atpyueed6ttc0canazv4x0u8wex9pemdz7g06arfe398wt0e9vcumvwe4qx4ar6m'),
                     amount: {
                         type: AmountType.WITHOUT_MULTIASSET,
@@ -750,9 +856,12 @@ export const ValidTransactionTestcases: ValidTransactionTestcase[] = [
                 validityIntervalStart: undefined,
                 mint: undefined,
                 scriptDataHash: undefined,
-                collaterals: undefined,
+                collateralInputs: undefined,
                 requiredSigners: undefined,
                 networkId: undefined,
+                collateralReturnOutput: undefined,
+                totalCollateral: undefined,
+                referenceInputs: undefined,
             },
             witnessSet: new Map([
                 [
@@ -813,6 +922,7 @@ export const ValidTransactionTestcases: ValidTransactionTestcase[] = [
                     },
                 ],
                 outputs: [{
+                    type: OutputType.ARRAY_LEGACY,
                     address: fromBech32('addr1x92s6rutty2gpljhaqe2hxwkct7rsly0g9atpyueed6ttc0canazv4x0u8wex9pemdz7g06arfe398wt0e9vcumvwe4qx4ar6m'),
                     amount: {
                         type: AmountType.WITHOUT_MULTIASSET,
@@ -829,7 +939,7 @@ export const ValidTransactionTestcases: ValidTransactionTestcase[] = [
                 validityIntervalStart: undefined,
                 mint: undefined,
                 scriptDataHash: toFixlenBuffer('2d1c584b45751ab66d924c4a47f7fe7ea5831e0b485f8d9d290e69eb809c013b', 32),
-                collaterals: [
+                collateralInputs: [
                     {
                         transactionId: toFixlenBuffer('94461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d', 32),
                         index: toUint(3),
@@ -837,6 +947,9 @@ export const ValidTransactionTestcases: ValidTransactionTestcase[] = [
                 ],
                 requiredSigners: undefined,
                 networkId: undefined,
+                collateralReturnOutput: undefined,
+                totalCollateral: undefined,
+                referenceInputs: undefined,
             },
             witnessSet: new Map([
                 [

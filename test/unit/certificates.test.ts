@@ -118,7 +118,7 @@ const InvalidCertificatesTestcases: InvalidParseTestcase[] = [
     {
         testname: 'Not an array',
         cbor: 'a100f6',
-        errMsg: ParseErrorReason.INVALID_TX_CERTIFICATES,
+        errMsg: ParseErrorReason.INVALID_CERTIFICATES,
     },
     {
         testname: 'Invalid certificate structure',

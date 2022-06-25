@@ -1,8 +1,8 @@
 import { Tagged } from 'cbor'
 
-import type { Amount, AssetName, Certificate, Coin, Collateral, Multiasset, PolicyId, PoolMetadata, PoolParams, RawTransaction, Relay, RewardAccount, StakeCredential, Transaction, TransactionBody, TransactionInput, TransactionOutput, Withdrawal } from './types'
-import { AmountType, CertificateType, RelayType } from './types'
-import { addIndefiniteLengthFlag, TransactionBodyKeys } from './utils'
+import type { Amount, AssetName, BabbageTransactionOutput, Certificate, Coin, Datum, LegacyTransactionOutput, Multiasset, PolicyId, PoolMetadata, PoolParams, RawTransaction, ReferenceScript, Relay, RewardAccount, StakeCredential, Transaction, TransactionBody, TransactionInput, TransactionOutput, Withdrawal } from './types'
+import { AmountType, CertificateType, DatumType, OutputType, RelayType } from './types'
+import { addIndefiniteLengthFlag, BabbageTransactionOutputKeys, CborTag, filteredMap, TransactionBodyKeys } from './utils'
 
 const identity = <T>(x: T): T => x
 
@@ -26,10 +26,39 @@ const serializeAmount = (amount: Amount) => {
     }
 }
 
-const serializeTxOutput = (output: TransactionOutput) =>
+const serializeLegacyTxOutput = (output: LegacyTransactionOutput) =>
     output.datumHash
-        ? [output.address, serializeAmount(output.amount), output.datumHash]
+        ? [output.address, serializeAmount(output.amount), output.datumHash.hash]
         : [output.address, serializeAmount(output.amount)]
+
+const serializeDatum = (datum: Datum) => {
+    switch (datum.type) {
+    case DatumType.HASH:
+        return [datum.type, datum.hash]
+    case DatumType.INLINE:
+        return [datum.type, new Tagged(CborTag.ENCODED_CBOR, datum.bytes)]
+    }
+}
+
+const serializeReferenceScript = (referenceScript: ReferenceScript) =>
+    new Tagged(CborTag.ENCODED_CBOR, referenceScript)
+
+const serializeBabbageTxOutput = (output: BabbageTransactionOutput) =>
+    filteredMap<BabbageTransactionOutputKeys, unknown>([
+        [BabbageTransactionOutputKeys.ADDRESS, identity(output.address)],
+        [BabbageTransactionOutputKeys.AMOUNT, serializeAmount(output.amount)],
+        [BabbageTransactionOutputKeys.DATUM, output.datum && serializeDatum(output.datum)],
+        [BabbageTransactionOutputKeys.REFERENCE_SCRIPT, output.referenceScript && serializeReferenceScript(output.referenceScript)],
+    ])
+
+const serializeTxOutput = (output: TransactionOutput) => {
+    switch (output.type) {
+    case OutputType.ARRAY_LEGACY:
+        return serializeLegacyTxOutput(output)
+    case OutputType.MAP_BABBAGE:
+        return serializeBabbageTxOutput(output)
+    }
+}
 
 const serializeWithdrawals = (withdrawals: Withdrawal[]): Map<RewardAccount, Coin> =>
     new Map(withdrawals.map(({rewardAccount, amount}) => [rewardAccount, amount]))
@@ -53,7 +82,7 @@ const serializePoolParams = (poolParams: PoolParams) => [
     poolParams.vrfKeyHash,
     poolParams.pledge,
     poolParams.cost,
-    new Tagged(30, poolParams.margin),
+    new Tagged(CborTag.TUPLE, poolParams.margin),
     poolParams.rewardAccount,
     poolParams.poolOwners,
     poolParams.relays.map(serializeRelay),
@@ -63,7 +92,7 @@ const serializePoolParams = (poolParams: PoolParams) => [
 const serializeStakeCredential = (stakeCredential: StakeCredential) =>
     [stakeCredential.type, stakeCredential.hash]
 
-const serializeTxCertificate = (certificate: Certificate) => {
+const serializeCertificate = (certificate: Certificate) => {
     switch (certificate.type) {
     case CertificateType.STAKE_REGISTRATION:
     case CertificateType.STAKE_DEREGISTRATION:
@@ -80,26 +109,28 @@ const serializeTxCertificate = (certificate: Certificate) => {
     }
 }
 
-const serializeCollateral = (collateral: Collateral) =>
-    [collateral.transactionId, collateral.index]
+const serializeCollateralInput = (collateralInput: TransactionInput) =>
+    [collateralInput.transactionId, collateralInput.index]
 
-export const serializeTxBody = (txBody: TransactionBody) => new Map(([
+export const serializeTxBody = (txBody: TransactionBody) => filteredMap<TransactionBodyKeys, unknown>([
     [TransactionBodyKeys.INPUTS, txBody.inputs.map(serializeTxInput)],
     [TransactionBodyKeys.OUTPUTS, txBody.outputs.map(serializeTxOutput)],
     [TransactionBodyKeys.FEE, identity(txBody.fee)],
     [TransactionBodyKeys.TTL, identity(txBody.ttl)],
-    [TransactionBodyKeys.CERTIFICATES, txBody.certificates?.map(serializeTxCertificate)],
+    [TransactionBodyKeys.CERTIFICATES, txBody.certificates?.map(serializeCertificate)],
     [TransactionBodyKeys.WITHDRAWALS, txBody.withdrawals && serializeWithdrawals(txBody.withdrawals)],
     [TransactionBodyKeys.UPDATE, identity(txBody.update)],
     [TransactionBodyKeys.METADATA_HASH, identity(txBody.metadataHash)],
     [TransactionBodyKeys.VALIDITY_INTERVAL_START, identity(txBody.validityIntervalStart)],
     [TransactionBodyKeys.MINT, txBody.mint && serializeMultiasset(txBody.mint)],
     [TransactionBodyKeys.SCRIPT_DATA_HASH, identity(txBody.scriptDataHash)],
-    [TransactionBodyKeys.COLLATERAL_INPUTS, txBody.collaterals?.map(serializeCollateral)],
+    [TransactionBodyKeys.COLLATERAL_INPUTS, txBody.collateralInputs?.map(serializeCollateralInput)],
     [TransactionBodyKeys.REQUIRED_SIGNERS, identity(txBody.requiredSigners)],
     [TransactionBodyKeys.NETWORK_ID, identity(txBody.networkId)],
-// return only the items that are present (so that no undefined appears in CBOR)
-]).filter(([_, value]) => value !== undefined) as [number, unknown][])
+    [TransactionBodyKeys.COLLATERAL_RETURN_OUTPUT, txBody.collateralReturnOutput && serializeTxOutput(txBody.collateralReturnOutput)],
+    [TransactionBodyKeys.TOTAL_COLLATERAL, identity(txBody.totalCollateral)],
+    [TransactionBodyKeys.REFERENCE_INPUTS, txBody.referenceInputs?.map(serializeTxInput)],
+])
 
 export const serializeTx = (tx: Transaction) => {
     return [

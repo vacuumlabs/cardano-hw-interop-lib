@@ -1,9 +1,9 @@
 import { ParseErrorReason } from './errors'
 import type { Parser, WithoutType } from './parsers'
-import { createParser, isMapWithKeysOfType, isNumber, isUint, isUintOfMaxSize, parseArray, parseBasedOnType, parseBuffer, parseBufferOfLength, parseBufferOfMaxLength, parseInt, parseMap, parseNullable, parseOptional, parseStringOfMaxLength, parseTuple, parseUint, validate } from './parsers'
-import type { Amount, Collateral, DatumHash, GenesisKeyDelegation, MoveInstantaneousRewardsCertificate, Multiasset, PoolMetadata, PoolParams, PoolRegistrationCertificate, PoolRetirementCertificate, Port, RawTransaction, RelayMultiHostName, RelaySingleHostAddress, RelaySingleHostName, RequiredSigner, StakeCredentialKey, StakeCredentialScript, StakeDelegationCertificate, StakeDeregistrationCertificate, StakeRegistrationCertificate, Transaction, TransactionBody, TransactionInput, TransactionOutput, Unparsed, Withdrawal } from './types'
-import { AmountType, ASSET_NAME_MAX_LENGTH, CertificateType, DATUM_HASH_LENGTH, DNS_NAME_MAX_LENGTH, IPV4_LENGTH, IPV6_LENGTH, KEY_HASH_LENGTH, METADATA_HASH_LENGTH, POOL_KEY_HASH_LENGTH, PORT_MAX_SIZE, RelayType, REWARD_ACCOUNT_LENGTH, SCRIPT_DATA_HASH_LENGTH, SCRIPT_HASH_LENGTH, StakeCredentialType, TX_ID_HASH_LENGTH, URL_MAX_LENGTH, VRF_KEY_HASH_LENGTH } from './types'
-import { addIndefiniteLengthFlag, TransactionBodyKeys, undefinedOnlyAtTheEnd } from './utils'
+import { createParser, isArray, isMapWithKeysOfType, isNumber, isUint, isUintOfMaxSize, parseArray, parseBasedOnType, parseBuffer, parseBufferOfLength, parseBufferOfMaxLength, parseEmbeddedCborBytes, parseInt, parseMap, parseNullable, parseOptional, parseStringOfMaxLength, parseTuple, parseUint, validate } from './parsers'
+import type { Amount, BabbageTransactionOutput, DatumHash, DatumInline, GenesisKeyDelegation, LegacyTransactionOutput, MoveInstantaneousRewardsCertificate, Multiasset, PoolMetadata, PoolParams, PoolRegistrationCertificate, PoolRetirementCertificate, Port, RawTransaction, RelayMultiHostName, RelaySingleHostAddress, RelaySingleHostName, RequiredSigner, StakeCredentialKey, StakeCredentialScript, StakeDelegationCertificate, StakeDeregistrationCertificate, StakeRegistrationCertificate, Transaction, TransactionBody, TransactionInput, TransactionOutput, Unparsed, Withdrawal } from './types'
+import { AmountType, ASSET_NAME_MAX_LENGTH, CertificateType, DATUM_HASH_LENGTH, DatumType, DNS_NAME_MAX_LENGTH, IPV4_LENGTH, IPV6_LENGTH, KEY_HASH_LENGTH, METADATA_HASH_LENGTH, OutputType, POOL_KEY_HASH_LENGTH, PORT_MAX_SIZE, RelayType, REWARD_ACCOUNT_LENGTH, SCRIPT_DATA_HASH_LENGTH, SCRIPT_HASH_LENGTH, StakeCredentialType, TX_ID_HASH_LENGTH, URL_MAX_LENGTH, VRF_KEY_HASH_LENGTH } from './types'
+import { addIndefiniteLengthFlag, BabbageTransactionOutputKeys, TransactionBodyKeys, undefinedOnlyAtTheEnd } from './utils'
 
 const dontParse: Parser<Unparsed> = (data: unknown) => data
 
@@ -44,6 +44,8 @@ const parseTxInput = (unparsedTxInput: unknown): TransactionInput => {
     return {transactionId, index}
 }
 
+const parseAddress = createParser(parseBuffer, ParseErrorReason.INVALID_OUTPUT_ADDRESS)
+
 const parseAmountWithMultiasset = (unparsedAmount: unknown): Amount => {
     const [coin, multiasset] = parseTuple(
         unparsedAmount,
@@ -65,26 +67,75 @@ const parseAmount = (unparsedAmount: unknown): Amount =>
         ? parseAmountWithoutMultiasset(unparsedAmount)
         : parseAmountWithMultiasset(unparsedAmount)
 
-
-const parseDatumHash = (unparsedDatumHash: unknown): DatumHash | undefined =>
+const parseLegacyTxOutputDatumHash = (unparsedDatumHash: unknown): DatumHash | undefined =>
     unparsedDatumHash
-        ? parseBufferOfLength(unparsedDatumHash, DATUM_HASH_LENGTH, ParseErrorReason.INVALID_OUTPUT_DATUM_HASH)
+        ? {
+            type: DatumType.HASH,
+            hash: parseBufferOfLength(unparsedDatumHash, DATUM_HASH_LENGTH, ParseErrorReason.INVALID_OUTPUT_DATUM_HASH),
+        }
         : undefined
 
-const parseTxOutput = (unparsedTxOutput: unknown): TransactionOutput => {
+const parseDatumType = (unparsedDatumType: unknown): DatumType => {
+    validate(isNumber(unparsedDatumType), ParseErrorReason.INVALID_OUTPUT_DATUM_TYPE)
+    validate(unparsedDatumType in DatumType, ParseErrorReason.INVALID_OUTPUT_DATUM_TYPE)
+    return unparsedDatumType
+}
+
+const parseDatumInline = (data: unknown[]): WithoutType<DatumInline> => ({
+    bytes: parseEmbeddedCborBytes(data[0], ParseErrorReason.INVALID_OUTPUT_DATUM_INLINE),
+})
+
+const parseDatumHash = (data: unknown[]): WithoutType<DatumHash> => ({
+    hash: parseBufferOfLength(data[0], DATUM_HASH_LENGTH, ParseErrorReason.INVALID_OUTPUT_DATUM_HASH),
+})
+
+const parseDatum = createParser(
+    parseBasedOnType,
+    ParseErrorReason.INVALID_OUTPUT_DATUM,
+    parseDatumType,
+    parseDatumHash,
+    parseDatumInline,
+)
+
+const parseLegacyTxOutput = (unparsedTxOutput: unknown): LegacyTransactionOutput => {
     const [address, amount, datumHash] = parseTuple(
         unparsedTxOutput,
         ParseErrorReason.INVALID_TX_OUTPUT,
-        createParser(parseBuffer, ParseErrorReason.INVALID_OUTPUT_ADDRESS),
+        parseAddress,
         parseAmount,
-        parseDatumHash,
+        parseLegacyTxOutputDatumHash,
     )
 
-    return {address, amount, datumHash}
+    return {
+        type: OutputType.ARRAY_LEGACY,
+        address,
+        amount,
+        datumHash,
+    }
+}
+
+const parseReferenceScript = createParser(parseEmbeddedCborBytes, ParseErrorReason.INVALID_OUTPUT_REFERENCE_SCRIPT)
+
+const parseBabbageTxOutput = (unparsedTxOutput: unknown): BabbageTransactionOutput => {
+    validate(isMapWithKeysOfType(unparsedTxOutput, isNumber), ParseErrorReason.INVALID_TX_OUTPUT)
+
+    return {
+        type: OutputType.MAP_BABBAGE,
+        address: parseAddress(unparsedTxOutput.get(BabbageTransactionOutputKeys.ADDRESS)),
+        amount: parseAmount(unparsedTxOutput.get(BabbageTransactionOutputKeys.AMOUNT)),
+        datum: parseOptional(unparsedTxOutput.get(BabbageTransactionOutputKeys.DATUM), parseDatum),
+        referenceScript: parseOptional(unparsedTxOutput.get(BabbageTransactionOutputKeys.REFERENCE_SCRIPT), parseReferenceScript),
+    }
+}
+
+const parseTxOutput = (unparsedTxOutput: unknown): TransactionOutput => {
+    return isArray(unparsedTxOutput)
+        ? parseLegacyTxOutput(unparsedTxOutput)
+        : parseBabbageTxOutput(unparsedTxOutput)
 }
 
 export const parseWithdrawals = (unparsedWithdrawals: unknown): Withdrawal[] => {
-    const withdrawalsMap = parseMap(unparsedWithdrawals, parseRewardAccount, createParser(parseUint, ParseErrorReason.INVALID_WITHDRAWAL_AMOUNT), ParseErrorReason.INVALID_TX_WITHDRAWALS)
+    const withdrawalsMap = parseMap(unparsedWithdrawals, parseRewardAccount, createParser(parseUint, ParseErrorReason.INVALID_WITHDRAWAL_AMOUNT), ParseErrorReason.INVALID_WITHDRAWALS)
 
     return Array.from(withdrawalsMap).map(([rewardAccount, amount]) => ({rewardAccount, amount}))
 }
@@ -235,33 +286,47 @@ const parseCertificate = createParser(
     parseMoveInstantaneousRewardsCertificate,
 )
 
-const parseCollateral = (unparsedTxCollateral: unknown): Collateral => {
+const parseCollateralInput = (unparsedCollateralInput: unknown): TransactionInput => {
     const [transactionId, index] = parseTuple(
-        unparsedTxCollateral,
-        ParseErrorReason.INVALID_TX_COLLATERAL_INPUT,
+        unparsedCollateralInput,
+        ParseErrorReason.INVALID_COLLATERAL_INPUT,
         createParser(parseBufferOfLength, TX_ID_HASH_LENGTH, ParseErrorReason.INVALID_TRANSACTION_ID),
-        createParser(parseUint, ParseErrorReason.INVALID_TX_COLLATERAL_INPUT_INDEX),
+        createParser(parseUint, ParseErrorReason.INVALID_COLLATERAL_INPUT_INDEX),
     )
 
     return {transactionId, index}
 }
 
 const parseRequiredSigner = (unparsedRequiredSigner: unknown): RequiredSigner  => (
-    parseBufferOfLength(unparsedRequiredSigner, KEY_HASH_LENGTH, ParseErrorReason.INVALID_TX_REQUIRED_SIGNERS)
+    parseBufferOfLength(unparsedRequiredSigner, KEY_HASH_LENGTH, ParseErrorReason.INVALID_REQUIRED_SIGNERS)
 )
+
+
+const parseReferenceInput = (unparsedReferenceInput: unknown): TransactionInput => {
+    const [transactionId, index] = parseTuple(
+        unparsedReferenceInput,
+        ParseErrorReason.INVALID_REFERENCE_INPUT,
+        createParser(parseBufferOfLength, TX_ID_HASH_LENGTH, ParseErrorReason.INVALID_TRANSACTION_ID),
+        createParser(parseUint, ParseErrorReason.INVALID_REFERENCE_INPUT_INDEX),
+    )
+
+    return {transactionId, index}
+}
 
 export const parseInputs = createParser(parseArray, parseTxInput, ParseErrorReason.INVALID_TX_INPUTS)
 export const parseOutputs = createParser(parseArray, parseTxOutput, ParseErrorReason.INVALID_TX_OUTPUTS)
-export const parseFee = createParser(parseUint, ParseErrorReason.INVALID_TX_FEE)
-export const parseTtl = createParser(parseUint, ParseErrorReason.INVALID_TX_TTL)
-export const parseCertificates = createParser(parseArray, parseCertificate, ParseErrorReason.INVALID_TX_CERTIFICATES)
-export const parseMetadataHash = createParser(parseBufferOfLength, METADATA_HASH_LENGTH, ParseErrorReason.INVALID_TX_METADATA_HASH)
-export const parseValidityIntervalStart = createParser(parseUint, ParseErrorReason.INVALID_TX_VALIDITY_INTERVAL_START)
-export const parseMint = createParser(parseMultiasset, createParser(parseInt, ParseErrorReason.INVALID_MINT_AMOUNT), ParseErrorReason.INVALID_TX_MINT)
-const parseScriptDataHash = createParser(parseBufferOfLength, SCRIPT_DATA_HASH_LENGTH, ParseErrorReason.INVALID_TX_SCRIPT_DATA_HASH)
-const parseCollaterals = createParser(parseArray, parseCollateral, ParseErrorReason.INVALID_TX_COLLATERAL_INPUTS)
-const parseRequiredSigners = createParser(parseArray, parseRequiredSigner, ParseErrorReason.INVALID_TX_REQUIRED_SIGNERS)
-const parseNetworkId = createParser(parseUint, ParseErrorReason.INVALID_TX_NETWORK_ID)
+export const parseFee = createParser(parseUint, ParseErrorReason.INVALID_FEE)
+export const parseTtl = createParser(parseUint, ParseErrorReason.INVALID_TTL)
+export const parseCertificates = createParser(parseArray, parseCertificate, ParseErrorReason.INVALID_CERTIFICATES)
+export const parseMetadataHash = createParser(parseBufferOfLength, METADATA_HASH_LENGTH, ParseErrorReason.INVALID_METADATA_HASH)
+export const parseValidityIntervalStart = createParser(parseUint, ParseErrorReason.INVALID_VALIDITY_INTERVAL_START)
+export const parseMint = createParser(parseMultiasset, createParser(parseInt, ParseErrorReason.INVALID_MINT_AMOUNT), ParseErrorReason.INVALID_MINT)
+const parseScriptDataHash = createParser(parseBufferOfLength, SCRIPT_DATA_HASH_LENGTH, ParseErrorReason.INVALID_SCRIPT_DATA_HASH)
+const parseCollateralInputs = createParser(parseArray, parseCollateralInput, ParseErrorReason.INVALID_COLLATERAL_INPUTS)
+const parseRequiredSigners = createParser(parseArray, parseRequiredSigner, ParseErrorReason.INVALID_REQUIRED_SIGNERS)
+const parseNetworkId = createParser(parseUint, ParseErrorReason.INVALID_NETWORK_ID)
+const parseTotalCollateral = createParser(parseUint, ParseErrorReason.INVALID_TOTAL_COLLATERAL)
+const parseReferenceInputs = createParser(parseArray, parseReferenceInput, ParseErrorReason.INVALID_REFERENCE_INPUTS)
 
 export const parseTxBody = (unparsedTxBody: unknown): TransactionBody => {
     validate(isMapWithKeysOfType(unparsedTxBody, isNumber), ParseErrorReason.INVALID_TX_BODY_CBOR)
@@ -278,9 +343,12 @@ export const parseTxBody = (unparsedTxBody: unknown): TransactionBody => {
         validityIntervalStart: parseOptional(unparsedTxBody.get(TransactionBodyKeys.VALIDITY_INTERVAL_START), parseValidityIntervalStart),
         mint: parseOptional(unparsedTxBody.get(TransactionBodyKeys.MINT), parseMint),
         scriptDataHash: parseOptional(unparsedTxBody.get(TransactionBodyKeys.SCRIPT_DATA_HASH), parseScriptDataHash),
-        collaterals: parseOptional(unparsedTxBody.get(TransactionBodyKeys.COLLATERAL_INPUTS), parseCollaterals),
+        collateralInputs: parseOptional(unparsedTxBody.get(TransactionBodyKeys.COLLATERAL_INPUTS), parseCollateralInputs),
         requiredSigners: parseOptional(unparsedTxBody.get(TransactionBodyKeys.REQUIRED_SIGNERS), parseRequiredSigners),
         networkId: parseOptional(unparsedTxBody.get(TransactionBodyKeys.NETWORK_ID), parseNetworkId),
+        collateralReturnOutput: parseOptional(unparsedTxBody.get(TransactionBodyKeys.COLLATERAL_RETURN_OUTPUT), parseTxOutput),
+        totalCollateral: parseOptional(unparsedTxBody.get(TransactionBodyKeys.TOTAL_COLLATERAL), parseTotalCollateral),
+        referenceInputs: parseOptional(unparsedTxBody.get(TransactionBodyKeys.REFERENCE_INPUTS), parseReferenceInputs),
     }
 }
 

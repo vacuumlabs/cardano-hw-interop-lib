@@ -36,6 +36,12 @@ export type RewardAccount = FixlenBuffer<typeof REWARD_ACCOUNT_LENGTH>
 export type Coin = Uint
 export type Epoch = Uint
 
+// Transaction input
+export type TransactionInput = {
+    transactionId: FixlenBuffer<typeof TX_ID_HASH_LENGTH>,
+    index: Uint,
+}
+
 // Multiasset
 export type PolicyId = FixlenBuffer<typeof SCRIPT_HASH_LENGTH>
 export type AssetName = MaxlenBuffer<typeof ASSET_NAME_MAX_LENGTH>
@@ -49,13 +55,7 @@ export type AssetGroup<T> = {
 }
 export type Multiasset<T> = AssetGroup<T>[]
 
-// Transaction input
-export type TransactionInput = {
-    transactionId: FixlenBuffer<typeof TX_ID_HASH_LENGTH>,
-    index: Uint,
-}
-
-// Transaction output
+// Amount
 export enum AmountType {
     WITHOUT_MULTIASSET,
     WITH_MULTIASSET,
@@ -70,13 +70,49 @@ export type Amount = {
     multiasset: Multiasset<Uint>,
 }
 
-export type DatumHash = FixlenBuffer<typeof DATUM_HASH_LENGTH>
+// Datum
+export enum DatumType {
+    HASH = 0,
+    INLINE = 1,
+}
 
-export type TransactionOutput = {
+export type DatumHash = {
+    type: DatumType.HASH,
+    hash: FixlenBuffer<typeof DATUM_HASH_LENGTH>,
+}
+
+
+export type DatumInline = {
+    type: DatumType.INLINE,
+    bytes: Buffer,
+}
+
+export type Datum = DatumHash | DatumInline
+
+// Transaction output
+export enum OutputType {
+    ARRAY_LEGACY,
+    MAP_BABBAGE,
+}
+
+export type LegacyTransactionOutput = {
+    type: OutputType.ARRAY_LEGACY,
     address: Address,
     amount: Amount,
     datumHash?: DatumHash,
 }
+
+export type ReferenceScript = Buffer
+
+export type BabbageTransactionOutput = {
+    type: OutputType.MAP_BABBAGE,
+    address: Address,
+    amount: Amount,
+    datum?: Datum,
+    referenceScript?: ReferenceScript,
+}
+
+export type TransactionOutput = LegacyTransactionOutput | BabbageTransactionOutput
 
 // Certificate
 export enum CertificateType {
@@ -206,23 +242,17 @@ export type Withdrawal = {
     amount: Coin,
 }
 
-// Required signer
-export type RequiredSigner = FixlenBuffer<typeof KEY_HASH_LENGTH>
-
 // Mint
 export type Mint = Multiasset<Int>
 
-// Collateral input
-export type Collateral = {
-    transactionId: FixlenBuffer<typeof TX_ID_HASH_LENGTH>,
-    index: Uint,
-}
+// Required signer
+export type RequiredSigner = FixlenBuffer<typeof KEY_HASH_LENGTH>
 
 // Transaction body
 export type TransactionBody = {
     inputs: TransactionInput[],
     outputs: TransactionOutput[],
-    fee: Uint,
+    fee: Coin,
     ttl?: Uint,
     certificates?: Certificate[],
     withdrawals?: Withdrawal[],
@@ -231,9 +261,12 @@ export type TransactionBody = {
     validityIntervalStart?: Uint,
     mint?: Mint,
     scriptDataHash?: FixlenBuffer<typeof SCRIPT_DATA_HASH_LENGTH>,
-    collaterals?: Collateral[],
+    collateralInputs?: TransactionInput[],
     requiredSigners?: RequiredSigner[],
     networkId?: Uint,
+    collateralReturnOutput?: TransactionOutput,
+    totalCollateral?: Coin,
+    referenceInputs?: TransactionInput[],
 }
 
 export type Transaction = {

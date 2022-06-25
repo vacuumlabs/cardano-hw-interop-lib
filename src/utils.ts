@@ -3,13 +3,18 @@ import cbor from 'cbor'
 import type { RewardAccount} from './types'
 import { StakeCredentialType } from './types'
 
+export enum CborTag {
+    ENCODED_CBOR = 24,
+    TUPLE = 30,
+}
+
 export const decodeCbor = (buffer: Buffer) => cbor.decode(buffer, {
     preventDuplicateKeys: true,
     tags: {
         // Specifies that tag 30 should be parsed only as a tuple. For example
         // the CDDL specifies unit_interval as:
         // unit_interval = #6.30([uint, uint])
-        30: (v: any) => {
+        [CborTag.TUPLE]: (v: any) => {
             if (!Array.isArray(v) || v.length != 2) {
                 throw new Error('Invalid tuple')
             }
@@ -35,6 +40,14 @@ export const undefinedOnlyAtTheEnd = (xs: any[]): boolean => {
     return xs.slice(firstUndefined).every((x) => x === undefined)
 }
 
+/**
+ * Creates a map from the input `entries`.
+ * If a value is `undefined`, the key-value pair is omitted entirely.
+ */
+export const filteredMap = <K, V>(entries: [K, V | undefined][]): Map<K, V> => new Map<K, V>(
+    entries.filter(([_, value]) => value !== undefined) as [K, V][]
+)
+
 export const getRewardAccountStakeCredentialType = (rewardAccount: RewardAccount) => {
     switch(rewardAccount[0] >> 4 & 1) {
     case 0:
@@ -44,6 +57,13 @@ export const getRewardAccountStakeCredentialType = (rewardAccount: RewardAccount
     default:
         throw Error('Invalid reward account type')
     }
+}
+
+export enum BabbageTransactionOutputKeys {
+    ADDRESS = 0,
+    AMOUNT = 1,
+    DATUM = 2,
+    REFERENCE_SCRIPT = 3,
 }
 
 export enum TransactionBodyKeys {
@@ -61,4 +81,7 @@ export enum TransactionBodyKeys {
     COLLATERAL_INPUTS = 13,
     REQUIRED_SIGNERS = 14,
     NETWORK_ID = 15,
+    COLLATERAL_RETURN_OUTPUT = 16,
+    TOTAL_COLLATERAL = 17,
+    REFERENCE_INPUTS = 18,
 }

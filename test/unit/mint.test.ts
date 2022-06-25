@@ -53,7 +53,7 @@ const InvalidMintTestcases: InvalidParseTestcase[] = [
     {
         testname: 'Not a map',
         cbor: '83016161f6',
-        errMsg: ParseErrorReason.INVALID_TX_MINT,
+        errMsg: ParseErrorReason.INVALID_MINT,
     },
     {
         testname: 'Invalid policy id',
