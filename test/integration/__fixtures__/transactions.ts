@@ -332,6 +332,65 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
             referenceInputs: undefined,
         },
     },
+    {
+        testname: 'Tx body with inline datum, reference script, collateral return, total collateral and reference input',
+        cbor: 'a8008182582094461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d000181a4005839008b3303988371208dd0916cc4548c4eafc2fd3d6205ea8ec180c1b1d9e0820d5929d99bce8aa81e86195fd2b824e6550820a03af325f6ff220100028201d81841a003d8185846820158425840010000332233322222253353004333573466ebc00c00801801440204c98d4c01ccd5ce2481094e6f7420457175616c000084984880084880048004480048004102000b5820853cbe68f7fccdeeeb0fd7b711ea147912190c35ac52d9d94080ae82809b2f840d8182582094461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d0110a2005839008b3303988371208dd0916cc4548c4eafc2fd3d6205ea8ec180c1b1d9e0820d5929d99bce8aa81e86195fd2b824e6550820a03af325f6ff220100110a128182582094461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d02',
+        txBody: {
+            inputs: [
+                {
+                    transactionId: toFixlenBuffer('94461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d', 32),
+                    index: toUint(0),
+                },
+            ],
+            outputs: [{
+                type: OutputType.MAP_BABBAGE,
+                address: fromBech32('addr_test1qz9nxqucsdcjprwsj9kvg4yvf6hu9lfavgz74rkpsrqmrk0qsgx4j2wen08g42q7scv4l54cynn92zpq5qa0xf0klu3qe9xkhw'),
+                amount: {
+                    type: AmountType.WITHOUT_MULTIASSET,
+                    coin: toUint(0),
+                },
+                datum: {
+                    type: DatumType.INLINE,
+                    bytes: Buffer.from('a0', 'hex'),
+                },
+                referenceScript: Buffer.from('820158425840010000332233322222253353004333573466ebc00c00801801440204c98d4c01ccd5ce2481094e6f7420457175616c0000849848800848800480044800480041', 'hex'),
+            }],
+            fee: toUint(0),
+            ttl: undefined,
+            certificates: undefined,
+            withdrawals: undefined,
+            update: undefined,
+            metadataHash: undefined,
+            validityIntervalStart: undefined,
+            mint: undefined,
+            scriptDataHash: toFixlenBuffer('853cbe68f7fccdeeeb0fd7b711ea147912190c35ac52d9d94080ae82809b2f84', 32),
+            collateralInputs: [
+                {
+                    transactionId: toFixlenBuffer('94461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d', 32),
+                    index: toUint(1),
+                },
+            ],
+            requiredSigners: undefined,
+            networkId: undefined,
+            collateralReturnOutput: {
+                type: OutputType.MAP_BABBAGE,
+                address: fromBech32('addr_test1qz9nxqucsdcjprwsj9kvg4yvf6hu9lfavgz74rkpsrqmrk0qsgx4j2wen08g42q7scv4l54cynn92zpq5qa0xf0klu3qe9xkhw'),
+                amount: {
+                    type: AmountType.WITHOUT_MULTIASSET,
+                    coin: toUint(0),
+                },
+                datum: undefined,
+                referenceScript: undefined,
+            },
+            totalCollateral: toUint(10),
+            referenceInputs: [
+                {
+                    transactionId: toFixlenBuffer('94461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d', 32),
+                    index: toUint(2),
+                },
+            ],
+        },
+    },
 ]
 
 
