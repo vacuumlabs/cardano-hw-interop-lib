@@ -1,6 +1,6 @@
 import { ParseErrorReason } from './errors'
 import type { Parser, WithoutType } from './parsers'
-import { createParser, isArray, isMapWithKeysOfType, isNumber, isUint, isUintOfMaxSize, parseArray, parseBasedOnType, parseBuffer, parseBufferOfLength, parseBufferOfMaxLength, parseInt, parseMap, parseNullable, parseOptional, parseStringOfMaxLength, parseTuple, parseUint, validate } from './parsers'
+import { createParser, isArray, isMapWithKeysOfType, isNumber, isUint, isUintOfMaxSize, parseArray, parseBasedOnType, parseBuffer, parseBufferOfLength, parseBufferOfMaxLength, parseEmbeddedCborBytes, parseInt, parseMap, parseNullable, parseOptional, parseStringOfMaxLength, parseTuple, parseUint, validate } from './parsers'
 import type { Amount, BabbageTransactionOutput, DatumHash, DatumInline, GenesisKeyDelegation, LegacyTransactionOutput, MoveInstantaneousRewardsCertificate, Multiasset, PoolMetadata, PoolParams, PoolRegistrationCertificate, PoolRetirementCertificate, Port, RawTransaction, RelayMultiHostName, RelaySingleHostAddress, RelaySingleHostName, RequiredSigner, StakeCredentialKey, StakeCredentialScript, StakeDelegationCertificate, StakeDeregistrationCertificate, StakeRegistrationCertificate, Transaction, TransactionBody, TransactionInput, TransactionOutput, Unparsed, Withdrawal } from './types'
 import { AmountType, ASSET_NAME_MAX_LENGTH, CertificateType, DATUM_HASH_LENGTH, DatumType, DNS_NAME_MAX_LENGTH, IPV4_LENGTH, IPV6_LENGTH, KEY_HASH_LENGTH, METADATA_HASH_LENGTH, OutputType, POOL_KEY_HASH_LENGTH, PORT_MAX_SIZE, RelayType, REWARD_ACCOUNT_LENGTH, SCRIPT_DATA_HASH_LENGTH, SCRIPT_HASH_LENGTH, StakeCredentialType, TX_ID_HASH_LENGTH, URL_MAX_LENGTH, VRF_KEY_HASH_LENGTH } from './types'
 import { addIndefiniteLengthFlag, BabbageTransactionOutputKeys, TransactionBodyKeys, undefinedOnlyAtTheEnd } from './utils'
@@ -82,7 +82,7 @@ const parseDatumType = (unparsedDatumType: unknown): DatumType => {
 }
 
 const parseDatumInline = (data: unknown[]): WithoutType<DatumInline> => ({
-    bytes: parseBuffer(data[0], ParseErrorReason.INVALID_OUTPUT_DATUM_INLINE),
+    bytes: parseEmbeddedCborBytes(data[0], ParseErrorReason.INVALID_OUTPUT_DATUM_INLINE),
 })
 
 const parseDatumHash = (data: unknown[]): WithoutType<DatumHash> => ({
@@ -93,8 +93,8 @@ const parseDatum = createParser(
     parseBasedOnType,
     ParseErrorReason.INVALID_OUTPUT_DATUM,
     parseDatumType,
-    parseDatumInline,
     parseDatumHash,
+    parseDatumInline,
 )
 
 const parseLegacyTxOutput = (unparsedTxOutput: unknown): LegacyTransactionOutput => {
@@ -114,7 +114,7 @@ const parseLegacyTxOutput = (unparsedTxOutput: unknown): LegacyTransactionOutput
     }
 }
 
-const parseReferenceScript = createParser(parseBuffer, ParseErrorReason.INVALID_OUTPUT_REFERENCE_SCRIPT)
+const parseReferenceScript = createParser(parseEmbeddedCborBytes, ParseErrorReason.INVALID_OUTPUT_REFERENCE_SCRIPT)
 
 const parseBabbageTxOutput = (unparsedTxOutput: unknown): BabbageTransactionOutput => {
     validate(isMapWithKeysOfType(unparsedTxOutput, isNumber), ParseErrorReason.INVALID_TX_OUTPUT)
