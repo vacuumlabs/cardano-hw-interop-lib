@@ -16,7 +16,11 @@ export enum ValidationErrorReason {
     // Fixable validation errors
     CBOR_IS_NOT_CANONICAL = 'CBOR is not canonical',
     OPTIONAL_EMPTY_LISTS_AND_MAPS_MUST_NOT_BE_INCLUDED = 'Optional empty lists and maps must not be included as part of the transaction body or its elements',
-    OUTPUT_WITHOUT_TOKENS_MUST_BE_A_SIMPLE_TUPLE = 'Outputs containing no multi-asset tokens must be serialized as a simple tuple',
+    OUTPUT_AMOUNT_WITHOUT_TOKENS_MUST_NOT_BE_A_TUPLE = 'Output amount (value) without tokens must not be a tuple',
+    INLINE_DATUM_MUST_NOT_BE_EMPTY_IF_DEFINED = 'Inline datum must not be empty if defined',
+    REFERENCE_SCRIPT_MUST_NOT_BE_EMPTY_IF_DEFINED = 'Reference script must not be empty if defined',
+    COLLATERAL_RETURN_MUST_NOT_CONTAIN_DATUM = 'Collateral return must not contain datum',
+    COLLATERAL_RETURN_MUST_NOT_CONTAIN_REFERENCE_SCRIPT = 'Collateral return must not contain reference script',
 }
 
 const FIXABLE = true
@@ -37,7 +41,11 @@ const validationErrorFixability: Record<ValidationErrorReason, boolean> = {
     [ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_MINT_ENTRY]: UNFIXABLE,
     [ValidationErrorReason.CBOR_IS_NOT_CANONICAL]: FIXABLE,
     [ValidationErrorReason.OPTIONAL_EMPTY_LISTS_AND_MAPS_MUST_NOT_BE_INCLUDED]: FIXABLE,
-    [ValidationErrorReason.OUTPUT_WITHOUT_TOKENS_MUST_BE_A_SIMPLE_TUPLE]: FIXABLE,
+    [ValidationErrorReason.OUTPUT_AMOUNT_WITHOUT_TOKENS_MUST_NOT_BE_A_TUPLE]: FIXABLE,
+    [ValidationErrorReason.INLINE_DATUM_MUST_NOT_BE_EMPTY_IF_DEFINED]: FIXABLE,
+    [ValidationErrorReason.REFERENCE_SCRIPT_MUST_NOT_BE_EMPTY_IF_DEFINED]: FIXABLE,
+    [ValidationErrorReason.COLLATERAL_RETURN_MUST_NOT_CONTAIN_DATUM]: FIXABLE,
+    [ValidationErrorReason.COLLATERAL_RETURN_MUST_NOT_CONTAIN_REFERENCE_SCRIPT]: FIXABLE,
 }
 
 export type ValidationError = {

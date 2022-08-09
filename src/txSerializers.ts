@@ -1,7 +1,7 @@
 import { Tagged } from 'cbor'
 
 import type { Amount, AssetName, BabbageTransactionOutput, Certificate, Coin, Datum, LegacyTransactionOutput, Multiasset, PolicyId, PoolMetadata, PoolParams, RawTransaction, ReferenceScript, Relay, RewardAccount, StakeCredential, Transaction, TransactionBody, TransactionInput, TransactionOutput, Withdrawal } from './types'
-import { AmountType, CertificateType, DatumType, OutputType, RelayType } from './types'
+import { AmountType, CertificateType, DatumType, RelayType,TxOutputFormat } from './types'
 import { addIndefiniteLengthFlag, BabbageTransactionOutputKeys, CborTag, filteredMap, TransactionBodyKeys } from './utils'
 
 const identity = <T>(x: T): T => x
@@ -52,10 +52,10 @@ const serializeBabbageTxOutput = (output: BabbageTransactionOutput) =>
     ])
 
 const serializeTxOutput = (output: TransactionOutput) => {
-    switch (output.type) {
-    case OutputType.ARRAY_LEGACY:
+    switch (output.format) {
+    case TxOutputFormat.ARRAY_LEGACY:
         return serializeLegacyTxOutput(output)
-    case OutputType.MAP_BABBAGE:
+    case TxOutputFormat.MAP_BABBAGE:
         return serializeBabbageTxOutput(output)
     }
 }

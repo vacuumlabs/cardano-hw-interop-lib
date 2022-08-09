@@ -90,13 +90,13 @@ export type DatumInline = {
 export type Datum = DatumHash | DatumInline
 
 // Transaction output
-export enum OutputType {
+export enum TxOutputFormat {
     ARRAY_LEGACY,
     MAP_BABBAGE,
 }
 
 export type LegacyTransactionOutput = {
-    type: OutputType.ARRAY_LEGACY,
+    format: TxOutputFormat.ARRAY_LEGACY,
     address: Address,
     amount: Amount,
     datumHash?: DatumHash,
@@ -105,7 +105,7 @@ export type LegacyTransactionOutput = {
 export type ReferenceScript = Buffer
 
 export type BabbageTransactionOutput = {
-    type: OutputType.MAP_BABBAGE,
+    format: TxOutputFormat.MAP_BABBAGE,
     address: Address,
     amount: Amount,
     datum?: Datum,
