@@ -1,5 +1,5 @@
 import type { MaxlenBuffer, Port, RawTransaction, Transaction, TransactionBody } from '../../../src/types'
-import { AmountType, CertificateType, DatumType, OutputType, RelayType, StakeCredentialType } from '../../../src/types'
+import { AmountType, CertificateType, DatumType, RelayType, StakeCredentialType,TxOutputFormat } from '../../../src/types'
 import { addIndefiniteLengthFlag } from '../../../src/utils'
 import { fromBech32, ipv4ToBuffer, rewardAccount, toFixlenBuffer, toInt, toMaxLenString, toUint } from '../../test_utils'
 
@@ -19,7 +19,7 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
                 index: toUint(0),
             }],
             outputs: [{
-                type: OutputType.ARRAY_LEGACY,
+                format: TxOutputFormat.ARRAY_LEGACY,
                 address: fromBech32('addr_test1qqr585tvlc7ylnqvz8pyqwauzrdu0mxag3m7q56grgmgu7sxu2hyfhlkwuxupa9d5085eunq2qywy7hvmvej456flknswgndm3'),
                 amount: {
                     type: AmountType.WITHOUT_MULTIASSET,
@@ -53,7 +53,7 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
                 index: toUint(0),
             }],
             outputs: [{
-                type: OutputType.ARRAY_LEGACY,
+                format: TxOutputFormat.ARRAY_LEGACY,
                 address: fromBech32('addr_test1qqr585tvlc7ylnqvz8pyqwauzrdu0mxag3m7q56grgmgu7sxu2hyfhlkwuxupa9d5085eunq2qywy7hvmvej456flknswgndm3'),
                 amount: {
                     type: AmountType.WITHOUT_MULTIASSET,
@@ -97,7 +97,7 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
             }],
             outputs: [
                 {
-                    type: OutputType.ARRAY_LEGACY,
+                    format: TxOutputFormat.ARRAY_LEGACY,
                     address: fromBech32('addr_test1xqt87mdlvy9wqv8sgwkmrua00p65ak2ett22c8m7m8lkgenkp7mf2hgjz7clrusgmak5t2ere8shkrycfgkn5g4mh7uqvcq039'),
                     amount: {
                         type: AmountType.WITH_MULTIASSET,
@@ -113,7 +113,7 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
                     datumHash: undefined,
                 },
                 {
-                    type: OutputType.ARRAY_LEGACY,
+                    format: TxOutputFormat.ARRAY_LEGACY,
                     address: fromBech32('addr_test1qqr585tvlc7ylnqvz8pyqwauzrdu0mxag3m7q56grgmgu7sxu2hyfhlkwuxupa9d5085eunq2qywy7hvmvej456flknswgndm3'),
                     amount: {
                         type: AmountType.WITH_MULTIASSET,
@@ -173,7 +173,7 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
                 index: toUint(42),
             }],
             outputs: [{
-                type: OutputType.ARRAY_LEGACY,
+                format: TxOutputFormat.ARRAY_LEGACY,
                 address: fromBech32('addr1qxdn4yany8lc6ewkmuwxmpza2ndm7t9ngyzlmdzwecdh6vfvqjwlak9ug8k7lw7gxh9q5uuu4jtp24u4qf3w7j9uluwssp092m'),
                 amount: {
                     type: AmountType.WITHOUT_MULTIASSET,
@@ -278,7 +278,7 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
             }],
             outputs: [
                 {
-                    type: OutputType.ARRAY_LEGACY,
+                    format: TxOutputFormat.ARRAY_LEGACY,
                     address: fromBech32('addr_test1zp0z7zqwhya6mpk5q929ur897g3pp9kkgalpreny8y304rfw6j2jxnwq6enuzvt0lp89wgcsufj7mvcnxpzgkd4hz70z3h2pnc8lhq8r'),
                     amount: {
                         type: AmountType.WITHOUT_MULTIASSET,
@@ -290,7 +290,7 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
                     },
                 },
                 {
-                    type: OutputType.ARRAY_LEGACY,
+                    format: TxOutputFormat.ARRAY_LEGACY,
                     address: fromBech32('addr_test1xqt87mdlvy9wqv8sgwkmrua00p65ak2ett22c8m7m8lkgenkp7mf2hgjz7clrusgmak5t2ere8shkrycfgkn5g4mh7uqvcq039'),
                     amount: {
                         type: AmountType.WITH_MULTIASSET,
@@ -343,7 +343,7 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
                 },
             ],
             outputs: [{
-                type: OutputType.MAP_BABBAGE,
+                format: TxOutputFormat.MAP_BABBAGE,
                 address: fromBech32('addr_test1qz9nxqucsdcjprwsj9kvg4yvf6hu9lfavgz74rkpsrqmrk0qsgx4j2wen08g42q7scv4l54cynn92zpq5qa0xf0klu3qe9xkhw'),
                 amount: {
                     type: AmountType.WITHOUT_MULTIASSET,
@@ -373,7 +373,7 @@ export const ValidTransactionBodyTestcases: ValidTransactionBodyTestcase[] = [
             requiredSigners: undefined,
             networkId: undefined,
             collateralReturnOutput: {
-                type: OutputType.MAP_BABBAGE,
+                format: TxOutputFormat.MAP_BABBAGE,
                 address: fromBech32('addr_test1qz9nxqucsdcjprwsj9kvg4yvf6hu9lfavgz74rkpsrqmrk0qsgx4j2wen08g42q7scv4l54cynn92zpq5qa0xf0klu3qe9xkhw'),
                 amount: {
                     type: AmountType.WITHOUT_MULTIASSET,
@@ -419,7 +419,7 @@ export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
                     index: toUint(0),
                 }],
                 outputs: [{
-                    type: OutputType.ARRAY_LEGACY,
+                    format: TxOutputFormat.ARRAY_LEGACY,
                     address: fromBech32('addr_test1qqr585tvlc7ylnqvz8pyqwauzrdu0mxag3m7q56grgmgu7sxu2hyfhlkwuxupa9d5085eunq2qywy7hvmvej456flknswgndm3'),
                     amount: {
                         type: AmountType.WITHOUT_MULTIASSET,
@@ -492,7 +492,7 @@ export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
                 ],
                 outputs: [
                     {
-                        type: OutputType.ARRAY_LEGACY,
+                        format: TxOutputFormat.ARRAY_LEGACY,
                         address: fromBech32('addr1qxdn4yany8lc6ewkmuwxmpza2ndm7t9ngyzlmdzwecdh6vfvqjwlak9ug8k7lw7gxh9q5uuu4jtp24u4qf3w7j9uluwssp092m'),
                         amount: {
                             type: AmountType.WITH_MULTIASSET,
@@ -508,7 +508,7 @@ export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
                         datumHash: undefined,
                     },
                     {
-                        type: OutputType.ARRAY_LEGACY,
+                        format: TxOutputFormat.ARRAY_LEGACY,
                         address: fromBech32('addr_test1qqr585tvlc7ylnqvz8pyqwauzrdu0mxag3m7q56grgmgu7sxu2hyfhlkwuxupa9d5085eunq2qywy7hvmvej456flknswgndm3'),
                         amount: {
                             type: AmountType.WITHOUT_MULTIASSET,
@@ -517,7 +517,7 @@ export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
                         datumHash: undefined,
                     },
                     {
-                        type: OutputType.ARRAY_LEGACY,
+                        format: TxOutputFormat.ARRAY_LEGACY,
                         address: fromBech32('addr_test1xqt87mdlvy9wqv8sgwkmrua00p65ak2ett22c8m7m8lkgenkp7mf2hgjz7clrusgmak5t2ere8shkrycfgkn5g4mh7uqvcq039'),
                         amount: {
                             type: AmountType.WITH_MULTIASSET,
@@ -694,7 +694,7 @@ export const ValidRawTransactionTestcases: ValidRawTransactionTestcase[] = [
                     },
                 ],
                 outputs: [{
-                    type: OutputType.ARRAY_LEGACY,
+                    format: TxOutputFormat.ARRAY_LEGACY,
                     address: fromBech32('addr1x92s6rutty2gpljhaqe2hxwkct7rsly0g9atpyueed6ttc0canazv4x0u8wex9pemdz7g06arfe398wt0e9vcumvwe4qx4ar6m'),
                     amount: {
                         type: AmountType.WITHOUT_MULTIASSET,
@@ -785,7 +785,7 @@ export const ValidTransactionTestcases: ValidTransactionTestcase[] = [
                     index: toUint(0),
                 }],
                 outputs: [{
-                    type: OutputType.ARRAY_LEGACY,
+                    format: TxOutputFormat.ARRAY_LEGACY,
                     address: fromBech32('addr_test1qqr585tvlc7ylnqvz8pyqwauzrdu0mxag3m7q56grgmgu7sxu2hyfhlkwuxupa9d5085eunq2qywy7hvmvej456flknswgndm3'),
                     amount: {
                         type: AmountType.WITHOUT_MULTIASSET,
@@ -839,7 +839,7 @@ export const ValidTransactionTestcases: ValidTransactionTestcase[] = [
                     },
                 ],
                 outputs: [{
-                    type: OutputType.ARRAY_LEGACY,
+                    format: TxOutputFormat.ARRAY_LEGACY,
                     address: fromBech32('addr1x92s6rutty2gpljhaqe2hxwkct7rsly0g9atpyueed6ttc0canazv4x0u8wex9pemdz7g06arfe398wt0e9vcumvwe4qx4ar6m'),
                     amount: {
                         type: AmountType.WITHOUT_MULTIASSET,
@@ -922,7 +922,7 @@ export const ValidTransactionTestcases: ValidTransactionTestcase[] = [
                     },
                 ],
                 outputs: [{
-                    type: OutputType.ARRAY_LEGACY,
+                    format: TxOutputFormat.ARRAY_LEGACY,
                     address: fromBech32('addr1x92s6rutty2gpljhaqe2hxwkct7rsly0g9atpyueed6ttc0canazv4x0u8wex9pemdz7g06arfe398wt0e9vcumvwe4qx4ar6m'),
                     amount: {
                         type: AmountType.WITHOUT_MULTIASSET,

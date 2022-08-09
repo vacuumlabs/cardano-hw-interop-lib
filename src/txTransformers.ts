@@ -1,5 +1,5 @@
-import type { Amount, Multiasset, RawTransaction, Transaction, TransactionBody, TransactionOutput } from './types'
-import { AmountType } from './types'
+import type { Amount, Datum, Multiasset, RawTransaction, ReferenceScript, Transaction, TransactionBody, TransactionOutput } from './types'
+import { AmountType, DatumType, TxOutputFormat } from './types'
 
 const transformOptionalList = <T>(optionalList?: T[]): T[] | undefined =>
     optionalList?.length === 0 ? undefined : optionalList
@@ -36,10 +36,44 @@ const transformAmount = (amount: Amount): Amount => {
     }
 }
 
-const transformTxOutput = (output: TransactionOutput): TransactionOutput => ({
-    ...output,
-    amount: transformAmount(output.amount),
-})
+const transformDatum = (datum: Datum | undefined): Datum | undefined => {
+    if (datum === undefined) return datum
+
+    switch (datum.type) {
+    case DatumType.HASH:
+        return datum
+    case DatumType.INLINE:
+        if (datum.bytes.length === 0) {
+            return undefined
+        }
+
+        return datum
+    }
+}
+
+const transformReferenceScript = (referenceScript: ReferenceScript | undefined): ReferenceScript | undefined => 
+    referenceScript === undefined 
+        ? undefined 
+        : referenceScript.length === 0 
+            ? undefined 
+            : referenceScript
+
+const transformTxOutput = (output: TransactionOutput): TransactionOutput => {
+    switch (output.format) {
+    case TxOutputFormat.ARRAY_LEGACY:
+        return {
+            ...output,
+            amount: transformAmount(output.amount),
+        }
+    case TxOutputFormat.MAP_BABBAGE:
+        return {
+            ...output,
+            amount: transformAmount(output.amount),
+            datum: transformDatum(output.datum),
+            referenceScript: transformReferenceScript(output.referenceScript),
+        }
+    }
+}
 
 export const transformTxBody = (txBody: TransactionBody): TransactionBody => ({
     ...txBody,

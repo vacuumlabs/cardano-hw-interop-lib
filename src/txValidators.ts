@@ -1,7 +1,7 @@
 import type { ValidationError } from './errors'
 import { err, ValidationErrorReason } from './errors'
-import type { Certificate, Int, Mint, Multiasset, RequiredSigner, StakeCredentialType, StakeDelegationCertificate, StakeDeregistrationCertificate, StakeRegistrationCertificate, TransactionBody, TransactionInput, TransactionOutput, Uint, Withdrawal } from './types'
-import { AmountType, CertificateType } from './types'
+import type { Amount, Certificate, Int, Mint, Multiasset, RequiredSigner, StakeCredentialType, StakeDelegationCertificate, StakeDeregistrationCertificate, StakeRegistrationCertificate, TransactionBody, TransactionInput, TransactionOutput, Uint, Withdrawal } from './types'
+import { AmountType, CertificateType , DatumType, TxOutputFormat} from './types'
 import { bind, getRewardAccountStakeCredentialType } from './utils'
 
 const UINT16_MAX = 65535
@@ -65,7 +65,7 @@ function *validateMultiasset<T>(multiasset: Multiasset<T>, validateAmount: (n: T
     }
 }
 
-function *validateTxOutput({amount}: TransactionOutput, position: string): ValidatorReturnType {
+function *validateTxOutputAmount(amount: Amount, position: string): ValidatorReturnType {
     switch (amount.type) {
     case AmountType.WITHOUT_MULTIASSET:
         yield* validateUint64(amount.coin, `${position}.amount`)
@@ -76,8 +76,21 @@ function *validateTxOutput({amount}: TransactionOutput, position: string): Valid
         // function, this is a very specific check for the output format
         // that it is okay that they are defacto preformed twice with
         // different ValidationErrors, and both errors are marked as fixable
-        yield* validate(amount.multiasset.length > 0, err(ValidationErrorReason.OUTPUT_WITHOUT_TOKENS_MUST_BE_A_SIMPLE_TUPLE, `${position}.amount`))
+        yield* validate(amount.multiasset.length > 0, err(ValidationErrorReason.OUTPUT_AMOUNT_WITHOUT_TOKENS_MUST_NOT_BE_A_TUPLE, `${position}.amount`))
         yield* validateMultiasset(amount.multiasset, validateUint64, `${position}`)
+        break
+    }
+}
+
+function *validateTxOutput(output: TransactionOutput, position: string): ValidatorReturnType {
+    yield* validateTxOutputAmount(output.amount, position)
+
+    switch (output.format) {
+    case TxOutputFormat.MAP_BABBAGE:
+        yield *validate(output.datum?.type !== DatumType.INLINE || output.datum.bytes.length > 0, err(ValidationErrorReason.INLINE_DATUM_MUST_NOT_BE_EMPTY_IF_DEFINED, `${position}.datum.bytes`))
+        yield *validate(output.referenceScript == null || output.referenceScript?.length > 0, err(ValidationErrorReason.REFERENCE_SCRIPT_MUST_NOT_BE_EMPTY_IF_DEFINED, `${position}.reference_script`))
+        break
+    default:
         break
     }
 }
@@ -86,7 +99,7 @@ function *validateTxOutputs(outputs: TransactionOutput[]): ValidatorReturnType {
     yield* validateListConstraints(outputs, 'transaction_body.outputs', true)
 
     for (const [i, output] of outputs.entries()) {
-        validateTxOutput(output, `transaction_body.outputs[${i}]`)
+        yield *validateTxOutput(output, `transaction_body.outputs[${i}]`)
     }
 }
 
@@ -181,6 +194,18 @@ function *validateReferenceInputs(referenceInputs: TransactionInput[]): Validato
     }
 }
 
+function *validateTxCollateralReturnOutput(output: TransactionOutput, position: string): ValidatorReturnType {
+    validateTxOutputAmount(output.amount, position)
+    switch (output.format) {
+    case TxOutputFormat.MAP_BABBAGE:
+        yield* validate(output.datum == null, err(ValidationErrorReason.COLLATERAL_RETURN_MUST_NOT_CONTAIN_DATUM, `${position}.datum`))
+        yield* validate(output.referenceScript == null, err(ValidationErrorReason.COLLATERAL_RETURN_MUST_NOT_CONTAIN_REFERENCE_SCRIPT, `${position}.reference_script`))
+        break
+    default:
+        break
+    }
+}
+
 /**
  * Checks if a transaction contains pool registration certificate, if it does
  * runs a series of validators for pool registration transactions.
@@ -224,7 +249,7 @@ function *validateTxBody(txBody: TransactionBody): ValidatorReturnType {
     yield* validateOptional(txBody.requiredSigners, validateRequiredSigners)
     yield* validateOptional(txBody.networkId, bind(validateUint64, 'transaction_body.network_id'))
     yield* validatePoolRegistrationTransaction(txBody)
-    yield* validateOptional(txBody.collateralReturnOutput, bind(validateTxOutput, 'transaction_body.collateral_return_output'))
+    yield* validateOptional(txBody.collateralReturnOutput, bind(validateTxCollateralReturnOutput, 'transaction_body.collateral_return_output'))
     yield* validateOptional(txBody.totalCollateral, bind(validateUint64, 'transaction_body.total_collateral'))
     yield* validateOptional(txBody.referenceInputs, validateReferenceInputs)
 }

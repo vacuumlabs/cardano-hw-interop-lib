@@ -2,7 +2,7 @@ import { ParseErrorReason } from './errors'
 import type { Parser, WithoutType } from './parsers'
 import { createParser, isArray, isMapWithKeysOfType, isNumber, isUint, isUintOfMaxSize, parseArray, parseBasedOnType, parseBuffer, parseBufferOfLength, parseBufferOfMaxLength, parseEmbeddedCborBytes, parseInt, parseMap, parseNullable, parseOptional, parseStringOfMaxLength, parseTuple, parseUint, validate } from './parsers'
 import type { Amount, BabbageTransactionOutput, DatumHash, DatumInline, GenesisKeyDelegation, LegacyTransactionOutput, MoveInstantaneousRewardsCertificate, Multiasset, PoolMetadata, PoolParams, PoolRegistrationCertificate, PoolRetirementCertificate, Port, RawTransaction, RelayMultiHostName, RelaySingleHostAddress, RelaySingleHostName, RequiredSigner, StakeCredentialKey, StakeCredentialScript, StakeDelegationCertificate, StakeDeregistrationCertificate, StakeRegistrationCertificate, Transaction, TransactionBody, TransactionInput, TransactionOutput, Unparsed, Withdrawal } from './types'
-import { AmountType, ASSET_NAME_MAX_LENGTH, CertificateType, DATUM_HASH_LENGTH, DatumType, DNS_NAME_MAX_LENGTH, IPV4_LENGTH, IPV6_LENGTH, KEY_HASH_LENGTH, METADATA_HASH_LENGTH, OutputType, POOL_KEY_HASH_LENGTH, PORT_MAX_SIZE, RelayType, REWARD_ACCOUNT_LENGTH, SCRIPT_DATA_HASH_LENGTH, SCRIPT_HASH_LENGTH, StakeCredentialType, TX_ID_HASH_LENGTH, URL_MAX_LENGTH, VRF_KEY_HASH_LENGTH } from './types'
+import { AmountType, ASSET_NAME_MAX_LENGTH, CertificateType, DATUM_HASH_LENGTH, DatumType, DNS_NAME_MAX_LENGTH, IPV4_LENGTH, IPV6_LENGTH, KEY_HASH_LENGTH, METADATA_HASH_LENGTH, POOL_KEY_HASH_LENGTH, PORT_MAX_SIZE, RelayType, REWARD_ACCOUNT_LENGTH, SCRIPT_DATA_HASH_LENGTH, SCRIPT_HASH_LENGTH, StakeCredentialType, TX_ID_HASH_LENGTH, TxOutputFormat, URL_MAX_LENGTH, VRF_KEY_HASH_LENGTH } from './types'
 import { addIndefiniteLengthFlag, BabbageTransactionOutputKeys, TransactionBodyKeys, undefinedOnlyAtTheEnd } from './utils'
 
 const dontParse: Parser<Unparsed> = (data: unknown) => data
@@ -75,6 +75,23 @@ const parseLegacyTxOutputDatumHash = (unparsedDatumHash: unknown): DatumHash | u
         }
         : undefined
 
+const parseLegacyTxOutput = (unparsedTxOutput: unknown): LegacyTransactionOutput => {
+    const [address, amount, datumHash] = parseTuple(
+        unparsedTxOutput,
+        ParseErrorReason.INVALID_TX_OUTPUT,
+        parseAddress,
+        parseAmount,
+        parseLegacyTxOutputDatumHash,
+    )
+
+    return {
+        format: TxOutputFormat.ARRAY_LEGACY,
+        address,
+        amount,
+        datumHash,
+    }
+}
+
 const parseDatumType = (unparsedDatumType: unknown): DatumType => {
     validate(isNumber(unparsedDatumType), ParseErrorReason.INVALID_OUTPUT_DATUM_TYPE)
     validate(unparsedDatumType in DatumType, ParseErrorReason.INVALID_OUTPUT_DATUM_TYPE)
@@ -97,30 +114,13 @@ const parseDatum = createParser(
     parseDatumInline,
 )
 
-const parseLegacyTxOutput = (unparsedTxOutput: unknown): LegacyTransactionOutput => {
-    const [address, amount, datumHash] = parseTuple(
-        unparsedTxOutput,
-        ParseErrorReason.INVALID_TX_OUTPUT,
-        parseAddress,
-        parseAmount,
-        parseLegacyTxOutputDatumHash,
-    )
-
-    return {
-        type: OutputType.ARRAY_LEGACY,
-        address,
-        amount,
-        datumHash,
-    }
-}
-
 const parseReferenceScript = createParser(parseEmbeddedCborBytes, ParseErrorReason.INVALID_OUTPUT_REFERENCE_SCRIPT)
 
 const parseBabbageTxOutput = (unparsedTxOutput: unknown): BabbageTransactionOutput => {
     validate(isMapWithKeysOfType(unparsedTxOutput, isNumber), ParseErrorReason.INVALID_TX_OUTPUT)
 
     return {
-        type: OutputType.MAP_BABBAGE,
+        format: TxOutputFormat.MAP_BABBAGE,
         address: parseAddress(unparsedTxOutput.get(BabbageTransactionOutputKeys.ADDRESS)),
         amount: parseAmount(unparsedTxOutput.get(BabbageTransactionOutputKeys.AMOUNT)),
         datum: parseOptional(unparsedTxOutput.get(BabbageTransactionOutputKeys.DATUM), parseDatum),
