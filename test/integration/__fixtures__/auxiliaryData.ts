@@ -1,0 +1,39 @@
+import * as cbor from 'cbor'
+
+import { toFixlenBuffer } from '../../test_utils'
+
+export const CanonicalAuxiliaryData = {
+  // 259({0: {721: {"ipfs": "some other text", "assetHash": "0931ae2de9aa46212e50adc1798f9071e7c6368b78ae7eb434c2ca0ed9d05370"}}})
+  data: cbor.decode(
+    Buffer.from(
+      'd90103a100a11902d1a264697066736f736f6d65206f74686572207465787469617373657448617368784030393331616532646539616134363231326535306164633137393866393037316537633633363862373861653765623433346332636130656439643035333730',
+      'hex',
+    ),
+  ),
+  hash: toFixlenBuffer(
+    '564702640848981c8b9996b84a13e34cfe4db95914694e0ad46a807da3d05bdb',
+    32,
+  ),
+  transformedHash: toFixlenBuffer(
+    '564702640848981c8b9996b84a13e34cfe4db95914694e0ad46a807da3d05bdb',
+    32,
+  ),
+}
+
+export const NonCanonicalAuxiliaryData = {
+  // 259({0: {721: {"assetHash": "0931ae2de9aa46212e50adc1798f9071e7c6368b78ae7eb434c2ca0ed9d05370", "ipfs": "some text"}}})
+  data: cbor.decode(
+    Buffer.from(
+      'd90103a100a11902d1a269617373657448617368784030393331616532646539616134363231326535306164633137393866393037316537633633363862373861653765623433346332636130656439643035333730646970667369736f6d652074657874',
+      'hex',
+    ),
+  ),
+  hash: toFixlenBuffer(
+    'fb7099a47afd6efb4f9cccf9d0f8745331a19eb8b3f50548ffadae9de8551743',
+    32,
+  ),
+  transformedHash: toFixlenBuffer(
+    'ef10842a1a55e79310cba366c48b5bd8538039fbbadb01d9a69da74f0a5310f0',
+    32,
+  ),
+}

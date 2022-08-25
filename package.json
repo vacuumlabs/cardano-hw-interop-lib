@@ -35,6 +35,7 @@
     "typescript": "^4.4.3"
   },
   "dependencies": {
+    "blake2b": "^2.1.4",
     "cbor": "^8.1.0"
   },
   "bugs": {

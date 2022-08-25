@@ -25,7 +25,13 @@
     "target": "ES2019",
     "typeRoots": ["./node_modules/@types", "./types"],
     "noErrorTruncation": true,
-    "baseUrl": "src"
+    "baseUrl": "src",
+    "paths": {
+      "*": ["./src/@types/*"]
+    }
   },
-  "include": ["./**/*.ts"]
+  "include": ["./**/*.ts"],
+  "ts-node": {
+    "files": true
+  }
 }
