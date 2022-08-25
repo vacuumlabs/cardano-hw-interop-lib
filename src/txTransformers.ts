@@ -1,6 +1,8 @@
 import type {
   Amount,
   Datum,
+  FixlenBuffer,
+  METADATA_HASH_LENGTH,
   Multiasset,
   RawTransaction,
   ReferenceScript,
@@ -9,6 +11,7 @@ import type {
   TransactionOutput,
 } from './types'
 import { AmountType, DatumType, TxOutputFormat } from './types'
+import { blake2b256, encodeToCbor } from './utils'
 
 const transformOptionalList = <T>(optionalList?: T[]): T[] | undefined =>
   optionalList?.length === 0 ? undefined : optionalList
@@ -93,7 +96,15 @@ const transformTxOutput = (output: TransactionOutput): TransactionOutput => {
   }
 }
 
-export const transformTxBody = (txBody: TransactionBody): TransactionBody => ({
+const transformAuxiliaryDataHash = (
+  auxiliaryData: unknown | undefined,
+): FixlenBuffer<typeof METADATA_HASH_LENGTH> | undefined =>
+  auxiliaryData ? blake2b256(encodeToCbor(auxiliaryData)) : undefined
+
+export const transformTxBody = (
+  txBody: TransactionBody,
+  auxiliaryData: unknown,
+): TransactionBody => ({
   ...txBody,
   outputs: txBody.outputs.map(transformTxOutput),
   certificates: transformOptionalList(txBody.certificates),
@@ -104,14 +115,15 @@ export const transformTxBody = (txBody: TransactionBody): TransactionBody => ({
     txBody.collateralReturnOutput &&
     transformTxOutput(txBody.collateralReturnOutput),
   referenceInputs: transformOptionalList(txBody.referenceInputs),
+  metadataHash: transformAuxiliaryDataHash(auxiliaryData),
 })
 
 export const transformTx = (tx: Transaction): Transaction => ({
   ...tx,
-  body: transformTxBody(tx.body),
+  body: transformTxBody(tx.body, tx.auxiliaryData),
 })
 
 export const transformRawTx = (rawTx: RawTransaction): RawTransaction => ({
   ...rawTx,
-  body: transformTxBody(rawTx.body),
+  body: transformTxBody(rawTx.body, rawTx.auxiliaryData),
 })

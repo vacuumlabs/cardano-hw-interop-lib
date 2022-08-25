@@ -1,6 +1,7 @@
+import blake2b from 'blake2b'
 import cbor from 'cbor'
 
-import type { RewardAccount } from './types'
+import type { FixlenBuffer, RewardAccount } from './types'
 import { StakeCredentialType } from './types'
 
 export enum CborTag {
@@ -93,3 +94,6 @@ export enum TransactionBodyKeys {
   TOTAL_COLLATERAL = 17,
   REFERENCE_INPUTS = 18,
 }
+
+export const blake2b256 = (data: unknown): FixlenBuffer<32> =>
+  Buffer.from(blake2b(32).update(data).digest()) as FixlenBuffer<32>
