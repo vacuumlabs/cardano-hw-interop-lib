@@ -44,7 +44,9 @@
   "scripts": {
     "clean": "rm -rf dist/",
     "build": "tsc -p src/tsconfig.json",
-    "eslint": "eslint . --max-warnings=0",
+    "lint": "eslint . --max-warnings=0",
+    "prettier:check": "prettier --check .",
+    "prettier": "prettier --write .",
     "test": "mocha -r ts-node/register test/**/*.test.ts"
   }
 }
