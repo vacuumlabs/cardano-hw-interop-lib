@@ -1,0 +1,70 @@
+name: Main checks
+on: pull_request
+jobs:
+  run-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js 16.16.0
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.16.0'
+          cache: 'yarn'
+
+      - name: Set up yarn
+        run: yarn
+
+      - name: Lint
+        run: yarn lint
+
+  run-prettier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js 16.16.0
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.16.0'
+          cache: 'yarn'
+
+      - name: Set up yarn
+        run: yarn
+
+      - name: Prettier
+        run: yarn prettier:check
+
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js 16.16.0
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.16.0'
+          cache: 'yarn'
+
+      - name: Set up yarn
+        run: yarn
+
+      - name: Test
+        run: yarn test
+
+  run-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js 16.16.0
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.16.0'
+          cache: 'yarn'
+
+      - name: Set up yarn
+        run: yarn
+
+      - name: Build
+        run: yarn build
