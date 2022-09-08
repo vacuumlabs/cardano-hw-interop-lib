@@ -189,7 +189,10 @@ export const serializeTxBody = (txBody: TransactionBody) =>
       txBody.withdrawals && serializeWithdrawals(txBody.withdrawals),
     ],
     [TransactionBodyKeys.UPDATE, identity(txBody.update)],
-    [TransactionBodyKeys.METADATA_HASH, identity(txBody.metadataHash)],
+    [
+      TransactionBodyKeys.AUXILIARY_DATA_HASH,
+      identity(txBody.auxiliaryDataHash),
+    ],
     [
       TransactionBodyKeys.VALIDITY_INTERVAL_START,
       identity(txBody.validityIntervalStart),
