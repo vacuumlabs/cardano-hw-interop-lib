@@ -21,7 +21,6 @@
   "extends": ["eslint:recommended", "plugin:import/errors"],
   "plugins": ["@typescript-eslint", "import", "simple-import-sort", "prettier"],
   "rules": {
-    "indent": 2,
     "semi": ["error", "never"],
     "simple-import-sort/imports": "warn",
     "no-redeclare": "off",
