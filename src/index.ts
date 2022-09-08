@@ -9,7 +9,6 @@ import { decodeCbor, encodeToCbor } from './utils'
 export type { ValidationError } from './errors'
 export * from './types'
 
-
 /**
  * Takes a Buffer of CBOR encoded transaction body and decodes it
  * to a TransactionBody object
@@ -18,7 +17,7 @@ export * from './types'
  * @returns Decoded TransactionBody object
  */
 export const decodeTxBody = (txBodyCbor: Buffer): TransactionBody =>
-    parsers.parseTxBody(decodeCbor(txBodyCbor))
+  parsers.parseTxBody(decodeCbor(txBodyCbor))
 
 /**
  * Takes a Buffer of CBOR encoded transaction and decodes it
@@ -28,7 +27,7 @@ export const decodeTxBody = (txBodyCbor: Buffer): TransactionBody =>
  * @returns Decoded Transaction object
  */
 export const decodeTx = (txCbor: Buffer): Transaction =>
-    parsers.parseTx(decodeCbor(txCbor))
+  parsers.parseTx(decodeCbor(txCbor))
 
 /**
  * Takes a Buffer of CBOR encoded raw transaction and decodes it
@@ -41,8 +40,7 @@ export const decodeTx = (txCbor: Buffer): Transaction =>
  * @returns Decoded RawTransaction object
  */
 export const decodeRawTx = (rawTxCbor: Buffer): RawTransaction =>
-    parsers.parseRawTx(decodeCbor(rawTxCbor))
-
+  parsers.parseRawTx(decodeCbor(rawTxCbor))
 
 /**
  * Takes a transaction body and encodes it back to it's CBOR representation.
@@ -53,7 +51,7 @@ export const decodeRawTx = (rawTxCbor: Buffer): RawTransaction =>
  * @returns Buffer containing the CBOR encoded `txBody`
  */
 export const encodeTxBody = (txBody: TransactionBody): Buffer =>
-    encodeToCbor(serializers.serializeTxBody(txBody))
+  encodeToCbor(serializers.serializeTxBody(txBody))
 
 /**
  * Takes a transaction and encodes it back to it's CBOR representation.
@@ -64,7 +62,7 @@ export const encodeTxBody = (txBody: TransactionBody): Buffer =>
  * @returns Buffer containing the CBOR encoded `tx`
  */
 export const encodeTx = (tx: Transaction): Buffer =>
-    encodeToCbor(serializers.serializeTx(tx))
+  encodeToCbor(serializers.serializeTx(tx))
 
 /**
  * Takes a raw transaction and encodes it back to it's CBOR representation.
@@ -78,8 +76,7 @@ export const encodeTx = (tx: Transaction): Buffer =>
  * @returns Buffer containing the CBOR encoded `rawTx`
  */
 export const encodeRawTx = (rawTx: RawTransaction): Buffer =>
-    encodeToCbor(serializers.serializeRawTx(rawTx))
-
+  encodeToCbor(serializers.serializeRawTx(rawTx))
 
 /**
  * Takes a Buffer of CBOR encoded transaction body and validates it according to
@@ -89,9 +86,9 @@ export const encodeRawTx = (rawTx: RawTransaction): Buffer =>
  * @returns Found validation errors
  */
 export const validateTxBody = (txBodyCbor: Buffer): ValidationError[] => {
-    const txBody = decodeTxBody(txBodyCbor)
-    const canonicalTxBodyCbor = encodeTxBody(txBody)
-    return validateTxCommon(txBodyCbor, canonicalTxBodyCbor, txBody)
+  const txBody = decodeTxBody(txBodyCbor)
+  const canonicalTxBodyCbor = encodeTxBody(txBody)
+  return validateTxCommon(txBodyCbor, canonicalTxBodyCbor, txBody)
 }
 
 /**
@@ -105,9 +102,9 @@ export const validateTxBody = (txBodyCbor: Buffer): ValidationError[] => {
  * @returns Found validation errors
  */
 export const validateTx = (txCbor: Buffer): ValidationError[] => {
-    const tx = decodeTx(txCbor)
-    const canonicalTxCbor = encodeTx(tx)
-    return validateTxCommon(txCbor, canonicalTxCbor, tx.body)
+  const tx = decodeTx(txCbor)
+  const canonicalTxCbor = encodeTx(tx)
+  return validateTxCommon(txCbor, canonicalTxCbor, tx.body)
 }
 
 /**
@@ -118,11 +115,10 @@ export const validateTx = (txCbor: Buffer): ValidationError[] => {
  * @returns Found validation errors
  */
 export const validateRawTx = (rawTxCbor: Buffer): ValidationError[] => {
-    const rawTx = decodeRawTx(rawTxCbor)
-    const canonicalRawTxCbor = encodeRawTx(rawTx)
-    return validateTxCommon(rawTxCbor, canonicalRawTxCbor, rawTx.body)
+  const rawTx = decodeRawTx(rawTxCbor)
+  const canonicalRawTxCbor = encodeRawTx(rawTx)
+  return validateTxCommon(rawTxCbor, canonicalRawTxCbor, rawTx.body)
 }
-
 
 /**
  * Takes a transaction body and applies transformations on it to fix fixable
@@ -135,7 +131,6 @@ export const validateRawTx = (rawTxCbor: Buffer): ValidationError[] => {
  * @returns Transformed transaction body
  */
 export const transformTxBody = transformers.transformTxBody
-
 
 /**
  * Takes a transaction and applies transformations on it to fix fixable

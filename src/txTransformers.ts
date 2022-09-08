@@ -1,97 +1,117 @@
-import type { Amount, Datum, Multiasset, RawTransaction, ReferenceScript, Transaction, TransactionBody, TransactionOutput } from './types'
+import type {
+  Amount,
+  Datum,
+  Multiasset,
+  RawTransaction,
+  ReferenceScript,
+  Transaction,
+  TransactionBody,
+  TransactionOutput,
+} from './types'
 import { AmountType, DatumType, TxOutputFormat } from './types'
 
 const transformOptionalList = <T>(optionalList?: T[]): T[] | undefined =>
-    optionalList?.length === 0 ? undefined : optionalList
+  optionalList?.length === 0 ? undefined : optionalList
 
-const transformMultiasset = <T>(multiasset?: Multiasset<T>): Multiasset<T> | undefined =>
-    multiasset === undefined ? undefined : transformOptionalList(
+const transformMultiasset = <T>(
+  multiasset?: Multiasset<T>,
+): Multiasset<T> | undefined =>
+  multiasset === undefined
+    ? undefined
+    : transformOptionalList(
         multiasset
-            .map(({policyId, tokens}) => ({policyId, tokens: transformOptionalList(tokens)}))
-            .filter(({tokens}) => tokens !== undefined) as Multiasset<T>
-    )
+          .map(({ policyId, tokens }) => ({
+            policyId,
+            tokens: transformOptionalList(tokens),
+          }))
+          .filter(({ tokens }) => tokens !== undefined) as Multiasset<T>,
+      )
 
 const transformAmount = (amount: Amount): Amount => {
-    switch (amount.type) {
+  switch (amount.type) {
     case AmountType.WITHOUT_MULTIASSET:
-        return amount
+      return amount
     case AmountType.WITH_MULTIASSET: {
-        // Applying the rule that outputs containing no multi-asset tokens
-        // must be serialized as a simple tuple
-        const multiasset = transformMultiasset(amount.multiasset)
+      // Applying the rule that outputs containing no multi-asset tokens
+      // must be serialized as a simple tuple
+      const multiasset = transformMultiasset(amount.multiasset)
 
-        if (multiasset === undefined) {
-            return {
-                type: AmountType.WITHOUT_MULTIASSET,
-                coin: amount.coin,
-            }
-        }
-
+      if (multiasset === undefined) {
         return {
-            type: AmountType.WITH_MULTIASSET,
-            coin: amount.coin,
-            multiasset,
+          type: AmountType.WITHOUT_MULTIASSET,
+          coin: amount.coin,
         }
+      }
+
+      return {
+        type: AmountType.WITH_MULTIASSET,
+        coin: amount.coin,
+        multiasset,
+      }
     }
-    }
+  }
 }
 
 const transformDatum = (datum: Datum | undefined): Datum | undefined => {
-    if (datum === undefined) return datum
+  if (datum === undefined) return datum
 
-    switch (datum.type) {
+  switch (datum.type) {
     case DatumType.HASH:
-        return datum
+      return datum
     case DatumType.INLINE:
-        if (datum.bytes.length === 0) {
-            return undefined
-        }
+      if (datum.bytes.length === 0) {
+        return undefined
+      }
 
-        return datum
-    }
+      return datum
+  }
 }
 
-const transformReferenceScript = (referenceScript: ReferenceScript | undefined): ReferenceScript | undefined => 
-    referenceScript === undefined 
-        ? undefined 
-        : referenceScript.length === 0 
-            ? undefined 
-            : referenceScript
+const transformReferenceScript = (
+  referenceScript: ReferenceScript | undefined,
+): ReferenceScript | undefined =>
+  referenceScript === undefined
+    ? undefined
+    : referenceScript.length === 0
+    ? undefined
+    : referenceScript
 
 const transformTxOutput = (output: TransactionOutput): TransactionOutput => {
-    switch (output.format) {
+  switch (output.format) {
     case TxOutputFormat.ARRAY_LEGACY:
-        return {
-            ...output,
-            amount: transformAmount(output.amount),
-        }
+      return {
+        ...output,
+        amount: transformAmount(output.amount),
+      }
     case TxOutputFormat.MAP_BABBAGE:
-        return {
-            ...output,
-            amount: transformAmount(output.amount),
-            datum: transformDatum(output.datum),
-            referenceScript: transformReferenceScript(output.referenceScript),
-        }
-    }
+      return {
+        ...output,
+        amount: transformAmount(output.amount),
+        datum: transformDatum(output.datum),
+        referenceScript: transformReferenceScript(output.referenceScript),
+      }
+  }
 }
 
 export const transformTxBody = (txBody: TransactionBody): TransactionBody => ({
-    ...txBody,
-    outputs: txBody.outputs.map(transformTxOutput),
-    certificates: transformOptionalList(txBody.certificates),
-    withdrawals: transformOptionalList(txBody.withdrawals),
-    collateralInputs: transformOptionalList(txBody.collateralInputs),
-    requiredSigners: transformOptionalList(txBody.requiredSigners),
-    collateralReturnOutput: txBody.collateralReturnOutput && transformTxOutput(txBody.collateralReturnOutput),
-    referenceInputs: transformOptionalList(txBody.referenceInputs),
+  ...txBody,
+  outputs: txBody.outputs.map(transformTxOutput),
+  certificates: transformOptionalList(txBody.certificates),
+  withdrawals: transformOptionalList(txBody.withdrawals),
+  collateralInputs: transformOptionalList(txBody.collateralInputs),
+  requiredSigners: transformOptionalList(txBody.requiredSigners),
+  collateralReturnOutput:
+    txBody.collateralReturnOutput &&
+    transformTxOutput(txBody.collateralReturnOutput),
+  referenceInputs: transformOptionalList(txBody.referenceInputs),
 })
 
 export const transformTx = (tx: Transaction): Transaction => ({
-    ...tx,
-    body: transformTxBody(tx.body),
+  ...tx,
+  body: transformTxBody(tx.body),
 })
 
 export const transformRawTx = (rawTx: RawTransaction): RawTransaction => ({
-    ...rawTx,
-    body: transformTxBody(rawTx.body),
+  ...rawTx,
+  body: transformTxBody(rawTx.body),
 })
