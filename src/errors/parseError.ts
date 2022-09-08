@@ -64,7 +64,7 @@ export enum ParseErrorReason {
   INVALID_TTL = 'Invalid transaction ttl',
   INVALID_CERTIFICATES = 'Invalid transaction certificates',
   INVALID_WITHDRAWALS = 'Invalid transaction withdrawals',
-  INVALID_METADATA_HASH = 'Invalid transaction metadata hash',
+  INVALID_AUXILIARY_DATA_HASH = 'Invalid transaction auxiliary data hash',
   INVALID_VALIDITY_INTERVAL_START = 'Invalid transaction validity interval start',
   INVALID_MINT = 'Invalid transaction mint',
   INVALID_SCRIPT_DATA_HASH = 'Invalid transaction script data hash',

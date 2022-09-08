@@ -1,8 +1,8 @@
 import type {
   Amount,
+  AUXILIARY_DATA_HASH_LENGTH,
   Datum,
   FixlenBuffer,
-  METADATA_HASH_LENGTH,
   Multiasset,
   RawTransaction,
   ReferenceScript,
@@ -98,7 +98,7 @@ const transformTxOutput = (output: TransactionOutput): TransactionOutput => {
 
 const transformAuxiliaryDataHash = (
   auxiliaryData: unknown | undefined,
-): FixlenBuffer<typeof METADATA_HASH_LENGTH> | undefined =>
+): FixlenBuffer<typeof AUXILIARY_DATA_HASH_LENGTH> | undefined =>
   auxiliaryData ? blake2b256(encodeToCbor(auxiliaryData)) : undefined
 
 export const transformTxBody = (
@@ -115,7 +115,7 @@ export const transformTxBody = (
     txBody.collateralReturnOutput &&
     transformTxOutput(txBody.collateralReturnOutput),
   referenceInputs: transformOptionalList(txBody.referenceInputs),
-  metadataHash: transformAuxiliaryDataHash(auxiliaryData),
+  auxiliaryDataHash: transformAuxiliaryDataHash(auxiliaryData),
 })
 
 export const transformTx = (tx: Transaction): Transaction => ({

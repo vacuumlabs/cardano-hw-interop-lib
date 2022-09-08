@@ -56,6 +56,7 @@ import type {
 import {
   AmountType,
   ASSET_NAME_MAX_LENGTH,
+  AUXILIARY_DATA_HASH_LENGTH,
   CertificateType,
   DATUM_HASH_LENGTH,
   DatumType,
@@ -63,8 +64,8 @@ import {
   IPV4_LENGTH,
   IPV6_LENGTH,
   KEY_HASH_LENGTH,
-  METADATA_HASH_LENGTH,
   POOL_KEY_HASH_LENGTH,
+  POOL_METADATA_HASH_LENGTH,
   PORT_MAX_SIZE,
   RelayType,
   REWARD_ACCOUNT_LENGTH,
@@ -422,7 +423,7 @@ const parsePoolMetadata = (unparsedPoolMetadata: unknown): PoolMetadata => {
     ),
     createParser(
       parseBufferOfLength,
-      METADATA_HASH_LENGTH,
+      POOL_METADATA_HASH_LENGTH,
       ParseErrorReason.INVALID_POOL_METADATA_METADATA_HASH,
     ),
   )
@@ -609,10 +610,10 @@ export const parseCertificates = createParser(
   parseCertificate,
   ParseErrorReason.INVALID_CERTIFICATES,
 )
-export const parseMetadataHash = createParser(
+export const parseAuxiliaryDataHash = createParser(
   parseBufferOfLength,
-  METADATA_HASH_LENGTH,
-  ParseErrorReason.INVALID_METADATA_HASH,
+  AUXILIARY_DATA_HASH_LENGTH,
+  ParseErrorReason.INVALID_AUXILIARY_DATA_HASH,
 )
 export const parseValidityIntervalStart = createParser(
   parseUint,
@@ -672,9 +673,9 @@ export const parseTxBody = (unparsedTxBody: unknown): TransactionBody => {
       parseWithdrawals,
     ),
     update: unparsedTxBody.get(TransactionBodyKeys.UPDATE),
-    metadataHash: parseOptional(
-      unparsedTxBody.get(TransactionBodyKeys.METADATA_HASH),
-      parseMetadataHash,
+    auxiliaryDataHash: parseOptional(
+      unparsedTxBody.get(TransactionBodyKeys.AUXILIARY_DATA_HASH),
+      parseAuxiliaryDataHash,
     ),
     validityIntervalStart: parseOptional(
       unparsedTxBody.get(TransactionBodyKeys.VALIDITY_INTERVAL_START),

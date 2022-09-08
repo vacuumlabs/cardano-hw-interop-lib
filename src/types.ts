@@ -12,10 +12,11 @@ export const KEY_HASH_LENGTH = 28
 export const SCRIPT_HASH_LENGTH = 28
 export const GENESIS_DELEGATE_HASH_LENGTH = 28
 export const POOL_KEY_HASH_LENGTH = 28
+export const POOL_METADATA_HASH_LENGTH = 32
 export const GENESIS_HASH_LENGTH = 28
 export const REWARD_ACCOUNT_LENGTH = 29
 export const VRF_KEY_HASH_LENGTH = 32
-export const METADATA_HASH_LENGTH = 32
+export const AUXILIARY_DATA_HASH_LENGTH = 32
 export const TX_ID_HASH_LENGTH = 32
 export const DATUM_HASH_LENGTH = 32
 export const SCRIPT_DATA_HASH_LENGTH = 32
@@ -198,7 +199,7 @@ export type Relay =
 
 export type PoolMetadata = {
   url: MaxlenString<typeof URL_MAX_LENGTH>
-  metadataHash: FixlenBuffer<typeof METADATA_HASH_LENGTH>
+  metadataHash: FixlenBuffer<typeof POOL_METADATA_HASH_LENGTH>
 }
 
 export type PoolParams = {
@@ -264,7 +265,7 @@ export type TransactionBody = {
   certificates?: Certificate[]
   withdrawals?: Withdrawal[]
   update?: Unparsed
-  metadataHash?: FixlenBuffer<typeof METADATA_HASH_LENGTH>
+  auxiliaryDataHash?: FixlenBuffer<typeof AUXILIARY_DATA_HASH_LENGTH>
   validityIntervalStart?: Uint
   mint?: Mint
   scriptDataHash?: FixlenBuffer<typeof SCRIPT_DATA_HASH_LENGTH>
