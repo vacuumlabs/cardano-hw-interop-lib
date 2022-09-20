@@ -9,6 +9,7 @@ import type {
   Transaction,
   TransactionBody,
   TransactionOutput,
+  Unparsed,
 } from './types'
 import { AmountType, DatumType, TxOutputFormat } from './types'
 import { blake2b256, encodeToCbor } from './utils'
@@ -96,14 +97,26 @@ const transformTxOutput = (output: TransactionOutput): TransactionOutput => {
   }
 }
 
+/**
+ * If the auxiliary data hash does not match the provided auxiliary data, it is replaced with the
+ * correct hash. This is useful if the auxiliary data was reserialized canonically.
+ * Some clients don't pass in auxiliary data along with the auxiliary data hash when signing the tx
+ * (i.e. auxiliaryData is null). In such case, return the original hash (otherwise we would replace
+ * the provided hash with a hash of undefined data).
+ */
 const transformAuxiliaryDataHash = (
-  auxiliaryData: unknown | undefined,
+  auxiliaryDataHash:
+    | FixlenBuffer<typeof AUXILIARY_DATA_HASH_LENGTH>
+    | undefined,
+  auxiliaryData: Unparsed,
 ): FixlenBuffer<typeof AUXILIARY_DATA_HASH_LENGTH> | undefined =>
-  auxiliaryData ? blake2b256(encodeToCbor(auxiliaryData)) : undefined
+  auxiliaryData == null
+    ? auxiliaryDataHash
+    : blake2b256(encodeToCbor(auxiliaryData))
 
 export const transformTxBody = (
   txBody: TransactionBody,
-  auxiliaryData: unknown,
+  auxiliaryData: Unparsed,
 ): TransactionBody => ({
   ...txBody,
   outputs: txBody.outputs.map(transformTxOutput),
@@ -115,7 +128,10 @@ export const transformTxBody = (
     txBody.collateralReturnOutput &&
     transformTxOutput(txBody.collateralReturnOutput),
   referenceInputs: transformOptionalList(txBody.referenceInputs),
-  auxiliaryDataHash: transformAuxiliaryDataHash(auxiliaryData),
+  auxiliaryDataHash: transformAuxiliaryDataHash(
+    txBody.auxiliaryDataHash,
+    auxiliaryData,
+  ),
 })
 
 export const transformTx = (tx: Transaction): Transaction => ({
