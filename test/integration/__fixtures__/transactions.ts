@@ -663,6 +663,53 @@ export const TransformTransactionTestcases: TransformTransactionBodyTestcase[] =
         referenceInputs: undefined,
       },
     },
+    {
+      testname: 'Simple tx body with auxiliary data hash but no auxiliary data',
+      cbor: 'a50081825820bc8bf52ea894fb8e442fe3eea628be87d0c9a37baef185b70eb00a5c8a849d3b000181825839000743d16cfe3c4fcc0c11c2403bbc10dbc7ecdd4477e053481a368e7a06e2ae44dff6770dc0f4ada3cf4cf2605008e27aecdb332ad349fda71a0023583c021a00029b75031a01a3bd8f075820fb7099a47afd6efb4f9cccf9d0f8745331a19eb8b3f50548ffadae9de8551743',
+      auxiliaryData: null,
+      txBody: {
+        inputs: [
+          {
+            transactionId: toFixlenBuffer(
+              'bc8bf52ea894fb8e442fe3eea628be87d0c9a37baef185b70eb00a5c8a849d3b',
+              32,
+            ),
+            index: toUint(0),
+          },
+        ],
+        outputs: [
+          {
+            format: TxOutputFormat.ARRAY_LEGACY,
+            address: fromBech32(
+              'addr_test1qqr585tvlc7ylnqvz8pyqwauzrdu0mxag3m7q56grgmgu7sxu2hyfhlkwuxupa9d5085eunq2qywy7hvmvej456flknswgndm3',
+            ),
+            amount: {
+              type: AmountType.WITHOUT_MULTIASSET,
+              coin: toUint(2316348),
+            },
+            datumHash: undefined,
+          },
+        ],
+        fee: toUint(170869),
+        ttl: toUint(27508111),
+        certificates: undefined,
+        withdrawals: undefined,
+        update: undefined,
+        auxiliaryDataHash: toFixlenBuffer(
+          'fb7099a47afd6efb4f9cccf9d0f8745331a19eb8b3f50548ffadae9de8551743',
+          32,
+        ),
+        validityIntervalStart: undefined,
+        mint: undefined,
+        scriptDataHash: undefined,
+        collateralInputs: undefined,
+        requiredSigners: undefined,
+        networkId: undefined,
+        collateralReturnOutput: undefined,
+        totalCollateral: undefined,
+        referenceInputs: undefined,
+      },
+    },
   ]
 
 type ValidRawTransactionTestcase = {
