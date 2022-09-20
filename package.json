@@ -46,8 +46,8 @@
     "clean": "rm -rf dist/",
     "build": "tsc -p src/tsconfig.json",
     "lint": "eslint . --max-warnings=0",
-    "prettier:check": "prettier --check .",
-    "prettier": "prettier --write .",
+    "prettier:check": "prettier --check src test",
+    "prettier": "prettier --write src test",
     "test": "mocha -r ts-node/register test/**/*.test.ts"
   }
 }
