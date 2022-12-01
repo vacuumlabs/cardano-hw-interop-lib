@@ -4,7 +4,6 @@ import type {
   Datum,
   FixlenBuffer,
   Multiasset,
-  RawTransaction,
   ReferenceScript,
   Transaction,
   TransactionBody,
@@ -137,9 +136,4 @@ export const transformTxBody = (
 export const transformTx = (tx: Transaction): Transaction => ({
   ...tx,
   body: transformTxBody(tx.body, tx.auxiliaryData),
-})
-
-export const transformRawTx = (rawTx: RawTransaction): RawTransaction => ({
-  ...rawTx,
-  body: transformTxBody(rawTx.body, rawTx.auxiliaryData),
 })

@@ -36,7 +36,6 @@ import type {
   PoolRegistrationCertificate,
   PoolRetirementCertificate,
   Port,
-  RawTransaction,
   RelayMultiHostName,
   RelaySingleHostAddress,
   RelaySingleHostName,
@@ -78,7 +77,6 @@ import {
   VRF_KEY_HASH_LENGTH,
 } from './types'
 import {
-  addIndefiniteLengthFlag,
   BabbageTransactionOutputKeys,
   TransactionBodyKeys,
   undefinedOnlyAtTheEnd,
@@ -745,57 +743,5 @@ export const parseTx = (unparsedTx: unknown): Transaction => {
     witnessSet: presentItems[0],
     scriptValidity: presentItems[1],
     auxiliaryData: presentItems[2],
-  }
-}
-
-export const parseRawTx = (unparsedRawTx: unknown): RawTransaction => {
-  const [body, ...otherItems] = parseTuple(
-    unparsedRawTx,
-    ParseErrorReason.INVALID_RAW_TX_CBOR,
-    parseTxBody,
-    //             | old cli:      | shelley era:    | alonzo era:
-    dontParse, // | auxiliaryData | scriptWitnesses | scriptWitnesses
-    dontParse, // | `undefined`   | auxiliaryData   | datumWitnesses
-    dontParse, // | `undefined`   | `undefined`     | redeemerWitnesses
-    dontParse, // | `undefined`   | `undefined`     | scriptValidity
-    dontParse, // | `undefined`   | `undefined`     | auxiliaryData
-  )
-  validate(
-    undefinedOnlyAtTheEnd(otherItems),
-    ParseErrorReason.INVALID_RAW_TX_CBOR,
-  )
-  const presentItems = otherItems.filter((item) => item !== undefined)
-  validate(
-    [1, 2, 5].includes(presentItems.length),
-    ParseErrorReason.INVALID_RAW_TX_CBOR,
-  )
-
-  // older versions of cardano-cli included only txBody and auxiliaryData
-  if (presentItems.length === 1) {
-    return { body, auxiliaryData: presentItems[0] }
-  }
-
-  // cardano-cli expects indefinite-length scriptWitnesses
-  // we add the flag here right after parsing so that validators can encode the witnesses correctly
-  addIndefiniteLengthFlag(presentItems[0])
-
-  // newer versions of cardano-cli with --shelley-era, --allegra-era and --mary-era
-  // include txBody, scriptWitnesses and auxiliaryData
-  if (presentItems.length === 2) {
-    return {
-      body,
-      scriptWitnesses: presentItems[0],
-      auxiliaryData: presentItems[1],
-    }
-  }
-
-  // newer versions of cardano-cli with --alonzo-era include all rawTx items
-  return {
-    body,
-    scriptWitnesses: presentItems[0],
-    datumWitnesses: presentItems[1],
-    redeemerWitnesses: presentItems[2],
-    scriptValidity: presentItems[3],
-    auxiliaryData: presentItems[4],
   }
 }

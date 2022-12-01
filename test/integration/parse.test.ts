@@ -1,9 +1,8 @@
 import { expect } from 'chai'
 
 import { ParseError, ParseErrorReason } from '../../src/errors'
-import { decodeRawTx, decodeTx, decodeTxBody } from '../../src/index'
+import { decodeTx, decodeTxBody } from '../../src/index'
 import {
-  ValidRawTransactionTestcases,
   ValidTransactionBodyTestcases,
   ValidTransactionTestcases,
 } from './__fixtures__/transactions'
@@ -14,15 +13,6 @@ describe('Parse', () => {
       it(testname, () => {
         const parsedTxBody = decodeTxBody(Buffer.from(cbor, 'hex'))
         expect(parsedTxBody).to.deep.equal(txBody)
-      })
-    }
-  })
-
-  describe('Valid raw transactions', () => {
-    for (const { testname, cbor, rawTx } of ValidRawTransactionTestcases) {
-      it(testname, () => {
-        const parsedRawTx = decodeRawTx(Buffer.from(cbor, 'hex'))
-        expect(parsedRawTx).to.deep.equal(rawTx)
       })
     }
   })
@@ -48,20 +38,6 @@ describe('Parse', () => {
         ParseError,
         ParseErrorReason.INVALID_TX_BODY_CBOR,
       )
-    })
-  })
-
-  describe('Invalid raw transactions', () => {
-    it('Raw transaction is not an array', () => {
-      expect(() => decodeRawTx(Buffer.from('00', 'hex'))).to.throw(
-        ParseError,
-        ParseErrorReason.INVALID_RAW_TX_CBOR,
-      )
-    })
-    it('Raw transaction array is too big', () => {
-      expect(() =>
-        decodeRawTx(Buffer.from('8701020304050607', 'hex')),
-      ).to.throw(ParseError, ParseErrorReason.INVALID_RAW_TX_CBOR)
     })
   })
 

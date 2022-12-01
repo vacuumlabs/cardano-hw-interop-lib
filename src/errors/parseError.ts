@@ -75,7 +75,6 @@ export enum ParseErrorReason {
   INVALID_REFERENCE_INPUTS = 'Invalid transaction reference inputs',
 
   INVALID_TX_CBOR = 'Invalid transaction CBOR',
-  INVALID_RAW_TX_CBOR = 'Invalid raw transaction CBOR',
 }
 
 export class ParseError extends Error {
