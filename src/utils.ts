@@ -27,11 +27,6 @@ export const decodeCbor = (buffer: Buffer) =>
 
 export const encodeToCbor = (x: any) => cbor.encodeOne(x, { canonical: true })
 
-export const addIndefiniteLengthFlag = (x: any) => {
-  x.encodeCBOR = cbor.Encoder.encodeIndefinite
-  return x
-}
-
 export const bind =
   <A, R, T extends any[]>(
     fn: (x: A, ...args: T) => R,

@@ -12,7 +12,6 @@ import type {
   PolicyId,
   PoolMetadata,
   PoolParams,
-  RawTransaction,
   ReferenceScript,
   Relay,
   RewardAccount,
@@ -31,7 +30,6 @@ import {
   TxOutputFormat,
 } from './types'
 import {
-  addIndefiniteLengthFlag,
   BabbageTransactionOutputKeys,
   CborTag,
   filteredMap,
@@ -223,21 +221,5 @@ export const serializeTx = (tx: Transaction) => {
     tx.witnessSet,
     tx.scriptValidity,
     tx.auxiliaryData,
-  ].filter((item) => item !== undefined)
-}
-
-export const serializeRawTx = (rawTx: RawTransaction) => {
-  if (rawTx.scriptWitnesses !== undefined) {
-    // cardano-cli expects indefinite-length scriptWitnesses
-    addIndefiniteLengthFlag(rawTx.scriptWitnesses)
-  }
-
-  return [
-    serializeTxBody(rawTx.body),
-    rawTx.scriptWitnesses,
-    rawTx.datumWitnesses,
-    rawTx.redeemerWitnesses,
-    rawTx.scriptValidity,
-    rawTx.auxiliaryData,
   ].filter((item) => item !== undefined)
 }
