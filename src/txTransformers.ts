@@ -11,7 +11,7 @@ import type {
   Unparsed,
 } from './types'
 import { AmountType, DatumType, TxOutputFormat } from './types'
-import { blake2b256, encodeToCbor } from './utils'
+import { blake2b256, encodeToCbor, unreachable } from './utils'
 
 const transformOptionalList = <T>(optionalList?: T[]): T[] | undefined =>
   optionalList?.length === 0 ? undefined : optionalList
@@ -52,6 +52,8 @@ const transformAmount = (amount: Amount): Amount => {
         multiasset,
       }
     }
+    default:
+      unreachable(amount)
   }
 }
 
@@ -65,8 +67,9 @@ const transformDatum = (datum: Datum | undefined): Datum | undefined => {
       if (datum.bytes.length === 0) {
         return undefined
       }
-
       return datum
+    default:
+      unreachable(datum)
   }
 }
 
@@ -93,6 +96,8 @@ const transformTxOutput = (output: TransactionOutput): TransactionOutput => {
         datum: transformDatum(output.datum),
         referenceScript: transformReferenceScript(output.referenceScript),
       }
+    default:
+      unreachable(output)
   }
 }
 

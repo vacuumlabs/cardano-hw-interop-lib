@@ -34,6 +34,7 @@ import {
   CborTag,
   filteredMap,
   TransactionBodyKeys,
+  unreachable,
 } from './utils'
 
 const identity = <T>(x: T): T => x
@@ -59,6 +60,8 @@ const serializeAmount = (amount: Amount) => {
       return amount.coin
     case AmountType.WITH_MULTIASSET:
       return [amount.coin, serializeMultiasset(amount.multiasset)]
+    default:
+      unreachable(amount)
   }
 }
 
@@ -73,6 +76,8 @@ const serializeDatum = (datum: Datum) => {
       return [datum.type, datum.hash]
     case DatumType.INLINE:
       return [datum.type, new Tagged(CborTag.ENCODED_CBOR, datum.bytes)]
+    default:
+      unreachable(datum)
   }
 }
 
@@ -100,6 +105,8 @@ const serializeTxOutput = (output: TransactionOutput) => {
       return serializeLegacyTxOutput(output)
     case TxOutputFormat.MAP_BABBAGE:
       return serializeBabbageTxOutput(output)
+    default:
+      unreachable(output)
   }
 }
 
@@ -118,6 +125,8 @@ const serializeRelay = (relay: Relay) => {
       return [relay.type, relay.port, relay.dnsName]
     case RelayType.MULTI_HOST_NAME:
       return [relay.type, relay.dnsName]
+    default:
+      unreachable(relay)
   }
 }
 
@@ -164,6 +173,8 @@ const serializeCertificate = (certificate: Certificate) => {
     case CertificateType.GENESIS_KEY_DELEGATION:
     case CertificateType.MOVE_INSTANTANEOUS_REWARDS_CERT:
       return [certificate.type, ...certificate.restOfData]
+    default:
+      unreachable(certificate)
   }
 }
 

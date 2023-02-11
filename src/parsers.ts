@@ -1,7 +1,6 @@
 import { Tagged } from 'cbor'
 
-import type { ParseErrorReason } from './errors'
-import { ParseError } from './errors'
+import { ParseErrorReason, ParseError } from './errors'
 import type {
   FixLenBuffer,
   Int,
@@ -112,7 +111,7 @@ export const parseEmbeddedCborBytes = (
   errMsg: ParseErrorReason,
 ): Buffer => {
   validate(data instanceof Tagged, errMsg)
-  validate(data.tag == CborTag.ENCODED_CBOR, errMsg)
+  validate(data.tag === CborTag.ENCODED_CBOR, errMsg)
   validate(isBuffer(data.value), errMsg)
   return data.value
 }
@@ -129,6 +128,7 @@ export type Parser<T> = (data: unknown) => T
  * returns a parser function that only requires the data to execute
  * @see Parser
  */
+/* eslint-disable no-redeclare */
 export function createParser<L extends number>(
   parser: (
     data: unknown,
@@ -156,16 +156,17 @@ export function createParser<L extends number>(
   maxLength: L,
   errMsg: ParseErrorReason,
 ): Parser<MaxLenString<L>>
-export function createParser<T, A extends any[]>(
+export function createParser<T, A extends unknown[]>(
   parser: (data: unknown, ...args: [...A]) => T,
   ...args: [...A]
 ): Parser<T>
-export function createParser<T, A extends any[]>(
+export function createParser<T, A extends unknown[]>(
   parser: (data: unknown, ...args: [...A]) => T,
   ...args: [...A]
 ): Parser<T> {
   return (data: unknown) => parser(data, ...args)
 }
+/* eslint-enable no-redeclare */
 
 export const parseMap = <K, V>(
   data: unknown,
@@ -200,7 +201,7 @@ export const parseArray = <T>(
  *     // returns [123N, -1N]
  *     parseTuple([123, -1], InvalidDataReason.INVALID, parseUint64, parseInt64)
  */
-export const parseTuple = <T extends any[]>(
+export const parseTuple = <T extends unknown[]>(
   data: unknown,
   errMsg: ParseErrorReason,
   ...parsers: { [K in keyof T]: Parser<T[K]> }
@@ -223,7 +224,7 @@ export type WithoutType<T> = Omit<T, 'type'>
 type ArrayParser<T> = (data: unknown[]) => T
 type ParsersWithoutType<T> = { [K in keyof T]: ArrayParser<WithoutType<T[K]>> }
 
-export const parseBasedOnType = <T extends number, U extends any[]>(
+export const parseBasedOnType = <T extends number, U extends unknown[]>(
   data: unknown,
   errMsg: ParseErrorReason,
   typeParser: Parser<T>,
