@@ -18,7 +18,7 @@ import type {
   Withdrawal,
 } from './types'
 import { AmountType, CertificateType, DatumType, TxOutputFormat } from './types'
-import { bind, getRewardAccountStakeCredentialType } from './utils'
+import { bind, getRewardAccountStakeCredentialType, unreachable } from './utils'
 
 const UINT16_MAX = 65535
 const MAX_UINT_64_STR = '18446744073709551615'
@@ -43,7 +43,8 @@ function* validateOptional<T>(
   x: T | undefined | null,
   validateFn: (x: T) => ValidatorReturnType,
 ): ValidatorReturnType {
-  x === undefined || x === null ? x : yield* validateFn(x)
+  if (x != null)
+    yield* validateFn(x)
 }
 
 /**
@@ -52,7 +53,7 @@ function* validateOptional<T>(
  *  * the length of a list must not exceed `UINT16_MAX`, i.e. 65535
  */
 function* validateListConstraints(
-  list: any[],
+  list: unknown[],
   position: string,
   requiredList: boolean,
 ): ValidatorReturnType {
@@ -143,6 +144,8 @@ function* validateTxOutputAmount(
         `${position}`,
       )
       break
+    default:
+      unreachable(amount)
   }
 }
 

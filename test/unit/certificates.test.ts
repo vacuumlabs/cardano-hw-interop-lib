@@ -1,12 +1,11 @@
 import { ParseErrorReason } from '../../src/errors'
 import { parseCertificates } from '../../src/txParsers'
-import type { Certificate, Port } from '../../src/types'
 import {
+  Certificate, Port,
   CertificateType,
   RelayType,
   StakeCredentialType,
 } from '../../src/types'
-import type { InvalidParseTestCase, ValidParseTestCase } from '../test_utils'
 import {
   ipv4ToBuffer,
   registerTests,
@@ -14,6 +13,7 @@ import {
   toFixLenBuffer,
   toMaxLenString,
   toUint,
+  InvalidParseTestCase, ValidParseTestCase
 } from '../test_utils'
 
 const ValidCertificatesTestCases: ValidParseTestCase<Certificate[]>[] = [

@@ -1,9 +1,7 @@
 import { ParseErrorReason } from '../../src/errors'
 import { parseOutputs } from '../../src/txParsers'
 import type { MaxLenBuffer, TransactionOutput } from '../../src/types'
-import { DatumType } from '../../src/types'
-import { TxOutputFormat } from '../../src/types'
-import { AmountType } from '../../src/types'
+import { DatumType , TxOutputFormat , AmountType } from '../../src/types'
 import type { InvalidParseTestCase, ValidParseTestCase } from '../test_utils'
 import {
   fromBech32,

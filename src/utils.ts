@@ -4,6 +4,15 @@ import cbor from 'cbor'
 import type { FixLenBuffer, RewardAccount } from './types'
 import { StakeCredentialType } from './types'
 
+export function assert(cond: boolean, errMsg: string): asserts cond {
+  const msg = errMsg ? `: ${errMsg}` : ''
+  if (!cond) throw new Error(`Assertion failed${msg}`)
+}
+
+export function unreachable(_val: never): never {
+  assert(false, 'Unreachable code hit')
+}
+
 export enum CborTag {
   ENCODED_CBOR = 24,
   TUPLE = 30,
@@ -16,8 +25,8 @@ export const decodeCbor = (buffer: Buffer) =>
       // Specifies that tag 30 should be parsed only as a tuple. For example
       // the CDDL specifies unit_interval as:
       // unit_interval = #6.30([uint, uint])
-      [CborTag.TUPLE]: (v: any) => {
-        if (!Array.isArray(v) || v.length != 2) {
+      [CborTag.TUPLE]: (v: unknown) => {
+        if (!Array.isArray(v) || v.length !== 2) {
           throw new Error('Invalid tuple')
         }
         return v
@@ -25,17 +34,17 @@ export const decodeCbor = (buffer: Buffer) =>
     },
   })
 
-export const encodeToCbor = (x: any) => cbor.encodeOne(x, { canonical: true })
+export const encodeToCbor = (x: unknown) => cbor.encodeOne(x, { canonical: true })
 
 export const bind =
-  <A, R, T extends any[]>(
+  <A, R, T extends unknown[]>(
     fn: (x: A, ...args: T) => R,
     ...args: T
   ): ((x: A) => R) =>
   (x: A) =>
     fn(x, ...args)
 
-export const undefinedOnlyAtTheEnd = (xs: any[]): boolean => {
+export const undefinedOnlyAtTheEnd = (xs: unknown[]): boolean => {
   const firstUndefined = xs.indexOf(undefined)
   if (firstUndefined === -1) {
     return true
@@ -53,6 +62,7 @@ export const filteredMap = <K, V>(entries: [K, V | undefined][]): Map<K, V> =>
 export const getRewardAccountStakeCredentialType = (
   rewardAccount: RewardAccount,
 ) => {
+  // eslint-disable-next-line no-bitwise
   switch ((rewardAccount[0] >> 4) & 1) {
     case 0:
       return StakeCredentialType.KEY_HASH
