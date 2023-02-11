@@ -82,7 +82,7 @@ import {
   undefinedOnlyAtTheEnd,
 } from './utils'
 
-const dontParse: Parser<Unparsed> = (data: unknown) => data
+const doNotParse: Parser<Unparsed> = (data: unknown) => data
 
 const parseRewardAccount = createParser(
   parseBufferOfLength,
@@ -720,9 +720,9 @@ export const parseTx = (unparsedTx: unknown): Transaction => {
     ParseErrorReason.INVALID_TX_CBOR,
     parseTxBody,
     //             | shelley era:  | alonzo era:
-    dontParse, // | witnessSet    | witnessSet
-    dontParse, // | auxiliaryData | scriptValidity
-    dontParse, // | `undefined`   | auxiliaryData
+    doNotParse, // | witnessSet    | witnessSet
+    doNotParse, // | auxiliaryData | scriptValidity
+    doNotParse, // | `undefined`   | auxiliaryData
   )
   validate(undefinedOnlyAtTheEnd(otherItems), ParseErrorReason.INVALID_TX_CBOR)
   const presentItems = otherItems.filter((item) => item !== undefined)

@@ -5,28 +5,28 @@ import type { ParseErrorReason } from '../src/errors'
 import { ParseError } from '../src/errors'
 import type { Parser } from '../src/parsers'
 import type {
-  FixlenBuffer,
+  FixLenBuffer,
   Int,
-  MaxlenString,
+  MaxLenString,
   RewardAccount,
   Uint,
 } from '../src/types'
 import { decodeCbor } from '../src/utils'
 
-export const ipv4ToBuffer = (ipv4: string): FixlenBuffer<4> =>
+export const ipv4ToBuffer = (ipv4: string): FixLenBuffer<4> =>
   Buffer.from(
     ipv4.split('.').map((n) => Number.parseInt(n, 10)),
-  ) as FixlenBuffer<4>
+  ) as FixLenBuffer<4>
 
-export const toFixlenBuffer = <N extends number>(
+export const toFixLenBuffer = <N extends number>(
   str: string,
   length: N,
-): FixlenBuffer<N> => Buffer.from(str, 'hex') as FixlenBuffer<typeof length>
+): FixLenBuffer<N> => Buffer.from(str, 'hex') as FixLenBuffer<typeof length>
 
 export const toMaxLenString = <N extends number>(
   str: string,
   length: N,
-): MaxlenString<N> => str as MaxlenString<typeof length>
+): MaxLenString<N> => str as MaxLenString<typeof length>
 
 export const toUint = (n: string | number): Uint =>
   (typeof n === 'string' ? BigInt(n) : n) as Uint
@@ -40,14 +40,14 @@ export const fromBech32 = (str: string): Buffer =>
 export const rewardAccount = (str: string): RewardAccount =>
   fromBech32(str) as RewardAccount
 
-export type ValidParseTestcase<T> = {
-  testname: string
+export type ValidParseTestCase<T> = {
+  testName: string
   cbor: string
   parsed: T
 }
 
-export type InvalidParseTestcase = {
-  testname: string
+export type InvalidParseTestCase = {
+  testName: string
   cbor: string
   errMsg: ParseErrorReason
 }
@@ -55,13 +55,13 @@ export type InvalidParseTestcase = {
 export const registerTests = <T>(
   name: string,
   parseFn: Parser<T>,
-  validTestcases: ValidParseTestcase<T>[],
-  invalidTestcases: InvalidParseTestcase[],
+  validTestCases: ValidParseTestCase<T>[],
+  invalidTestCases: InvalidParseTestCase[],
 ) =>
   describe(name, () => {
     describe('Valid', () => {
-      for (const { testname, cbor, parsed: expectedParsed } of validTestcases) {
-        it(testname, () => {
+      for (const { testName, cbor, parsed: expectedParsed } of validTestCases) {
+        it(testName, () => {
           const parsed = parseFn(decodeCbor(Buffer.from(cbor, 'hex')))
 
           expect(parsed).to.deep.equal(expectedParsed)
@@ -71,11 +71,11 @@ export const registerTests = <T>(
 
     describe('Invalid', () => {
       for (const {
-        testname,
+        testName,
         cbor,
         errMsg: expectedErrMsg,
-      } of invalidTestcases) {
-        it(testname, () => {
+      } of invalidTestCases) {
+        it(testName, () => {
           expect(() => parseFn(decodeCbor(Buffer.from(cbor, 'hex')))).to.throw(
             ParseError,
             expectedErrMsg,

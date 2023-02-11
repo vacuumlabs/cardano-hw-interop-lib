@@ -3,11 +3,11 @@ import { Tagged } from 'cbor'
 import type { ParseErrorReason } from './errors'
 import { ParseError } from './errors'
 import type {
-  FixlenBuffer,
+  FixLenBuffer,
   Int,
-  MaxlenBuffer,
-  MaxlenString,
-  MaxsizeUint,
+  MaxLenBuffer,
+  MaxLenString,
+  MaxSizeUint,
   Uint,
 } from './types'
 import { CborTag } from './utils'
@@ -34,7 +34,7 @@ export const isMapWithKeysOfType = <K>(
 export const isStringOfMaxLength = <L extends number>(
   data: unknown,
   maxLength: L,
-): data is MaxlenString<L> =>
+): data is MaxLenString<L> =>
   typeof data === 'string' && data.length <= maxLength
 
 export const isBuffer = (data: unknown): data is Buffer => Buffer.isBuffer(data)
@@ -42,12 +42,12 @@ export const isBuffer = (data: unknown): data is Buffer => Buffer.isBuffer(data)
 export const isBufferOfLength = <L extends number>(
   data: unknown,
   expectedLength: L,
-): data is FixlenBuffer<L> => isBuffer(data) && data.length === expectedLength
+): data is FixLenBuffer<L> => isBuffer(data) && data.length === expectedLength
 
 export const isBufferOfMaxLength = <L extends number>(
   data: unknown,
   maxLength: L,
-): data is MaxlenBuffer<L> => isBuffer(data) && data.length <= maxLength
+): data is MaxLenBuffer<L> => isBuffer(data) && data.length <= maxLength
 
 export const isNumber = (data: unknown): data is number =>
   typeof data === 'number'
@@ -60,7 +60,7 @@ export const isUint = (data: unknown): data is Uint => isInt(data) && data >= 0
 export const isUintOfMaxSize = <N extends number>(
   data: unknown,
   maxSize: N,
-): data is MaxsizeUint<N> => isUint(data) && data <= maxSize
+): data is MaxSizeUint<N> => isUint(data) && data <= maxSize
 
 export const parseInt = (data: unknown, errMsg: ParseErrorReason): Int => {
   validate(isInt(data), errMsg)
@@ -76,7 +76,7 @@ export const parseStringOfMaxLength = <L extends number>(
   data: unknown,
   maxLength: L,
   errMsg: ParseErrorReason,
-): MaxlenString<L> => {
+): MaxLenString<L> => {
   validate(isStringOfMaxLength(data, maxLength), errMsg)
   return data
 }
@@ -93,7 +93,7 @@ export const parseBufferOfLength = <L extends number>(
   data: unknown,
   length: L,
   errMsg: ParseErrorReason,
-): FixlenBuffer<L> => {
+): FixLenBuffer<L> => {
   validate(isBufferOfLength(data, length), errMsg)
   return data
 }
@@ -102,7 +102,7 @@ export const parseBufferOfMaxLength = <L extends number>(
   data: unknown,
   maxLength: L,
   errMsg: ParseErrorReason,
-): MaxlenBuffer<L> => {
+): MaxLenBuffer<L> => {
   validate(isBufferOfMaxLength(data, maxLength), errMsg)
   return data
 }
@@ -134,28 +134,28 @@ export function createParser<L extends number>(
     data: unknown,
     length: L,
     errMsg: ParseErrorReason,
-  ) => FixlenBuffer<L>,
+  ) => FixLenBuffer<L>,
   length: L,
   errMsg: ParseErrorReason,
-): Parser<FixlenBuffer<L>>
+): Parser<FixLenBuffer<L>>
 export function createParser<L extends number>(
   parser: (
     data: unknown,
     maxLength: L,
     errMsg: ParseErrorReason,
-  ) => MaxlenBuffer<L>,
+  ) => MaxLenBuffer<L>,
   maxLength: L,
   errMsg: ParseErrorReason,
-): Parser<MaxlenBuffer<L>>
+): Parser<MaxLenBuffer<L>>
 export function createParser<L extends number>(
   parser: (
     data: unknown,
     maxLength: L,
     errMsg: ParseErrorReason,
-  ) => MaxlenString<L>,
+  ) => MaxLenString<L>,
   maxLength: L,
   errMsg: ParseErrorReason,
-): Parser<MaxlenString<L>>
+): Parser<MaxLenString<L>>
 export function createParser<T, A extends any[]>(
   parser: (data: unknown, ...args: [...A]) => T,
   ...args: [...A]

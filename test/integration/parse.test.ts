@@ -3,14 +3,14 @@ import { expect } from 'chai'
 import { ParseError, ParseErrorReason } from '../../src/errors'
 import { decodeTx, decodeTxBody } from '../../src/index'
 import {
-  ValidTransactionBodyTestcases,
-  ValidTransactionTestcases,
+  ValidTransactionBodyTestCases,
+  ValidTransactionTestCases,
 } from './__fixtures__/transactions'
 
 describe('Parse', () => {
   describe('Valid transaction bodies', () => {
-    for (const { testname, cbor, txBody } of ValidTransactionBodyTestcases) {
-      it(testname, () => {
+    for (const { testName, cbor, txBody } of ValidTransactionBodyTestCases) {
+      it(testName, () => {
         const parsedTxBody = decodeTxBody(Buffer.from(cbor, 'hex'))
         expect(parsedTxBody).to.deep.equal(txBody)
       })
@@ -18,8 +18,8 @@ describe('Parse', () => {
   })
 
   describe('Valid transactions', () => {
-    for (const { testname, cbor, tx } of ValidTransactionTestcases) {
-      it(testname, () => {
+    for (const { testName, cbor, tx } of ValidTransactionTestCases) {
+      it(testName, () => {
         const parsedTx = decodeTx(Buffer.from(cbor, 'hex'))
         expect(parsedTx).to.deep.equal(tx)
       })
