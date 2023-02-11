@@ -3,10 +3,10 @@ export type Unparsed = unknown
 export type Uint = (number | bigint) & { __type: 'uint' }
 export type Int = (number | bigint) & { __type: 'int' }
 
-export type MaxlenString<N> = string & { __maxLength: N }
-export type FixlenBuffer<N> = Buffer & { __length: N }
-export type MaxlenBuffer<N> = Buffer & { __maxLength: N }
-export type MaxsizeUint<N> = Uint & { __maxSize: N }
+export type MaxLenString<N> = string & { __maxLength: N }
+export type FixLenBuffer<N> = Buffer & { __length: N }
+export type MaxLenBuffer<N> = Buffer & { __maxLength: N }
+export type MaxSizeUint<N> = Uint & { __maxSize: N }
 
 export const KEY_HASH_LENGTH = 28
 export const SCRIPT_HASH_LENGTH = 28
@@ -31,21 +31,21 @@ export const DNS_NAME_MAX_LENGTH = 64
 export const PORT_MAX_SIZE = 65535
 
 export type Address = Buffer
-export type KeyHash = FixlenBuffer<typeof KEY_HASH_LENGTH>
-export type ScriptHash = FixlenBuffer<typeof SCRIPT_HASH_LENGTH>
-export type RewardAccount = FixlenBuffer<typeof REWARD_ACCOUNT_LENGTH>
+export type KeyHash = FixLenBuffer<typeof KEY_HASH_LENGTH>
+export type ScriptHash = FixLenBuffer<typeof SCRIPT_HASH_LENGTH>
+export type RewardAccount = FixLenBuffer<typeof REWARD_ACCOUNT_LENGTH>
 export type Coin = Uint
 export type Epoch = Uint
 
 // Transaction input
 export type TransactionInput = {
-  transactionId: FixlenBuffer<typeof TX_ID_HASH_LENGTH>
+  transactionId: FixLenBuffer<typeof TX_ID_HASH_LENGTH>
   index: Uint
 }
 
 // Multiasset
-export type PolicyId = FixlenBuffer<typeof SCRIPT_HASH_LENGTH>
-export type AssetName = MaxlenBuffer<typeof ASSET_NAME_MAX_LENGTH>
+export type PolicyId = FixLenBuffer<typeof SCRIPT_HASH_LENGTH>
+export type AssetName = MaxLenBuffer<typeof ASSET_NAME_MAX_LENGTH>
 export type Token<T> = {
   assetName: AssetName
   amount: T
@@ -81,7 +81,7 @@ export enum DatumType {
 
 export type DatumHash = {
   type: DatumType.HASH
-  hash: FixlenBuffer<typeof DATUM_HASH_LENGTH>
+  hash: FixLenBuffer<typeof DATUM_HASH_LENGTH>
 }
 
 export type DatumInline = {
@@ -159,14 +159,14 @@ export type StakeDeregistrationCertificate = {
 export type StakeDelegationCertificate = {
   type: CertificateType.STAKE_DELEGATION
   stakeCredential: StakeCredential
-  poolKeyHash: FixlenBuffer<typeof POOL_KEY_HASH_LENGTH>
+  poolKeyHash: FixLenBuffer<typeof POOL_KEY_HASH_LENGTH>
 }
 
 export type UnitInterval = [Uint, Uint]
 
-export type Port = MaxsizeUint<typeof PORT_MAX_SIZE>
+export type Port = MaxSizeUint<typeof PORT_MAX_SIZE>
 
-export type DNSName = MaxlenString<typeof DNS_NAME_MAX_LENGTH>
+export type DNSName = MaxLenString<typeof DNS_NAME_MAX_LENGTH>
 
 export enum RelayType {
   SINGLE_HOST_ADDRESS = 0,
@@ -177,8 +177,8 @@ export enum RelayType {
 export type RelaySingleHostAddress = {
   type: RelayType.SINGLE_HOST_ADDRESS
   port: Port | null
-  ipv4: FixlenBuffer<typeof IPV4_LENGTH> | null
-  ipv6: FixlenBuffer<typeof IPV6_LENGTH> | null
+  ipv4: FixLenBuffer<typeof IPV4_LENGTH> | null
+  ipv6: FixLenBuffer<typeof IPV6_LENGTH> | null
 }
 
 export type RelaySingleHostName = {
@@ -198,13 +198,13 @@ export type Relay =
   | RelayMultiHostName
 
 export type PoolMetadata = {
-  url: MaxlenString<typeof URL_MAX_LENGTH>
-  metadataHash: FixlenBuffer<typeof POOL_METADATA_HASH_LENGTH>
+  url: MaxLenString<typeof URL_MAX_LENGTH>
+  metadataHash: FixLenBuffer<typeof POOL_METADATA_HASH_LENGTH>
 }
 
 export type PoolParams = {
-  operator: FixlenBuffer<typeof POOL_KEY_HASH_LENGTH>
-  vrfKeyHash: FixlenBuffer<typeof VRF_KEY_HASH_LENGTH>
+  operator: FixLenBuffer<typeof POOL_KEY_HASH_LENGTH>
+  vrfKeyHash: FixLenBuffer<typeof VRF_KEY_HASH_LENGTH>
   pledge: Coin
   cost: Coin
   margin: UnitInterval
@@ -221,7 +221,7 @@ export type PoolRegistrationCertificate = {
 
 export type PoolRetirementCertificate = {
   type: CertificateType.POOL_RETIREMENT
-  poolKeyHash: FixlenBuffer<typeof POOL_KEY_HASH_LENGTH>
+  poolKeyHash: FixLenBuffer<typeof POOL_KEY_HASH_LENGTH>
   epoch: Epoch
 }
 
@@ -254,7 +254,7 @@ export type Withdrawal = {
 export type Mint = Multiasset<Int>
 
 // Required signer
-export type RequiredSigner = FixlenBuffer<typeof KEY_HASH_LENGTH>
+export type RequiredSigner = FixLenBuffer<typeof KEY_HASH_LENGTH>
 
 // Transaction body
 export type TransactionBody = {
@@ -265,10 +265,10 @@ export type TransactionBody = {
   certificates?: Certificate[]
   withdrawals?: Withdrawal[]
   update?: Unparsed
-  auxiliaryDataHash?: FixlenBuffer<typeof AUXILIARY_DATA_HASH_LENGTH>
+  auxiliaryDataHash?: FixLenBuffer<typeof AUXILIARY_DATA_HASH_LENGTH>
   validityIntervalStart?: Uint
   mint?: Mint
-  scriptDataHash?: FixlenBuffer<typeof SCRIPT_DATA_HASH_LENGTH>
+  scriptDataHash?: FixLenBuffer<typeof SCRIPT_DATA_HASH_LENGTH>
   collateralInputs?: TransactionInput[]
   requiredSigners?: RequiredSigner[]
   networkId?: Uint

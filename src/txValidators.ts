@@ -431,7 +431,7 @@ function* validatePoolRegistrationTransaction(
   // present or if the array length is 0. Checking only whether the field is
   // not present is not sufficient because the transaction could contain an
   // empty array which is a fixable error but it would fail this validation,
-  // which is not fixable. This could lead to a scenario where a potentionally
+  // which is not fixable. This could lead to a scenario where a potentially
   // fixable transaction would have an unfixable validation error reported.
   yield* validate(
     !txBody.withdrawals || txBody.withdrawals.length === 0,

@@ -1,6 +1,6 @@
 # Cardano HW Interoperability Library
 
-JavaScript library to validate and transform Cardano transactions accroding to [CIP-0021](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/CIP-0021.md).
+JavaScript library to validate and transform Cardano transactions according to [CIP-0021](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/CIP-0021.md).
 
 ## Available methods
 
@@ -37,7 +37,7 @@ Takes a CBOR encoded input, validates it according to `CIP-0021` and returns an 
 The validation errors are of type `ValidationError` and we distinguish between _fixable_ and _unfixable_ errors. If the `validate` function reports:
 
 - no _fixable_ and no _unfixable_ errors then the CBOR is already fully compliant with CIP-0021.
-- only _fixable_ errors then a call to a `transform` function will solve the found errors and the _transcation_ will be compliant with CIP-0021.
+- only _fixable_ errors then a call to a `transform` function will solve the found errors and the _transaction_ will be compliant with CIP-0021.
 - _unfixable_ errors then the library is not able to transform the CBOR by itself.
 
 Available methods:

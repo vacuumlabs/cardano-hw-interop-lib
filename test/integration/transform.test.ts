@@ -1,16 +1,16 @@
 import { expect } from 'chai'
 
 import { decodeTxBody, transformTxBody } from '../../src/index'
-import { TransformTransactionTestcases } from './__fixtures__/transactions'
+import { TransformTransactionTestCases } from './__fixtures__/transactions'
 
 describe('Transform', () => {
   for (const {
-    testname,
+    testName,
     cbor,
     auxiliaryData,
     txBody,
-  } of TransformTransactionTestcases) {
-    it(testname, () => {
+  } of TransformTransactionTestCases) {
+    it(testName, () => {
       const transformedTxBody = transformTxBody(
         decodeTxBody(Buffer.from(cbor, 'hex')),
         auxiliaryData,

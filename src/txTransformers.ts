@@ -2,7 +2,7 @@ import type {
   Amount,
   AUXILIARY_DATA_HASH_LENGTH,
   Datum,
-  FixlenBuffer,
+  FixLenBuffer,
   Multiasset,
   ReferenceScript,
   Transaction,
@@ -105,10 +105,10 @@ const transformTxOutput = (output: TransactionOutput): TransactionOutput => {
  */
 const transformAuxiliaryDataHash = (
   auxiliaryDataHash:
-    | FixlenBuffer<typeof AUXILIARY_DATA_HASH_LENGTH>
+    | FixLenBuffer<typeof AUXILIARY_DATA_HASH_LENGTH>
     | undefined,
   auxiliaryData: Unparsed,
-): FixlenBuffer<typeof AUXILIARY_DATA_HASH_LENGTH> | undefined =>
+): FixLenBuffer<typeof AUXILIARY_DATA_HASH_LENGTH> | undefined =>
   auxiliaryData == null
     ? auxiliaryDataHash
     : blake2b256(encodeToCbor(auxiliaryData))
