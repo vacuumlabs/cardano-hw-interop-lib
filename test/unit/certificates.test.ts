@@ -1,7 +1,8 @@
-import { ParseErrorReason } from '../../src/errors'
-import { parseCertificates } from '../../src/txParsers'
+import {ParseErrorReason} from '../../src/errors'
+import {parseCertificates} from '../../src/txParsers'
 import {
-  Certificate, Port,
+  Certificate,
+  Port,
   CertificateType,
   RelayType,
   StakeCredentialType,
@@ -13,7 +14,8 @@ import {
   toFixLenBuffer,
   toMaxLenString,
   toUint,
-  InvalidParseTestCase, ValidParseTestCase
+  InvalidParseTestCase,
+  ValidParseTestCase,
 } from '../test_utils'
 
 const ValidCertificatesTestCases: ValidParseTestCase<Certificate[]>[] = [

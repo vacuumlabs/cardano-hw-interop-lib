@@ -1,14 +1,9 @@
-import { ParseErrorReason } from '../../src/errors'
-import { parseOutputs } from '../../src/txParsers'
-import type { MaxLenBuffer, TransactionOutput } from '../../src/types'
-import { DatumType , TxOutputFormat , AmountType } from '../../src/types'
-import type { InvalidParseTestCase, ValidParseTestCase } from '../test_utils'
-import {
-  fromBech32,
-  registerTests,
-  toFixLenBuffer,
-  toUint,
-} from '../test_utils'
+import {ParseErrorReason} from '../../src/errors'
+import {parseOutputs} from '../../src/txParsers'
+import type {MaxLenBuffer, TransactionOutput} from '../../src/types'
+import {DatumType, TxOutputFormat, AmountType} from '../../src/types'
+import type {InvalidParseTestCase, ValidParseTestCase} from '../test_utils'
+import {fromBech32, registerTests, toFixLenBuffer, toUint} from '../test_utils'
 
 const ValidOutputsTestCases: ValidParseTestCase<TransactionOutput[]>[] = [
   {

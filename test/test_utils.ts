@@ -1,9 +1,9 @@
-import { bech32 } from 'bech32'
-import { expect } from 'chai'
+import {bech32} from 'bech32'
+import {expect} from 'chai'
 
-import type { ParseErrorReason } from '../src/errors'
-import { ParseError } from '../src/errors'
-import type { Parser } from '../src/parsers'
+import type {ParseErrorReason} from '../src/errors'
+import {ParseError} from '../src/errors'
+import type {Parser} from '../src/parsers'
 import type {
   FixLenBuffer,
   Int,
@@ -11,7 +11,7 @@ import type {
   RewardAccount,
   Uint,
 } from '../src/types'
-import { decodeCbor } from '../src/utils'
+import {decodeCbor} from '../src/utils'
 
 export const ipv4ToBuffer = (ipv4: string): FixLenBuffer<4> =>
   Buffer.from(
@@ -60,7 +60,7 @@ export const registerTests = <T>(
 ) =>
   describe(name, () => {
     describe('Valid', () => {
-      for (const { testName, cbor, parsed: expectedParsed } of validTestCases) {
+      for (const {testName, cbor, parsed: expectedParsed} of validTestCases) {
         it(testName, () => {
           const parsed = parseFn(decodeCbor(Buffer.from(cbor, 'hex')))
 
@@ -70,11 +70,7 @@ export const registerTests = <T>(
     })
 
     describe('Invalid', () => {
-      for (const {
-        testName,
-        cbor,
-        errMsg: expectedErrMsg,
-      } of invalidTestCases) {
+      for (const {testName, cbor, errMsg: expectedErrMsg} of invalidTestCases) {
         it(testName, () => {
           expect(() => parseFn(decodeCbor(Buffer.from(cbor, 'hex')))).to.throw(
             ParseError,

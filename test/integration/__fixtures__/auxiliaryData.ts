@@ -1,6 +1,6 @@
 import * as cbor from 'cbor'
 
-import { toFixLenBuffer } from '../../test_utils'
+import {toFixLenBuffer} from '../../test_utils'
 
 export const CanonicalAuxiliaryData = {
   // 259({0: {721: {"ipfs": "some other text", "assetHash": "0931ae2de9aa46212e50adc1798f9071e7c6368b78ae7eb434c2ca0ed9d05370"}}})

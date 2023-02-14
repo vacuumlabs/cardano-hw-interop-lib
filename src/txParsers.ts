@@ -1,5 +1,5 @@
-import { ParseErrorReason } from './errors'
-import type { Parser, WithoutType } from './parsers'
+import {ParseErrorReason} from './errors'
+import type {Parser, WithoutType} from './parsers'
 import {
   createParser,
   isArray,
@@ -136,7 +136,7 @@ const parseTxInput = (unparsedTxInput: unknown): TransactionInput => {
     createParser(parseUint, ParseErrorReason.INVALID_TX_INPUT_INDEX),
   )
 
-  return { transactionId, index }
+  return {transactionId, index}
 }
 
 const parseAddress = createParser(
@@ -156,7 +156,7 @@ const parseAmountWithMultiasset = (unparsedAmount: unknown): Amount => {
     ),
   )
 
-  return { type: AmountType.WITH_MULTIASSET, coin, multiasset }
+  return {type: AmountType.WITH_MULTIASSET, coin, multiasset}
 }
 
 const parseAmountWithoutMultiasset = (unparsedAmount: unknown): Amount => ({
@@ -426,7 +426,7 @@ const parsePoolMetadata = (unparsedPoolMetadata: unknown): PoolMetadata => {
     ),
   )
 
-  return { url, metadataHash }
+  return {url, metadataHash}
 }
 
 const parsePoolParams = (unparsedPoolParams: unknown): PoolParams => {
@@ -564,7 +564,7 @@ const parseCollateralInput = (
     createParser(parseUint, ParseErrorReason.INVALID_COLLATERAL_INPUT_INDEX),
   )
 
-  return { transactionId, index }
+  return {transactionId, index}
 }
 
 const parseRequiredSigner = (unparsedRequiredSigner: unknown): RequiredSigner =>
@@ -588,7 +588,7 @@ const parseReferenceInput = (
     createParser(parseUint, ParseErrorReason.INVALID_REFERENCE_INPUT_INDEX),
   )
 
-  return { transactionId, index }
+  return {transactionId, index}
 }
 
 export const parseInputs = createParser(
@@ -734,7 +734,7 @@ export const parseTx = (unparsedTx: unknown): Transaction => {
   // cardano-cli with --shelley-era, --allegra-era and --mary-era
   // includes only txBody, witnessSet and auxiliaryData
   if (presentItems.length === 2) {
-    return { body, witnessSet: presentItems[0], auxiliaryData: presentItems[1] }
+    return {body, witnessSet: presentItems[0], auxiliaryData: presentItems[1]}
   }
 
   // cardano-cli with --alonzo-era includes all tx items

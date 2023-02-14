@@ -1,8 +1,8 @@
-import { ParseErrorReason } from '../../src/errors'
-import { parseInputs } from '../../src/txParsers'
-import type { TransactionInput } from '../../src/types'
-import type { InvalidParseTestCase, ValidParseTestCase } from '../test_utils'
-import { registerTests, toFixLenBuffer, toUint } from '../test_utils'
+import {ParseErrorReason} from '../../src/errors'
+import {parseInputs} from '../../src/txParsers'
+import type {TransactionInput} from '../../src/types'
+import type {InvalidParseTestCase, ValidParseTestCase} from '../test_utils'
+import {registerTests, toFixLenBuffer, toUint} from '../test_utils'
 
 const ValidInputsTestCases: ValidParseTestCase<TransactionInput[]>[] = [
   {

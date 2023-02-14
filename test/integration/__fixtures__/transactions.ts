@@ -878,7 +878,7 @@ export const ValidTransactionTestCases: ValidTransactionTestCase[] = [
           ],
         ],
       ]),
-      auxiliaryData: [new Map([[1234, { foo: 'bar' }]]), []],
+      auxiliaryData: [new Map([[1234, {foo: 'bar'}]]), []],
     },
   },
   {

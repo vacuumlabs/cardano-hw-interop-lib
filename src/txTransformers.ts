@@ -10,8 +10,8 @@ import type {
   TransactionOutput,
   Unparsed,
 } from './types'
-import { AmountType, DatumType, TxOutputFormat } from './types'
-import { blake2b256, encodeToCbor, unreachable } from './utils'
+import {AmountType, DatumType, TxOutputFormat} from './types'
+import {blake2b256, encodeToCbor, unreachable} from './utils'
 
 const transformOptionalList = <T>(optionalList?: T[]): T[] | undefined =>
   optionalList?.length === 0 ? undefined : optionalList
@@ -23,11 +23,11 @@ const transformMultiasset = <T>(
     ? undefined
     : transformOptionalList(
         multiasset
-          .map(({ policyId, tokens }) => ({
+          .map(({policyId, tokens}) => ({
             policyId,
             tokens: transformOptionalList(tokens),
           }))
-          .filter(({ tokens }) => tokens !== undefined) as Multiasset<T>,
+          .filter(({tokens}) => tokens !== undefined) as Multiasset<T>,
       )
 
 const transformAmount = (amount: Amount): Amount => {

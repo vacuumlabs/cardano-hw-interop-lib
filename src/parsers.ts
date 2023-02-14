@@ -1,6 +1,6 @@
-import { Tagged } from 'cbor'
+import {Tagged} from 'cbor'
 
-import { ParseErrorReason, ParseError } from './errors'
+import {ParseErrorReason, ParseError} from './errors'
 import type {
   FixLenBuffer,
   Int,
@@ -9,7 +9,7 @@ import type {
   MaxSizeUint,
   Uint,
 } from './types'
-import { CborTag } from './utils'
+import {CborTag} from './utils'
 
 export function validate(
   cond: boolean,
@@ -204,7 +204,7 @@ export const parseArray = <T>(
 export const parseTuple = <T extends unknown[]>(
   data: unknown,
   errMsg: ParseErrorReason,
-  ...parsers: { [K in keyof T]: Parser<T[K]> }
+  ...parsers: {[K in keyof T]: Parser<T[K]>}
 ): T => {
   validate(isArray(data), errMsg)
   validate(data.length <= parsers.length, errMsg)
@@ -222,7 +222,7 @@ export const parseNullable = <T>(data: unknown, parser: Parser<T>): T | null =>
 
 export type WithoutType<T> = Omit<T, 'type'>
 type ArrayParser<T> = (data: unknown[]) => T
-type ParsersWithoutType<T> = { [K in keyof T]: ArrayParser<WithoutType<T[K]>> }
+type ParsersWithoutType<T> = {[K in keyof T]: ArrayParser<WithoutType<T[K]>>}
 
 export const parseBasedOnType = <T extends number, U extends unknown[]>(
   data: unknown,

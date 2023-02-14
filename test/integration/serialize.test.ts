@@ -1,6 +1,6 @@
-import { expect } from 'chai'
+import {expect} from 'chai'
 
-import { encodeTx, encodeTxBody } from '../../src/index'
+import {encodeTx, encodeTxBody} from '../../src/index'
 import {
   ValidTransactionBodyTestCases,
   ValidTransactionTestCases,
@@ -8,7 +8,7 @@ import {
 
 describe('Serialize', () => {
   describe('Transaction bodies', () => {
-    for (const { testName, txBody, cbor } of ValidTransactionBodyTestCases) {
+    for (const {testName, txBody, cbor} of ValidTransactionBodyTestCases) {
       it(testName, () => {
         const serializedCbor = encodeTxBody(txBody).toString('hex')
         expect(serializedCbor).to.deep.equal(cbor)
@@ -17,7 +17,7 @@ describe('Serialize', () => {
   })
 
   describe('Transactions', () => {
-    for (const { testName, tx, cbor } of ValidTransactionTestCases) {
+    for (const {testName, tx, cbor} of ValidTransactionTestCases) {
       it(testName, () => {
         const serializedCbor = encodeTx(tx).toString('hex')
         expect(serializedCbor).to.deep.equal(cbor)
