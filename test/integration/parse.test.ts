@@ -1,7 +1,7 @@
-import { expect } from 'chai'
+import {expect} from 'chai'
 
-import { ParseError, ParseErrorReason } from '../../src/errors'
-import { decodeTx, decodeTxBody } from '../../src/index'
+import {ParseError, ParseErrorReason} from '../../src/errors'
+import {decodeTx, decodeTxBody} from '../../src/index'
 import {
   ValidTransactionBodyTestCases,
   ValidTransactionTestCases,
@@ -9,7 +9,7 @@ import {
 
 describe('Parse', () => {
   describe('Valid transaction bodies', () => {
-    for (const { testName, cbor, txBody } of ValidTransactionBodyTestCases) {
+    for (const {testName, cbor, txBody} of ValidTransactionBodyTestCases) {
       it(testName, () => {
         const parsedTxBody = decodeTxBody(Buffer.from(cbor, 'hex'))
         expect(parsedTxBody).to.deep.equal(txBody)
@@ -18,7 +18,7 @@ describe('Parse', () => {
   })
 
   describe('Valid transactions', () => {
-    for (const { testName, cbor, tx } of ValidTransactionTestCases) {
+    for (const {testName, cbor, tx} of ValidTransactionTestCases) {
       it(testName, () => {
         const parsedTx = decodeTx(Buffer.from(cbor, 'hex'))
         expect(parsedTx).to.deep.equal(tx)

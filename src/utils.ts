@@ -1,8 +1,8 @@
 import blake2b from 'blake2b'
 import cbor from 'cbor'
 
-import type { FixLenBuffer, RewardAccount } from './types'
-import { StakeCredentialType } from './types'
+import type {FixLenBuffer, RewardAccount} from './types'
+import {StakeCredentialType} from './types'
 
 export function assert(cond: boolean, errMsg: string): asserts cond {
   const msg = errMsg ? `: ${errMsg}` : ''
@@ -34,7 +34,7 @@ export const decodeCbor = (buffer: Buffer) =>
     },
   })
 
-export const encodeToCbor = (x: unknown) => cbor.encodeOne(x, { canonical: true })
+export const encodeToCbor = (x: unknown) => cbor.encodeOne(x, {canonical: true})
 
 export const bind =
   <A, R, T extends unknown[]>(

@@ -1,8 +1,8 @@
-import { ParseErrorReason } from '../../src/errors'
-import { parseMint } from '../../src/txParsers'
-import type { MaxLenBuffer, Mint } from '../../src/types'
-import type { InvalidParseTestCase, ValidParseTestCase } from '../test_utils'
-import { registerTests, toFixLenBuffer, toInt } from '../test_utils'
+import {ParseErrorReason} from '../../src/errors'
+import {parseMint} from '../../src/txParsers'
+import type {MaxLenBuffer, Mint} from '../../src/types'
+import type {InvalidParseTestCase, ValidParseTestCase} from '../test_utils'
+import {registerTests, toFixLenBuffer, toInt} from '../test_utils'
 
 const ValidMintTestCases: ValidParseTestCase<Mint>[] = [
   {

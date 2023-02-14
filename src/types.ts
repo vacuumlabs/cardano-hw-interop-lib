@@ -1,12 +1,12 @@
 export type Unparsed = unknown
 
-export type Uint = (number | bigint) & { __type: 'uint' }
-export type Int = (number | bigint) & { __type: 'int' }
+export type Uint = (number | bigint) & {__type: 'uint'}
+export type Int = (number | bigint) & {__type: 'int'}
 
-export type MaxLenString<N> = string & { __maxLength: N }
-export type FixLenBuffer<N> = Buffer & { __length: N }
-export type MaxLenBuffer<N> = Buffer & { __maxLength: N }
-export type MaxSizeUint<N> = Uint & { __maxSize: N }
+export type MaxLenString<N> = string & {__maxLength: N}
+export type FixLenBuffer<N> = Buffer & {__length: N}
+export type MaxLenBuffer<N> = Buffer & {__maxLength: N}
+export type MaxSizeUint<N> = Uint & {__maxSize: N}
 
 export const KEY_HASH_LENGTH = 28
 export const SCRIPT_HASH_LENGTH = 28

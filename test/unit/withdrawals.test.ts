@@ -1,8 +1,8 @@
-import { ParseErrorReason } from '../../src/errors'
-import { parseWithdrawals } from '../../src/txParsers'
-import type { Withdrawal } from '../../src/types'
-import type { InvalidParseTestCase, ValidParseTestCase } from '../test_utils'
-import { registerTests, rewardAccount, toUint } from '../test_utils'
+import {ParseErrorReason} from '../../src/errors'
+import {parseWithdrawals} from '../../src/txParsers'
+import type {Withdrawal} from '../../src/types'
+import type {InvalidParseTestCase, ValidParseTestCase} from '../test_utils'
+import {registerTests, rewardAccount, toUint} from '../test_utils'
 
 const ValidWithdrawalsTestCases: ValidParseTestCase<Withdrawal[]>[] = [
   {

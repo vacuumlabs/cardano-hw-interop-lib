@@ -1,7 +1,7 @@
-import { expect } from 'chai'
+import {expect} from 'chai'
 
-import { decodeTxBody, transformTxBody } from '../../src/index'
-import { TransformTransactionTestCases } from './__fixtures__/transactions'
+import {decodeTxBody, transformTxBody} from '../../src/index'
+import {TransformTransactionTestCases} from './__fixtures__/transactions'
 
 describe('Transform', () => {
   for (const {

@@ -1,5 +1,5 @@
-import type { ValidationError } from './errors'
-import { err, ValidationErrorReason } from './errors'
+import type {ValidationError} from './errors'
+import {err, ValidationErrorReason} from './errors'
 import type {
   Amount,
   Certificate,
@@ -17,8 +17,8 @@ import type {
   Uint,
   Withdrawal,
 } from './types'
-import { AmountType, CertificateType, DatumType, TxOutputFormat } from './types'
-import { bind, getRewardAccountStakeCredentialType, unreachable } from './utils'
+import {AmountType, CertificateType, DatumType, TxOutputFormat} from './types'
+import {bind, getRewardAccountStakeCredentialType, unreachable} from './utils'
 
 const UINT16_MAX = 65535
 const MAX_UINT_64_STR = '18446744073709551615'
@@ -43,8 +43,7 @@ function* validateOptional<T>(
   x: T | undefined | null,
   validateFn: (x: T) => ValidatorReturnType,
 ): ValidatorReturnType {
-  if (x != null)
-    yield* validateFn(x)
+  if (x != null) yield* validateFn(x)
 }
 
 /**
@@ -99,14 +98,14 @@ function* validateMultiasset<T>(
 ): ValidatorReturnType {
   yield* validateListConstraints(multiasset, position, false)
 
-  for (const { policyId, tokens } of multiasset) {
+  for (const {policyId, tokens} of multiasset) {
     yield* validateListConstraints(
       tokens,
       `${position}[${policyId.toString('hex')}]`,
       false,
     )
 
-    for (const { assetName, amount } of tokens) {
+    for (const {assetName, amount} of tokens) {
       yield* validateAmount(
         amount,
         `${position}[${policyId.toString('hex')}][${assetName.toString(
@@ -252,7 +251,7 @@ function* validateWithdrawals(withdrawals: Withdrawal[]): ValidatorReturnType {
     false,
   )
 
-  for (const { rewardAccount, amount } of withdrawals) {
+  for (const {rewardAccount, amount} of withdrawals) {
     yield* validateUint64(
       amount,
       `transaction_body.withdrawals[${rewardAccount.toString('hex')}]`,
@@ -270,7 +269,7 @@ function* validateStakeCredentials(
   if (certificates) {
     // We must first filter out the certificates that contain stake credentials
     const certificatesWithStakeCredentials = certificates.filter(
-      ({ type }) =>
+      ({type}) =>
         type === CertificateType.STAKE_REGISTRATION ||
         type === CertificateType.STAKE_DEREGISTRATION ||
         type === CertificateType.STAKE_DELEGATION,
@@ -279,7 +278,7 @@ function* validateStakeCredentials(
       | StakeDeregistrationCertificate
       | StakeDelegationCertificate
     )[]
-    certificatesWithStakeCredentials.forEach(({ stakeCredential }) =>
+    certificatesWithStakeCredentials.forEach(({stakeCredential}) =>
       certificateStakeCredentialTypes.add(stakeCredential.type),
     )
     // We check the set of stake credential types to be less or equal to one,
@@ -295,7 +294,7 @@ function* validateStakeCredentials(
   }
 
   if (withdrawals) {
-    withdrawals.forEach(({ rewardAccount }) =>
+    withdrawals.forEach(({rewardAccount}) =>
       withdrawalStakeCredentialTypes.add(
         getRewardAccountStakeCredentialType(rewardAccount),
       ),
@@ -417,7 +416,7 @@ function* validatePoolRegistrationTransaction(
   if (
     !txBody.certificates ||
     txBody.certificates.find(
-      ({ type }) => type === CertificateType.POOL_REGISTRATION,
+      ({type}) => type === CertificateType.POOL_REGISTRATION,
     ) === undefined
   ) {
     return
@@ -448,7 +447,7 @@ function* validatePoolRegistrationTransaction(
   yield* validate(
     !txBody.mint ||
       txBody.mint.length === 0 ||
-      txBody.mint.every(({ tokens }) => tokens.length === 0),
+      txBody.mint.every(({tokens}) => tokens.length === 0),
     err(
       ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_MINT_ENTRY,
       'transaction_body.mint',

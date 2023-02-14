@@ -1,4 +1,4 @@
-import { Tagged } from 'cbor'
+import {Tagged} from 'cbor'
 
 import type {
   Amount,
@@ -48,9 +48,9 @@ const serializeMultiasset = <T>(
   multiasset: Multiasset<T>,
 ): Map<PolicyId, Map<AssetName, T>> =>
   new Map(
-    multiasset.map(({ policyId, tokens }) => [
+    multiasset.map(({policyId, tokens}) => [
       policyId,
-      new Map(tokens.map(({ assetName, amount }) => [assetName, amount])),
+      new Map(tokens.map(({assetName, amount}) => [assetName, amount])),
     ]),
   )
 
@@ -113,9 +113,7 @@ const serializeTxOutput = (output: TransactionOutput) => {
 const serializeWithdrawals = (
   withdrawals: Withdrawal[],
 ): Map<RewardAccount, Coin> =>
-  new Map(
-    withdrawals.map(({ rewardAccount, amount }) => [rewardAccount, amount]),
-  )
+  new Map(withdrawals.map(({rewardAccount, amount}) => [rewardAccount, amount]))
 
 const serializeRelay = (relay: Relay) => {
   switch (relay.type) {
