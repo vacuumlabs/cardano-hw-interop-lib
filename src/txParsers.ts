@@ -656,6 +656,12 @@ export const parseTxBody = (unparsedTxBody: unknown): TransactionBody => {
     isMapWithKeysOfType(unparsedTxBody, isNumber),
     ParseErrorReason.INVALID_TX_BODY_CBOR,
   )
+  validate(
+    Array.from(unparsedTxBody.keys()).every((key) =>
+      Object.values(TransactionBodyKeys).includes(key),
+    ),
+    ParseErrorReason.INVALID_TX_BODY_UNKNOWN_ITEMS,
+  )
 
   return {
     inputs: parseInputs(unparsedTxBody.get(TransactionBodyKeys.INPUTS)),

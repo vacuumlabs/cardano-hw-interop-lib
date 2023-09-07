@@ -58,6 +58,7 @@ export enum ParseErrorReason {
   INVALID_REFERENCE_INPUT = 'Invalid transaction reference input',
 
   INVALID_TX_BODY_CBOR = 'Invalid transaction body CBOR',
+  INVALID_TX_BODY_UNKNOWN_ITEMS = 'Transaction body contains unknown items',
   INVALID_TX_INPUTS = 'Invalid transaction inputs',
   INVALID_TX_OUTPUTS = 'Invalid transaction outputs',
   INVALID_FEE = 'Invalid transaction fee',
