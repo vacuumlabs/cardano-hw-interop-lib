@@ -39,6 +39,28 @@ describe('Parse', () => {
         ParseErrorReason.INVALID_TX_BODY_CBOR,
       )
     })
+    it('Transaction body contains unknown items --- negative key', () => {
+      expect(() =>
+        decodeTxBody(
+          Buffer.from(
+            // tx body map key -17 not allowed
+            'a30081825820ba638246bd9be05aa46e865320c354efea75cf5796e88b763faaa30c9fbb78de003181825839000743d16cfe3c4fcc0c11c2403bbc10dbc7ecdd4477e053481a368e7a06e2ae44dff6770dc0f4ada3cf4cf2605008e27aecdb332ad349fda700021a0001e240',
+            'hex',
+          ),
+        ),
+      ).to.throw(ParseError, ParseErrorReason.INVALID_TX_BODY_UNKNOWN_ITEMS)
+    })
+    it('Transaction body contains unknown items --- unsupported key', () => {
+      expect(() =>
+        decodeTxBody(
+          Buffer.from(
+            // tx body map key 10 is not defined in the CDDL
+            'a30081825820ba638246bd9be05aa46e865320c354efea75cf5796e88b763faaa30c9fbb78de000a81825839000743d16cfe3c4fcc0c11c2403bbc10dbc7ecdd4477e053481a368e7a06e2ae44dff6770dc0f4ada3cf4cf2605008e27aecdb332ad349fda700021a0001e240',
+            'hex',
+          ),
+        ),
+      ).to.throw(ParseError, ParseErrorReason.INVALID_TX_BODY_UNKNOWN_ITEMS)
+    })
   })
 
   describe('Invalid transactions', () => {
