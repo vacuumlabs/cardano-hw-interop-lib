@@ -1,3 +1,10 @@
+import {
+  serializeTxInput,
+  serializeCertificate,
+  serializeCollateralInput,
+  serializeProposalProcedure,
+  identity,
+} from './txSerializers'
 import {ParseErrorReason} from './errors'
 import type {Parser, WithoutType} from './parsers'
 import {
@@ -12,17 +19,21 @@ import {
   parseBuffer,
   parseBufferOfLength,
   parseBufferOfMaxLength,
+  parseCddlSet,
   parseEmbeddedCborBytes,
   parseInt,
   parseMap,
   parseNullable,
   parseOptional,
   parseStringOfMaxLength,
+  parseTupleWithUndefined,
   parseTuple,
   parseUint,
   validate,
+  parseCddlNonEmptySet,
+  parseCddlNonEmptyOrderedSet,
 } from './parsers'
-import type {
+import {
   Amount,
   BabbageTransactionOutput,
   DatumHash,
@@ -51,8 +62,25 @@ import type {
   TransactionOutput,
   Unparsed,
   Withdrawal,
-} from './types'
-import {
+  StakeRegistrationConwayCertificate,
+  StakeDeregistrationConwayCertificate,
+  VoteDelegationCertificate,
+  DRepType,
+  KeyHashDRep,
+  ScriptHashDRep,
+  AbstainDRep,
+  NoConfidenceDRep,
+  StakeAndVoteDelegationCertificate,
+  StakeRegistrationAndDelegationCertificate,
+  StakeRegistrationWithVoteDelegationCertificate,
+  StakeRegistrationWithStakeAndVoteDelegationCertificate,
+  ANCHOR_DATA_HASH_LENGTH,
+  Anchor,
+  AuthorizeCommitteeHotCertificate,
+  ResignCommitteeColdCertificate,
+  DRepRegistrationCertificate,
+  DRepDeregistrationCertificate,
+  DRepUpdateCertificate,
   AmountType,
   ASSET_NAME_MAX_LENGTH,
   AUXILIARY_DATA_HASH_LENGTH,
@@ -75,22 +103,113 @@ import {
   TxOutputFormat,
   URL_MAX_LENGTH,
   VRF_KEY_HASH_LENGTH,
+  VoterVotes,
+  VoterType,
+  CommitteeKeyVoter,
+  CommitteeScriptVoter,
+  DRepKeyVoter,
+  StakePoolVoter,
+  DRepScriptVoter,
+  GovActionId,
+  VotingProcedure,
+  VoteOption,
+  Coin,
+  ProposalProcedure,
+  Int,
+  Uint,
+  UnitInterval,
 } from './types'
 import {
   BabbageTransactionOutputKeys,
+  CborTag,
   TransactionBodyKeys,
   undefinedOnlyAtTheEnd,
 } from './utils'
+import {Tagged} from 'cbor'
+
+// ======================== universal parsers / parsers for CDDL data types
+
+// parsers for tx body elements and certain CDDL "datatypes" are exported
 
 const doNotParse: Parser<Unparsed> = (data: unknown) => data
+
+export const parseCoin = createParser(parseUint, ParseErrorReason.INVALID_COIN)
+
+const parseCredentialType = (
+  unparsedCredentialType: unknown,
+): CredentialType => {
+  validate(
+    isNumber(unparsedCredentialType),
+    ParseErrorReason.INVALID_CREDENTIAL_TYPE,
+  )
+  validate(
+    unparsedCredentialType in CredentialType,
+    ParseErrorReason.INVALID_CREDENTIAL_TYPE,
+  )
+  return unparsedCredentialType
+}
+
+const parseKeyCredential = (data: unknown[]): WithoutType<KeyCredential> => {
+  validate(data.length === 1, ParseErrorReason.INVALID_CREDENTIAL)
+  return {
+    keyHash: parseBufferOfLength(
+      data[0],
+      KEY_HASH_LENGTH,
+      ParseErrorReason.INVALID_CREDENTIAL_KEY_HASH,
+    ),
+  }
+}
+
+const parseScriptCredential = (
+  data: unknown[],
+): WithoutType<ScriptCredential> => {
+  validate(data.length === 1, ParseErrorReason.INVALID_CREDENTIAL)
+  return {
+    scriptHash: parseBufferOfLength(
+      data[0],
+      SCRIPT_HASH_LENGTH,
+      ParseErrorReason.INVALID_CREDENTIAL_SCRIPT_HASH,
+    ),
+  }
+}
+
+export const parseCredential = createParser(
+  parseBasedOnType,
+  ParseErrorReason.INVALID_CREDENTIAL,
+  parseCredentialType,
+  parseKeyCredential,
+  parseScriptCredential,
+)
+
+// ======================== parsers for tx elements
+
+export const parseTxInput = (unparsedTxInput: unknown): TransactionInput => {
+  const [transactionId, index] = parseTuple(
+    unparsedTxInput,
+    ParseErrorReason.INVALID_TX_INPUT,
+    createParser(
+      parseBufferOfLength,
+      TX_ID_HASH_LENGTH,
+      ParseErrorReason.INVALID_TRANSACTION_ID,
+    ),
+    createParser(parseUint, ParseErrorReason.INVALID_TX_INPUT_INDEX),
+  )
+
+  return {transactionId, index}
+}
+
+export const parseInputs = createParser(
+  parseCddlSet,
+  parseTxInput,
+  serializeTxInput,
+  ParseErrorReason.INVALID_TX_INPUTS,
+)
 
 const parseRewardAccount = createParser(
   parseBufferOfLength,
   REWARD_ACCOUNT_LENGTH,
   ParseErrorReason.INVALID_REWARD_ACCOUNT,
 )
-const parseCoin = createParser(parseUint, ParseErrorReason.INVALID_COIN)
-const parseEpoch = createParser(parseUint, ParseErrorReason.INVALID_COIN)
 
 const parsePolicyId = createParser(
   parseBufferOfLength,
@@ -102,8 +221,7 @@ const parseAssetName = createParser(
   ASSET_NAME_MAX_LENGTH,
   ParseErrorReason.INVALID_ASSET_NAME,
 )
-
-const parseMultiasset = <T>(
+export const parseMultiasset = <T extends Int | Uint>(
   unparsedMultiasset: unknown,
   parseAssetValue: Parser<T>,
   errMsg: ParseErrorReason,
@@ -123,26 +241,6 @@ const parseMultiasset = <T>(
     })),
   }))
 }
-
-const parseTxInput = (unparsedTxInput: unknown): TransactionInput => {
-  const [transactionId, index] = parseTuple(
-    unparsedTxInput,
-    ParseErrorReason.INVALID_TX_INPUT,
-    createParser(
-      parseBufferOfLength,
-      TX_ID_HASH_LENGTH,
-      ParseErrorReason.INVALID_TRANSACTION_ID,
-    ),
-    createParser(parseUint, ParseErrorReason.INVALID_TX_INPUT_INDEX),
-  )
-
-  return {transactionId, index}
-}
-
-const parseAddress = createParser(
-  parseBuffer,
-  ParseErrorReason.INVALID_OUTPUT_ADDRESS,
-)
 
 const parseAmountWithMultiasset = (unparsedAmount: unknown): Amount => {
   const [coin, multiasset] = parseTuple(
@@ -164,7 +262,7 @@ const parseAmountWithoutMultiasset = (unparsedAmount: unknown): Amount => ({
   coin: parseUint(unparsedAmount, ParseErrorReason.INVALID_OUTPUT_AMOUNT),
 })
 
-const parseAmount = (unparsedAmount: unknown): Amount =>
+export const parseAmount = (unparsedAmount: unknown): Amount =>
   isUint(unparsedAmount)
     ? parseAmountWithoutMultiasset(unparsedAmount)
     : parseAmountWithMultiasset(unparsedAmount)
@@ -183,10 +281,15 @@ const parseLegacyTxOutputDatumHash = (
       }
     : undefined
 
+const parseAddress = createParser(
+  parseBuffer,
+  ParseErrorReason.INVALID_OUTPUT_ADDRESS,
+)
+
 const parseLegacyTxOutput = (
   unparsedTxOutput: unknown,
 ): LegacyTransactionOutput => {
-  const [address, amount, datumHash] = parseTuple(
+  const [address, amount, datumHash] = parseTupleWithUndefined(
     unparsedTxOutput,
     ParseErrorReason.INVALID_TX_OUTPUT,
     parseAddress,
@@ -269,67 +372,21 @@ const parseBabbageTxOutput = (
   }
 }
 
-const parseTxOutput = (unparsedTxOutput: unknown): TransactionOutput => {
+export const parseTxOutput = (unparsedTxOutput: unknown): TransactionOutput => {
   return isArray(unparsedTxOutput)
     ? parseLegacyTxOutput(unparsedTxOutput)
     : parseBabbageTxOutput(unparsedTxOutput)
 }
 
-export const parseWithdrawals = (
-  unparsedWithdrawals: unknown,
-): Withdrawal[] => {
-  const withdrawalsMap = parseMap(
-    unparsedWithdrawals,
-    parseRewardAccount,
-    createParser(parseUint, ParseErrorReason.INVALID_WITHDRAWAL_AMOUNT),
-    ParseErrorReason.INVALID_WITHDRAWALS,
-  )
-
-  return Array.from(withdrawalsMap).map(([rewardAccount, amount]) => ({
-    rewardAccount,
-    amount,
-  }))
-}
-
-const parseCredentialType = (
-  unparsedCredentialType: unknown,
-): CredentialType => {
-  validate(
-    isNumber(unparsedCredentialType),
-    ParseErrorReason.INVALID_CREDENTIAL_TYPE,
-  )
-  validate(
-    unparsedCredentialType in CredentialType,
-    ParseErrorReason.INVALID_CREDENTIAL_TYPE,
-  )
-  return unparsedCredentialType
-}
-
-const parseKeyCredential = (data: unknown[]): WithoutType<KeyCredential> => ({
-  hash: parseBufferOfLength(
-    data[0],
-    KEY_HASH_LENGTH,
-    ParseErrorReason.INVALID_CREDENTIAL_KEY_HASH,
-  ),
-})
-
-const parseScriptCredential = (
-  data: unknown[],
-): WithoutType<ScriptCredential> => ({
-  hash: parseBufferOfLength(
-    data[0],
-    SCRIPT_HASH_LENGTH,
-    ParseErrorReason.INVALID_CREDENTIAL_SCRIPT_HASH,
-  ),
-})
-
-const parseCredential = createParser(
-  parseBasedOnType,
-  ParseErrorReason.INVALID_CREDENTIAL,
-  parseCredentialType,
-  parseKeyCredential,
-  parseScriptCredential,
+export const parseOutputs = createParser(
+  parseArray,
+  parseTxOutput,
+  ParseErrorReason.INVALID_TX_OUTPUTS,
 )
+
+export const parseFee = createParser(parseUint, ParseErrorReason.INVALID_FEE)
+
+export const parseTtl = createParser(parseUint, ParseErrorReason.INVALID_TTL)
 
 const parsePoolKeyHash = createParser(
   parseBufferOfLength,
@@ -337,12 +394,21 @@ const parsePoolKeyHash = createParser(
   ParseErrorReason.INVALID_POOL_KEY_HASH,
 )
 
-const parseUnitInterval = createParser(
+const parseUnitIntervalData = createParser(
   parseTuple,
   ParseErrorReason.INVALID_UNIT_INTERVAL,
   createParser(parseUint, ParseErrorReason.INVALID_UNIT_INTERVAL_START),
   createParser(parseUint, ParseErrorReason.INVALID_UNIT_INTERVAL_END),
 )
+
+const parseUnitInterval = (data: unknown): UnitInterval => {
+  validate(data instanceof Tagged, ParseErrorReason.INVALID_UNIT_INTERVAL)
+  validate(
+    data.tag === CborTag.UNIT_INTERVAL,
+    ParseErrorReason.INVALID_UNIT_INTERVAL,
+  )
+  return parseUnitIntervalData(data.value)
+}
 
 const parsePort = (data: unknown): Port => {
   validate(
@@ -366,38 +432,47 @@ const parseRelayType = (unparsedRelayType: unknown): RelayType => {
 
 const parseRelaySingleHostAddress = (
   data: unknown[],
-): WithoutType<RelaySingleHostAddress> => ({
-  port: parseNullable(data[0], parsePort),
-  ipv4: parseNullable(
-    data[1],
-    createParser(
-      parseBufferOfLength,
-      IPV4_LENGTH,
-      ParseErrorReason.INVALID_RELAY_IPV4,
+): WithoutType<RelaySingleHostAddress> => {
+  validate(data.length === 3, ParseErrorReason.INVALID_RELAY)
+  return {
+    port: parseNullable(data[0], parsePort),
+    ipv4: parseNullable(
+      data[1],
+      createParser(
+        parseBufferOfLength,
+        IPV4_LENGTH,
+        ParseErrorReason.INVALID_RELAY_IPV4,
+      ),
     ),
-  ),
-  ipv6: parseNullable(
-    data[2],
-    createParser(
-      parseBufferOfLength,
-      IPV6_LENGTH,
-      ParseErrorReason.INVALID_RELAY_IPV6,
+    ipv6: parseNullable(
+      data[2],
+      createParser(
+        parseBufferOfLength,
+        IPV6_LENGTH,
+        ParseErrorReason.INVALID_RELAY_IPV6,
+      ),
     ),
-  ),
-})
+  }
+}
 
 const parseRelaySingleHostName = (
   data: unknown[],
-): WithoutType<RelaySingleHostName> => ({
-  port: parseNullable(data[0], parsePort),
-  dnsName: parseDnsName(data[1]),
-})
+): WithoutType<RelaySingleHostName> => {
+  validate(data.length === 2, ParseErrorReason.INVALID_RELAY)
+  return {
+    port: parseNullable(data[0], parsePort),
+    dnsName: parseDnsName(data[1]),
+  }
+}
 
 const parseRelayMultiHostName = (
   data: unknown[],
-): WithoutType<RelayMultiHostName> => ({
-  dnsName: parseDnsName(data[0]),
-})
+): WithoutType<RelayMultiHostName> => {
+  validate(data.length === 1, ParseErrorReason.INVALID_RELAY)
+  return {
+    dnsName: parseDnsName(data[0]),
+  }
+}
 
 const parseRelay = createParser(
   parseBasedOnType,
@@ -452,12 +527,13 @@ const parsePoolParams = (unparsedPoolParams: unknown): PoolParams => {
     parseUnitInterval,
     parseRewardAccount,
     createParser(
-      parseArray,
+      parseCddlSet,
       createParser(
         parseBufferOfLength,
         KEY_HASH_LENGTH,
         ParseErrorReason.INVALID_POOL_OWNER,
       ),
+      identity,
       ParseErrorReason.INVALID_POOL_OWNERS,
     ),
     createParser(parseArray, parseRelay, ParseErrorReason.INVALID_RELAYS),
@@ -477,6 +553,76 @@ const parsePoolParams = (unparsedPoolParams: unknown): PoolParams => {
   }
 }
 
+const parseDRepType = (unparsedType: unknown): DRepType => {
+  validate(isNumber(unparsedType), ParseErrorReason.INVALID_DREP_TYPE)
+  validate(unparsedType in DRepType, ParseErrorReason.INVALID_DREP_TYPE)
+  return unparsedType
+}
+
+const parseKeyHashDRep = (data: unknown[]): WithoutType<KeyHashDRep> => {
+  validate(data.length === 1, ParseErrorReason.INVALID_DREP)
+  return {
+    keyHash: parseBufferOfLength(
+      data[0],
+      KEY_HASH_LENGTH,
+      ParseErrorReason.INVALID_DREP,
+    ),
+  }
+}
+
+const parseScriptHashDRep = (data: unknown[]): WithoutType<ScriptHashDRep> => {
+  validate(data.length === 1, ParseErrorReason.INVALID_DREP)
+  return {
+    scriptHash: parseBufferOfLength(
+      data[0],
+      SCRIPT_HASH_LENGTH,
+      ParseErrorReason.INVALID_DREP,
+    ),
+  }
+}
+
+const parseAbstainDRep = (data: unknown[]): WithoutType<AbstainDRep> => {
+  // nothing to parse
+  validate(data.length === 0, ParseErrorReason.INVALID_DREP)
+  return {}
+}
+
+const parseNoConfidenceDRep = (
+  data: unknown[],
+): WithoutType<NoConfidenceDRep> => {
+  // nothing to parse
+  validate(data.length === 0, ParseErrorReason.INVALID_DREP)
+  return {}
+}
+
+export const parseAnchor = (data: unknown): Anchor => {
+  const [url, dataHash] = parseTuple(
+    data,
+    ParseErrorReason.INVALID_ANCHOR,
+    createParser(
+      parseStringOfMaxLength,
+      URL_MAX_LENGTH,
+      ParseErrorReason.INVALID_ANCHOR_URL,
+    ),
+    createParser(
+      parseBufferOfLength,
+      ANCHOR_DATA_HASH_LENGTH,
+      ParseErrorReason.INVALID_ANCHOR_DATA_HASH,
+    ),
+  )
+  return {url, dataHash}
+}
+
+export const parseDRep = createParser(
+  parseBasedOnType,
+  ParseErrorReason.INVALID_DREP,
+  parseDRepType,
+  parseKeyHashDRep,
+  parseScriptHashDRep,
+  parseAbstainDRep,
+  parseNoConfidenceDRep,
+)
+
 const parseCertificateType = (
   unparsedCertificateType: unknown,
 ): CertificateType => {
@@ -493,22 +639,31 @@ const parseCertificateType = (
 
 const parseStakeRegistrationCertificate = (
   data: unknown[],
-): WithoutType<StakeRegistrationCertificate> => ({
-  stakeCredential: parseCredential(data[0]),
-})
+): WithoutType<StakeRegistrationCertificate> => {
+  validate(data.length === 1, ParseErrorReason.INVALID_CERTIFICATE)
+  return {
+    stakeCredential: parseCredential(data[0]),
+  }
+}
 
 const parseStakeDeregistrationCertificate = (
   data: unknown[],
-): WithoutType<StakeDeregistrationCertificate> => ({
-  stakeCredential: parseCredential(data[0]),
-})
+): WithoutType<StakeDeregistrationCertificate> => {
+  validate(data.length === 1, ParseErrorReason.INVALID_CERTIFICATE)
+  return {
+    stakeCredential: parseCredential(data[0]),
+  }
+}
 
 const parseStakeDelegationCertificate = (
   data: unknown[],
-): WithoutType<StakeDelegationCertificate> => ({
-  stakeCredential: parseCredential(data[0]),
-  poolKeyHash: parsePoolKeyHash(data[1]),
-})
+): WithoutType<StakeDelegationCertificate> => {
+  validate(data.length === 2, ParseErrorReason.INVALID_CERTIFICATE)
+  return {
+    stakeCredential: parseCredential(data[0]),
+    poolKeyHash: parsePoolKeyHash(data[1]),
+  }
+}
 
 const parsePoolRegistrationCertificate = (
   data: unknown[],
@@ -516,26 +671,161 @@ const parsePoolRegistrationCertificate = (
   poolParams: parsePoolParams(data),
 })
 
+const parseEpoch = createParser(parseUint, ParseErrorReason.INVALID_COIN)
+
 const parsePoolRetirementCertificate = (
   data: unknown[],
-): WithoutType<PoolRetirementCertificate> => ({
-  poolKeyHash: parsePoolKeyHash(data[0]),
-  epoch: parseEpoch(data[1]),
-})
+): WithoutType<PoolRetirementCertificate> => {
+  validate(data.length === 2, ParseErrorReason.INVALID_CERTIFICATE)
+  return {
+    poolKeyHash: parsePoolKeyHash(data[0]),
+    epoch: parseEpoch(data[1]),
+  }
+}
 
+// removed in Conway, but we keep it here because it might appear
+// in erroneous / previously-built transactions
 const parseGenesisKeyDelegation = (
   data: unknown[],
 ): WithoutType<GenesisKeyDelegation> => ({
   restOfData: data,
 })
 
+// removed in Conway, but we keep it here because it might appear
+// in erroneous / previously-built transactions
 const parseMoveInstantaneousRewardsCertificate = (
   data: unknown[],
 ): WithoutType<MoveInstantaneousRewardsCertificate> => ({
   restOfData: data,
 })
 
-const parseCertificate = createParser(
+const parseStakeRegistrationConwayCertificate = (
+  data: unknown[],
+): WithoutType<StakeRegistrationConwayCertificate> => {
+  validate(data.length === 2, ParseErrorReason.INVALID_CERTIFICATE)
+  return {
+    stakeCredential: parseCredential(data[0]),
+    deposit: parseCoin(data[1]),
+  }
+}
+
+const parseStakeDeregistrationConwayCertificate = (
+  data: unknown[],
+): WithoutType<StakeDeregistrationConwayCertificate> => {
+  validate(data.length === 2, ParseErrorReason.INVALID_CERTIFICATE)
+  return {
+    stakeCredential: parseCredential(data[0]),
+    deposit: parseCoin(data[1]),
+  }
+}
+
+const parseVoteDelegationCertificate = (
+  data: unknown[],
+): WithoutType<VoteDelegationCertificate> => {
+  validate(data.length === 2, ParseErrorReason.INVALID_CERTIFICATE)
+  return {
+    stakeCredential: parseCredential(data[0]),
+    dRep: parseDRep(data[1]),
+  }
+}
+
+const parseStakeAndVoteDelegationCertificate = (
+  data: unknown[],
+): WithoutType<StakeAndVoteDelegationCertificate> => {
+  validate(data.length === 3, ParseErrorReason.INVALID_CERTIFICATE)
+  return {
+    stakeCredential: parseCredential(data[0]),
+    poolKeyHash: parsePoolKeyHash(data[1]),
+    dRep: parseDRep(data[2]),
+  }
+}
+
+const parseStakeRegistrationAndDelegationCertificate = (
+  data: unknown[],
+): WithoutType<StakeRegistrationAndDelegationCertificate> => {
+  validate(data.length === 3, ParseErrorReason.INVALID_CERTIFICATE)
+  return {
+    stakeCredential: parseCredential(data[0]),
+    poolKeyHash: parsePoolKeyHash(data[1]),
+    deposit: parseCoin(data[2]),
+  }
+}
+
+const parseStakeRegistrationWithVoteDelegationCertificate = (
+  data: unknown[],
+): WithoutType<StakeRegistrationWithVoteDelegationCertificate> => {
+  validate(data.length === 3, ParseErrorReason.INVALID_CERTIFICATE)
+  return {
+    stakeCredential: parseCredential(data[0]),
+    dRep: parseDRep(data[1]),
+    deposit: parseCoin(data[2]),
+  }
+}
+
+const parseStakeRegistrationWithStakeAndVoteDelegationCertificate = (
+  data: unknown[],
+): WithoutType<StakeRegistrationWithStakeAndVoteDelegationCertificate> => {
+  validate(data.length === 4, ParseErrorReason.INVALID_CERTIFICATE)
+  return {
+    stakeCredential: parseCredential(data[0]),
+    poolKeyHash: parsePoolKeyHash(data[1]),
+    dRep: parseDRep(data[2]),
+    deposit: parseCoin(data[3]),
+  }
+}
+
+const parseAuthorizeCommitteeHotCertificate = (
+  data: unknown[],
+): WithoutType<AuthorizeCommitteeHotCertificate> => {
+  validate(data.length === 2, ParseErrorReason.INVALID_CERTIFICATE)
+  return {
+    coldCredential: parseCredential(data[0]),
+    hotCredential: parseCredential(data[1]),
+  }
+}
+
+const parseResignCommitteeColdCertificate = (
+  data: unknown[],
+): WithoutType<ResignCommitteeColdCertificate> => {
+  validate(data.length === 2, ParseErrorReason.INVALID_CERTIFICATE)
+  return {
+    coldCredential: parseCredential(data[0]),
+    anchor: parseNullable(data[1], parseAnchor),
+  }
+}
+
+const parseDRepRegistrationCertificate = (
+  data: unknown[],
+): WithoutType<DRepRegistrationCertificate> => {
+  validate(data.length === 3, ParseErrorReason.INVALID_CERTIFICATE)
+  return {
+    dRepCredential: parseCredential(data[0]),
+    deposit: parseCoin(data[1]),
+    anchor: parseNullable(data[2], parseAnchor),
+  }
+}
+
+const parseDRepDeregistrationCertificate = (
+  data: unknown[],
+): WithoutType<DRepDeregistrationCertificate> => {
+  validate(data.length === 2, ParseErrorReason.INVALID_CERTIFICATE)
+  return {
+    dRepCredential: parseCredential(data[0]),
+    deposit: parseCoin(data[1]),
+  }
+}
+
+const parseDRepUpdateCertificate = (
+  data: unknown[],
+): WithoutType<DRepUpdateCertificate> => {
+  validate(data.length === 2, ParseErrorReason.INVALID_CERTIFICATE)
+  return {
+    dRepCredential: parseCredential(data[0]),
+    anchor: parseNullable(data[1], parseAnchor),
+  }
+}
+
+export const parseCertificate = createParser(
   parseBasedOnType,
   ParseErrorReason.INVALID_CERTIFICATE,
   parseCertificateType,
@@ -546,9 +836,64 @@ const parseCertificate = createParser(
   parsePoolRetirementCertificate,
   parseGenesisKeyDelegation,
   parseMoveInstantaneousRewardsCertificate,
+  parseStakeRegistrationConwayCertificate,
+  parseStakeDeregistrationConwayCertificate,
+  parseVoteDelegationCertificate,
+  parseStakeAndVoteDelegationCertificate,
+  parseStakeRegistrationAndDelegationCertificate,
+  parseStakeRegistrationWithVoteDelegationCertificate,
+  parseStakeRegistrationWithStakeAndVoteDelegationCertificate,
+  parseAuthorizeCommitteeHotCertificate,
+  parseResignCommitteeColdCertificate,
+  parseDRepRegistrationCertificate,
+  parseDRepDeregistrationCertificate,
+  parseDRepUpdateCertificate,
 )
 
-const parseCollateralInput = (
+export const parseCertificates = createParser(
+  parseCddlNonEmptyOrderedSet,
+  parseCertificate,
+  serializeCertificate,
+  ParseErrorReason.INVALID_CERTIFICATES,
+)
+
+export const parseWithdrawals = (
+  unparsedWithdrawals: unknown,
+): Withdrawal[] => {
+  const withdrawalsMap = parseMap(
+    unparsedWithdrawals,
+    parseRewardAccount,
+    createParser(parseUint, ParseErrorReason.INVALID_WITHDRAWAL_AMOUNT),
+    ParseErrorReason.INVALID_WITHDRAWALS,
+  )
+
+  return Array.from(withdrawalsMap).map(([rewardAccount, amount]) => ({
+    rewardAccount,
+    amount,
+  }))
+}
+
+export const parseAuxiliaryDataHash = createParser(
+  parseBufferOfLength,
+  AUXILIARY_DATA_HASH_LENGTH,
+  ParseErrorReason.INVALID_AUXILIARY_DATA_HASH,
+)
+export const parseValidityIntervalStart = createParser(
+  parseUint,
+  ParseErrorReason.INVALID_VALIDITY_INTERVAL_START,
+)
+export const parseMint = createParser(
+  parseMultiasset,
+  createParser(parseInt, ParseErrorReason.INVALID_MINT_AMOUNT),
+  ParseErrorReason.INVALID_MINT,
+)
+export const parseScriptDataHash = createParser(
+  parseBufferOfLength,
+  SCRIPT_DATA_HASH_LENGTH,
+  ParseErrorReason.INVALID_SCRIPT_DATA_HASH,
+)
+
+export const parseCollateralInput = (
   unparsedCollateralInput: unknown,
 ): TransactionInput => {
   const [transactionId, index] = parseTuple(
@@ -565,14 +910,50 @@ const parseCollateralInput = (
   return {transactionId, index}
 }
 
-const parseRequiredSigner = (unparsedRequiredSigner: unknown): RequiredSigner =>
+export const parseCollateralInputs = createParser(
+  parseCddlNonEmptySet,
+  parseCollateralInput,
+  serializeCollateralInput,
+  ParseErrorReason.INVALID_COLLATERAL_INPUTS,
+)
+
+export const parseRequiredSigner = (
+  unparsedRequiredSigner: unknown,
+): RequiredSigner =>
   parseBufferOfLength(
     unparsedRequiredSigner,
     KEY_HASH_LENGTH,
     ParseErrorReason.INVALID_REQUIRED_SIGNERS,
   )
 
-const parseReferenceInput = (
+export const parseRequiredSigners = createParser(
+  parseCddlNonEmptySet,
+  parseRequiredSigner,
+  identity,
+  ParseErrorReason.INVALID_REQUIRED_SIGNERS,
+)
+
+export const parseNetworkId = createParser(
+  parseUint,
+  ParseErrorReason.INVALID_NETWORK_ID,
+)
+
+export const parseCollateralOutput = (
+  unparsedTxOutput: unknown,
+): TransactionOutput => {
+  // The reported error is somewhat inaccurate (does not refer to "collateral return output"
+  // at all, just "output"), but it is not worth rewriting the output parsing.
+  // There are some conditions on collateral return outputs
+  // that we do not verify here anyway (limitations on address type, datum hash presence etc.).
+  return parseTxOutput(unparsedTxOutput)
+}
+
+export const parseTotalCollateral = createParser(
+  parseUint,
+  ParseErrorReason.INVALID_TOTAL_COLLATERAL,
+)
+
+export const parseReferenceInput = (
   unparsedReferenceInput: unknown,
 ): TransactionInput => {
   const [transactionId, index] = parseTuple(
@@ -589,65 +970,175 @@ const parseReferenceInput = (
   return {transactionId, index}
 }
 
-export const parseInputs = createParser(
-  parseArray,
-  parseTxInput,
-  ParseErrorReason.INVALID_TX_INPUTS,
-)
-export const parseOutputs = createParser(
-  parseArray,
-  parseTxOutput,
-  ParseErrorReason.INVALID_TX_OUTPUTS,
-)
-export const parseFee = createParser(parseUint, ParseErrorReason.INVALID_FEE)
-export const parseTtl = createParser(parseUint, ParseErrorReason.INVALID_TTL)
-export const parseCertificates = createParser(
-  parseArray,
-  parseCertificate,
-  ParseErrorReason.INVALID_CERTIFICATES,
-)
-export const parseAuxiliaryDataHash = createParser(
-  parseBufferOfLength,
-  AUXILIARY_DATA_HASH_LENGTH,
-  ParseErrorReason.INVALID_AUXILIARY_DATA_HASH,
-)
-export const parseValidityIntervalStart = createParser(
-  parseUint,
-  ParseErrorReason.INVALID_VALIDITY_INTERVAL_START,
-)
-export const parseMint = createParser(
-  parseMultiasset,
-  createParser(parseInt, ParseErrorReason.INVALID_MINT_AMOUNT),
-  ParseErrorReason.INVALID_MINT,
-)
-const parseScriptDataHash = createParser(
-  parseBufferOfLength,
-  SCRIPT_DATA_HASH_LENGTH,
-  ParseErrorReason.INVALID_SCRIPT_DATA_HASH,
-)
-const parseCollateralInputs = createParser(
-  parseArray,
-  parseCollateralInput,
-  ParseErrorReason.INVALID_COLLATERAL_INPUTS,
-)
-const parseRequiredSigners = createParser(
-  parseArray,
-  parseRequiredSigner,
-  ParseErrorReason.INVALID_REQUIRED_SIGNERS,
-)
-const parseNetworkId = createParser(
-  parseUint,
-  ParseErrorReason.INVALID_NETWORK_ID,
-)
-const parseTotalCollateral = createParser(
-  parseUint,
-  ParseErrorReason.INVALID_TOTAL_COLLATERAL,
-)
-const parseReferenceInputs = createParser(
-  parseArray,
+export const parseReferenceInputs = createParser(
+  parseCddlNonEmptySet,
   parseReferenceInput,
+  serializeTxInput,
   ParseErrorReason.INVALID_REFERENCE_INPUTS,
 )
+
+const parseVoterType = (unparsedType: unknown): VoterType => {
+  validate(isNumber(unparsedType), ParseErrorReason.INVALID_VOTER)
+  validate(unparsedType in VoterType, ParseErrorReason.INVALID_VOTER)
+  return unparsedType
+}
+
+const parseKeyVoterHash = createParser(
+  parseBufferOfLength,
+  KEY_HASH_LENGTH,
+  ParseErrorReason.INVALID_VOTER,
+)
+
+const parseScriptVoterHash = createParser(
+  parseBufferOfLength,
+  SCRIPT_HASH_LENGTH,
+  ParseErrorReason.INVALID_VOTER,
+)
+
+const parseCommitteeKeyVoter = (
+  data: unknown[],
+): WithoutType<CommitteeKeyVoter> => ({
+  hash: parseKeyVoterHash(data[0]),
+})
+
+const parseCommitteeScriptVoter = (
+  data: unknown[],
+): WithoutType<CommitteeScriptVoter> => ({
+  hash: parseScriptVoterHash(data[0]),
+})
+
+const parseDRepKeyVoter = (data: unknown[]): WithoutType<DRepKeyVoter> => ({
+  hash: parseKeyVoterHash(data[0]),
+})
+
+const parseDRepScriptVoter = (
+  data: unknown[],
+): WithoutType<DRepScriptVoter> => ({
+  hash: parseScriptVoterHash(data[0]),
+})
+
+const parseStakePoolVoter = (data: unknown[]): WithoutType<StakePoolVoter> => ({
+  hash: parseKeyVoterHash(data[0]),
+})
+
+const parseVoter = createParser(
+  parseBasedOnType,
+  ParseErrorReason.INVALID_VOTER,
+  parseVoterType,
+  parseCommitteeKeyVoter,
+  parseCommitteeScriptVoter,
+  parseDRepKeyVoter,
+  parseDRepScriptVoter,
+  parseStakePoolVoter,
+)
+
+const parseGovActionId = (unparsed: unknown): GovActionId => {
+  const [transactionId, index] = parseTuple(
+    unparsed,
+    ParseErrorReason.INVALID_GOV_ACTION_ID,
+    createParser(
+      parseBufferOfLength,
+      TX_ID_HASH_LENGTH,
+      ParseErrorReason.INVALID_GOV_ACTION_ID,
+    ),
+    createParser(parseUint, ParseErrorReason.INVALID_GOV_ACTION_ID),
+  )
+
+  return {transactionId, index}
+}
+
+const parseVoteOption = (unparsed: unknown): VoteOption => {
+  validate(isNumber(unparsed), ParseErrorReason.INVALID_VOTE_OPTION)
+  validate(unparsed in VoteOption, ParseErrorReason.INVALID_VOTE_OPTION)
+  return unparsed
+}
+
+export const parseVotingProcedure = (unparsed: unknown): VotingProcedure => {
+  const [voteOption, anchor] = parseTuple(
+    unparsed,
+    ParseErrorReason.INVALID_VOTING_PROCEDURE,
+    parseVoteOption,
+    createParser(
+      parseNullable,
+      parseAnchor,
+      ParseErrorReason.INVALID_VOTING_PROCEDURE,
+    ),
+  )
+  return {
+    voteOption,
+    anchor,
+  }
+}
+
+export const parseVotingProcedures = (unparsed: unknown): VoterVotes[] => {
+  const voterVotesMap = parseMap(
+    unparsed,
+    parseVoter,
+    createParser(
+      parseMap,
+      parseGovActionId,
+      parseVotingProcedure,
+      ParseErrorReason.INVALID_VOTE_OPTION,
+    ),
+    ParseErrorReason.INVALID_VOTING_PROCEDURES,
+  )
+  validate(
+    voterVotesMap.size > 0,
+    ParseErrorReason.INVALID_VOTING_PROCEDURES_EMPTY_MAP,
+  )
+  for (const [, votes] of voterVotesMap) {
+    validate(
+      votes.size > 0,
+      ParseErrorReason.INVALID_VOTING_PROCEDURES_EMPTY_MAP,
+    )
+  }
+
+  return Array.from(voterVotesMap).map(([voter, votes]) => ({
+    voter,
+    votes: Array.from(votes).map(([govActionId, votingProcedure]) => ({
+      govActionId,
+      votingProcedure,
+    })),
+  }))
+}
+
+export const parseProposalProcedure = (
+  unparsedProcedure: unknown,
+): ProposalProcedure => {
+  const [deposit, rewardAccount, govAction, anchor] = parseTuple(
+    unparsedProcedure,
+    ParseErrorReason.INVALID_PROPOSAL_PROCEDURE,
+    parseCoin,
+    parseRewardAccount,
+    doNotParse,
+    parseAnchor,
+  )
+
+  return {
+    deposit,
+    rewardAccount,
+    govAction,
+    anchor,
+  }
+}
+
+export const parseProposalProcedures = createParser(
+  parseCddlNonEmptyOrderedSet,
+  parseProposalProcedure,
+  serializeProposalProcedure,
+  ParseErrorReason.INVALID_PROPOSAL_PROCEDURES,
+)
+
+export const parseTreasury = createParser(
+  parseUint,
+  ParseErrorReason.INVALID_TREASURY,
+)
+
+export const parseDonation = (unparsed: unknown): Coin => {
+  const coin = parseUint(unparsed, ParseErrorReason.INVALID_DONATION)
+  validate(coin > 0, ParseErrorReason.INVALID_DONATION)
+  return coin
+}
 
 export const parseTxBody = (unparsedTxBody: unknown): TransactionBody => {
   validate(
@@ -705,7 +1196,7 @@ export const parseTxBody = (unparsedTxBody: unknown): TransactionBody => {
     ),
     collateralReturnOutput: parseOptional(
       unparsedTxBody.get(TransactionBodyKeys.COLLATERAL_RETURN_OUTPUT),
-      parseTxOutput,
+      parseCollateralOutput,
     ),
     totalCollateral: parseOptional(
       unparsedTxBody.get(TransactionBodyKeys.TOTAL_COLLATERAL),
@@ -715,11 +1206,27 @@ export const parseTxBody = (unparsedTxBody: unknown): TransactionBody => {
       unparsedTxBody.get(TransactionBodyKeys.REFERENCE_INPUTS),
       parseReferenceInputs,
     ),
+    votingProcedures: parseOptional(
+      unparsedTxBody.get(TransactionBodyKeys.VOTING_PROCEDURES),
+      parseVotingProcedures,
+    ),
+    proposalProcedures: parseOptional(
+      unparsedTxBody.get(TransactionBodyKeys.PROPOSAL_PROCEDURES),
+      parseProposalProcedures,
+    ),
+    treasury: parseOptional(
+      unparsedTxBody.get(TransactionBodyKeys.TREASURY),
+      parseTreasury,
+    ),
+    donation: parseOptional(
+      unparsedTxBody.get(TransactionBodyKeys.DONATION),
+      parseDonation,
+    ),
   }
 }
 
 export const parseTx = (unparsedTx: unknown): Transaction => {
-  const [body, ...otherItems] = parseTuple(
+  const [body, ...otherItems] = parseTupleWithUndefined(
     unparsedTx,
     ParseErrorReason.INVALID_TX_CBOR,
     parseTxBody,

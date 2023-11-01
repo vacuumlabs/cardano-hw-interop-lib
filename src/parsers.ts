@@ -1,7 +1,12 @@
 import {Tagged} from 'cbor'
+import {Serializer} from './txSerializers'
 
 import {ParseErrorReason, ParseError} from './errors'
 import type {
+  CddlNonEmptyOrderedSet,
+  CddlNonEmptySet,
+  CddlSet,
+  CddlSetBase,
   FixLenBuffer,
   Int,
   MaxLenBuffer,
@@ -9,7 +14,7 @@ import type {
   MaxSizeUint,
   Uint,
 } from './types'
-import {CborTag} from './utils'
+import {CborTag, encodeToCbor} from './utils'
 
 export function validate(
   cond: boolean,
@@ -192,10 +197,99 @@ export const parseArray = <T>(
   return data.map((value) => parseEntry(value))
 }
 
+const areUnique = <T>(items: T[], serialize: Serializer<T>): boolean => {
+  const encoded: Buffer[] = items.map(serialize).map(encodeToCbor)
+  const s = new Set<string>(encoded.map((buffer) => buffer.toString('hex')))
+  return s.size === items.length
+}
+
+// serializeEntry is needed to check uniqueness
+const parseCddlSetBase = <T>(
+  data: unknown,
+  parseEntry: Parser<T>,
+  serializeEntry: Serializer<T>,
+  errMsg: ParseErrorReason,
+): CddlSetBase<T> => {
+  let result: CddlSetBase<T>
+  if (data instanceof Tagged) {
+    validate(data.tag === CborTag.SET, errMsg)
+    validate(isArray(data.value), errMsg)
+    result = {
+      items: data.value.map((entry) => parseEntry(entry)),
+      hasTag: true,
+    }
+  } else {
+    validate(isArray(data), errMsg)
+    result = {
+      items: data.map((entry) => parseEntry(entry)),
+      hasTag: false,
+    }
+  }
+  validate(areUnique(result.items, serializeEntry), errMsg)
+
+  return result
+}
+
+export const parseCddlSet = <T>(
+  data: unknown,
+  parseEntry: Parser<T>,
+  serializeEntry: Serializer<T>,
+  errMsg: ParseErrorReason,
+): CddlSet<T> => {
+  return parseCddlSetBase(
+    data,
+    parseEntry,
+    serializeEntry,
+    errMsg,
+  ) as CddlSet<T>
+}
+
+export const parseCddlNonEmptySet = <T>(
+  data: unknown,
+  parseEntry: Parser<T>,
+  serializeEntry: Serializer<T>,
+  errMsg: ParseErrorReason,
+): CddlNonEmptySet<T> => {
+  const base = parseCddlSetBase(data, parseEntry, serializeEntry, errMsg)
+  validate(base.items.length > 0, errMsg)
+  return base as CddlNonEmptySet<T>
+}
+
+export const parseCddlNonEmptyOrderedSet = <T>(
+  data: unknown,
+  parseEntry: Parser<T>,
+  serializeEntry: Serializer<T>,
+  errMsg: ParseErrorReason,
+): CddlNonEmptyOrderedSet<T> => {
+  const base = parseCddlSetBase(data, parseEntry, serializeEntry, errMsg)
+  validate(base.items.length > 0, errMsg)
+  return base as CddlNonEmptyOrderedSet<T>
+}
+
 /**
  * Parses the data as an array of length of the provided parsers.
  * If the number of provided parsers exceeds the length of parsed array,
  * the missing elements are fed to the parsers as `undefined`.
+ *
+ * @example
+ *     // returns [123N, -1N]
+ *     parseTuple([123, -1], InvalidDataReason.INVALID, parseUint64, parseInt64)
+ */
+export const parseTupleWithUndefined = <T extends unknown[]>(
+  data: unknown,
+  errMsg: ParseErrorReason,
+  ...parsers: {[K in keyof T]: Parser<T[K]>}
+): T => {
+  validate(isArray(data), errMsg)
+  validate(data.length <= parsers.length, errMsg)
+
+  return parsers.map((parser, index) => parser(data[index])) as T
+}
+
+/**
+ * Parses the data as an array of length of the provided parsers.
+ * If the number of provided parsers exceeds the length of parsed array,
+ * an error is thrown.
  *
  * @example
  *     // returns [123N, -1N]
@@ -207,7 +301,7 @@ export const parseTuple = <T extends unknown[]>(
   ...parsers: {[K in keyof T]: Parser<T[K]>}
 ): T => {
   validate(isArray(data), errMsg)
-  validate(data.length <= parsers.length, errMsg)
+  validate(data.length === parsers.length, errMsg)
 
   return parsers.map((parser, index) => parser(data[index])) as T
 }
