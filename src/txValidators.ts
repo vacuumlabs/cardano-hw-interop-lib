@@ -7,7 +7,7 @@ import type {
   Mint,
   Multiasset,
   RequiredSigner,
-  StakeCredentialType,
+  CredentialType,
   StakeDelegationCertificate,
   StakeDeregistrationCertificate,
   StakeRegistrationCertificate,
@@ -263,8 +263,8 @@ function* validateStakeCredentials(
   certificates: Certificate[] | undefined,
   withdrawals: Withdrawal[] | undefined,
 ): ValidatorReturnType {
-  const certificateStakeCredentialTypes: Set<StakeCredentialType> = new Set()
-  const withdrawalStakeCredentialTypes: Set<StakeCredentialType> = new Set()
+  const certificateStakeCredentialTypes: Set<CredentialType> = new Set()
+  const withdrawalStakeCredentialTypes: Set<CredentialType> = new Set()
 
   if (certificates) {
     // We must first filter out the certificates that contain stake credentials

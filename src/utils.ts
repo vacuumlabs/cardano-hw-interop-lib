@@ -2,7 +2,7 @@ import blake2b from 'blake2b'
 import cbor from 'cbor'
 
 import type {FixLenBuffer, RewardAccount} from './types'
-import {StakeCredentialType} from './types'
+import {CredentialType} from './types'
 
 export function assert(cond: boolean, errMsg: string): asserts cond {
   const msg = errMsg ? `: ${errMsg}` : ''
@@ -65,9 +65,9 @@ export const getRewardAccountStakeCredentialType = (
   // eslint-disable-next-line no-bitwise
   switch ((rewardAccount[0] >> 4) & 1) {
     case 0:
-      return StakeCredentialType.KEY_HASH
+      return CredentialType.KEY_HASH
     case 1:
-      return StakeCredentialType.SCRIPT_HASH
+      return CredentialType.SCRIPT_HASH
     default:
       throw Error('Invalid reward account type')
   }

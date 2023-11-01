@@ -129,36 +129,36 @@ export enum CertificateType {
   MOVE_INSTANTANEOUS_REWARDS_CERT = 6,
 }
 
-export enum StakeCredentialType {
+export enum CredentialType {
   KEY_HASH = 0,
   SCRIPT_HASH = 1,
 }
 
-export type StakeCredentialKey = {
-  type: StakeCredentialType.KEY_HASH
+export type KeyCredential = {
+  type: CredentialType.KEY_HASH
   hash: KeyHash
 }
 
-export type StakeCredentialScript = {
-  type: StakeCredentialType.SCRIPT_HASH
+export type ScriptCredential = {
+  type: CredentialType.SCRIPT_HASH
   hash: ScriptHash
 }
 
-export type StakeCredential = StakeCredentialKey | StakeCredentialScript
+export type Credential = KeyCredential | ScriptCredential
 
 export type StakeRegistrationCertificate = {
   type: CertificateType.STAKE_REGISTRATION
-  stakeCredential: StakeCredential
+  stakeCredential: Credential
 }
 
 export type StakeDeregistrationCertificate = {
   type: CertificateType.STAKE_DEREGISTRATION
-  stakeCredential: StakeCredential
+  stakeCredential: Credential
 }
 
 export type StakeDelegationCertificate = {
   type: CertificateType.STAKE_DELEGATION
-  stakeCredential: StakeCredential
+  stakeCredential: Credential
   poolKeyHash: FixLenBuffer<typeof POOL_KEY_HASH_LENGTH>
 }
 

@@ -9,7 +9,7 @@ import {
   CertificateType,
   DatumType,
   RelayType,
-  StakeCredentialType,
+  CredentialType,
   TxOutputFormat,
 } from '../../../src/types'
 import {
@@ -267,7 +267,7 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
         {
           type: CertificateType.STAKE_REGISTRATION,
           stakeCredential: {
-            type: StakeCredentialType.KEY_HASH,
+            type: CredentialType.KEY_HASH,
             hash: toFixLenBuffer(
               '2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d',
               28,
@@ -277,7 +277,7 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
         {
           type: CertificateType.STAKE_DEREGISTRATION,
           stakeCredential: {
-            type: StakeCredentialType.SCRIPT_HASH,
+            type: CredentialType.SCRIPT_HASH,
             hash: toFixLenBuffer(
               'c1d58a7602c3bd8104cd2a871a2d1cb68f6f6669bd37a7688618ee55',
               28,
@@ -287,7 +287,7 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
         {
           type: CertificateType.STAKE_DELEGATION,
           stakeCredential: {
-            type: StakeCredentialType.KEY_HASH,
+            type: CredentialType.KEY_HASH,
             hash: toFixLenBuffer(
               '2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d',
               28,
