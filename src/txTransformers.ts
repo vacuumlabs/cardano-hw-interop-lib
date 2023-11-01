@@ -3,20 +3,23 @@ import type {
   AUXILIARY_DATA_HASH_LENGTH,
   Datum,
   FixLenBuffer,
+  Int,
   Multiasset,
+  PoolRegistrationCertificate,
   ReferenceScript,
   Transaction,
   TransactionBody,
   TransactionOutput,
+  Uint,
   Unparsed,
 } from './types'
-import {AmountType, DatumType, TxOutputFormat} from './types'
+import {AmountType, CertificateType, DatumType, TxOutputFormat} from './types'
 import {blake2b256, encodeToCbor, unreachable} from './utils'
 
 const transformOptionalList = <T>(optionalList?: T[]): T[] | undefined =>
   optionalList?.length === 0 ? undefined : optionalList
 
-const transformMultiasset = <T>(
+const transformMultiasset = <T extends Int | Uint>(
   multiasset?: Multiasset<T>,
 ): Multiasset<T> | undefined =>
   multiasset === undefined
@@ -118,25 +121,54 @@ const transformAuxiliaryDataHash = (
     ? auxiliaryDataHash
     : blake2b256(encodeToCbor(auxiliaryData))
 
+// Add 258 tags everywhere if at least one is present.
+// In the future, when the tags are mandatory,
+// we should add them everywhere even if not present.
+export const makeSetTagsConsistent = (
+  txBody: TransactionBody,
+): TransactionBody => {
+  const poolRegistrationCertificate = txBody.certificates?.items.find(
+    ({type}) => type === CertificateType.POOL_REGISTRATION,
+  ) as PoolRegistrationCertificate
+  const allSets = [
+    txBody.inputs,
+    txBody.certificates,
+    txBody.collateralInputs,
+    txBody.requiredSigners,
+    txBody.referenceInputs,
+    txBody.proposalProcedures,
+    poolRegistrationCertificate?.poolParams.poolOwners,
+  ]
+  const tagIsPresent = allSets.some((s) => s !== undefined && s.hasTag)
+  if (tagIsPresent) {
+    allSets.map((s) => {
+      if (s !== undefined) {
+        s.hasTag = true
+      }
+    })
+  }
+  return txBody
+}
+
 export const transformTxBody = (
   txBody: TransactionBody,
   auxiliaryData: Unparsed,
-): TransactionBody => ({
-  ...txBody,
-  outputs: txBody.outputs.map(transformTxOutput),
-  certificates: transformOptionalList(txBody.certificates),
-  withdrawals: transformOptionalList(txBody.withdrawals),
-  collateralInputs: transformOptionalList(txBody.collateralInputs),
-  requiredSigners: transformOptionalList(txBody.requiredSigners),
-  collateralReturnOutput:
-    txBody.collateralReturnOutput &&
-    transformTxOutput(txBody.collateralReturnOutput),
-  referenceInputs: transformOptionalList(txBody.referenceInputs),
-  auxiliaryDataHash: transformAuxiliaryDataHash(
-    txBody.auxiliaryDataHash,
-    auxiliaryData,
-  ),
-})
+): TransactionBody => {
+  const transformedBody = {
+    ...txBody,
+    outputs: txBody.outputs.map(transformTxOutput),
+    withdrawals: transformOptionalList(txBody.withdrawals),
+    auxiliaryDataHash: transformAuxiliaryDataHash(
+      txBody.auxiliaryDataHash,
+      auxiliaryData,
+    ),
+    collateralReturnOutput:
+      txBody.collateralReturnOutput &&
+      transformTxOutput(txBody.collateralReturnOutput),
+    votingProcedures: transformOptionalList(txBody.votingProcedures),
+  }
+  return makeSetTagsConsistent(transformedBody)
+}
 
 export const transformTx = (tx: Transaction): Transaction => ({
   ...tx,

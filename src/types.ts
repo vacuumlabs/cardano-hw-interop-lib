@@ -8,6 +8,23 @@ export type FixLenBuffer<N> = Buffer & {__length: N}
 export type MaxLenBuffer<N> = Buffer & {__maxLength: N}
 export type MaxSizeUint<N> = Uint & {__maxSize: N}
 
+export type CddlSetBase<T> = {
+  items: T[]
+  hasTag: boolean // 258 tag, existing since Conway, using the tag is optional in Conway
+}
+export type CddlSet<T> = CddlSetBase<T> & {
+  _nonEmpty: false
+  _ordered: false
+}
+export type CddlNonEmptySet<T> = CddlSetBase<T> & {
+  _nonEmpty: true
+  _ordered: false
+}
+export type CddlNonEmptyOrderedSet<T> = CddlSetBase<T> & {
+  _nonEmpty: true
+  _ordered: true
+}
+
 export const KEY_HASH_LENGTH = 28
 export const SCRIPT_HASH_LENGTH = 28
 export const GENESIS_DELEGATE_HASH_LENGTH = 28
@@ -20,6 +37,7 @@ export const AUXILIARY_DATA_HASH_LENGTH = 32
 export const TX_ID_HASH_LENGTH = 32
 export const DATUM_HASH_LENGTH = 32
 export const SCRIPT_DATA_HASH_LENGTH = 32
+export const ANCHOR_DATA_HASH_LENGTH = 32
 
 export const IPV4_LENGTH = 4
 export const IPV6_LENGTH = 16
@@ -46,15 +64,15 @@ export type TransactionInput = {
 // Multiasset
 export type PolicyId = FixLenBuffer<typeof SCRIPT_HASH_LENGTH>
 export type AssetName = MaxLenBuffer<typeof ASSET_NAME_MAX_LENGTH>
-export type Token<T> = {
+export type Token<T extends Int | Uint> = {
   assetName: AssetName
   amount: T
 }
-export type AssetGroup<T> = {
+export type AssetGroup<T extends Int | Uint> = {
   policyId: PolicyId
   tokens: Token<T>[]
 }
-export type Multiasset<T> = AssetGroup<T>[]
+export type Multiasset<T extends Int | Uint> = AssetGroup<T>[]
 
 // Amount
 export enum AmountType {
@@ -125,8 +143,20 @@ export enum CertificateType {
   STAKE_DELEGATION = 2,
   POOL_REGISTRATION = 3,
   POOL_RETIREMENT = 4,
-  GENESIS_KEY_DELEGATION = 5,
-  MOVE_INSTANTANEOUS_REWARDS_CERT = 6,
+  GENESIS_KEY_DELEGATION = 5, // removed in Conway
+  MOVE_INSTANTANEOUS_REWARDS_CERT = 6, // removed in Conway
+  STAKE_REGISTRATION_CONWAY = 7,
+  STAKE_DEREGISTRATION_CONWAY = 8,
+  VOTE_DELEGATION = 9,
+  STAKE_AND_VOTE_DELEGATION = 10,
+  STAKE_REGISTRATION_AND_DELEGATION = 11,
+  STAKE_REGISTRATION_WITH_VOTE_DELEGATION = 12,
+  STAKE_REGISTRATION_WITH_STAKE_AND_VOTE_DELEGATION = 13,
+  AUTHORIZE_COMMITTEE_HOT = 14,
+  RESIGN_COMMITTEE_COLD = 15,
+  DREP_REGISTRATION = 16,
+  DREP_DEREGISTRATION = 17,
+  DREP_UPDATE = 18,
 }
 
 export enum CredentialType {
@@ -136,12 +166,12 @@ export enum CredentialType {
 
 export type KeyCredential = {
   type: CredentialType.KEY_HASH
-  hash: KeyHash
+  keyHash: KeyHash
 }
 
 export type ScriptCredential = {
   type: CredentialType.SCRIPT_HASH
-  hash: ScriptHash
+  scriptHash: ScriptHash
 }
 
 export type Credential = KeyCredential | ScriptCredential
@@ -209,7 +239,7 @@ export type PoolParams = {
   cost: Coin
   margin: UnitInterval
   rewardAccount: RewardAccount
-  poolOwners: KeyHash[]
+  poolOwners: CddlSet<KeyHash>
   relays: Relay[]
   poolMetadata: PoolMetadata | null
 }
@@ -235,6 +265,116 @@ export type MoveInstantaneousRewardsCertificate = {
   restOfData: Unparsed[]
 }
 
+export type StakeRegistrationConwayCertificate = {
+  type: CertificateType.STAKE_REGISTRATION_CONWAY
+  stakeCredential: Credential
+  deposit: Coin
+}
+
+export type StakeDeregistrationConwayCertificate = {
+  type: CertificateType.STAKE_DEREGISTRATION_CONWAY
+  stakeCredential: Credential
+  deposit: Coin
+}
+
+export enum DRepType {
+  KEY_HASH = 0,
+  SCRIPT_HASH = 1,
+  ABSTAIN = 2,
+  NO_CONFIDENCE = 3,
+}
+
+export type KeyHashDRep = {
+  type: DRepType.KEY_HASH
+  keyHash: KeyHash
+}
+
+export type ScriptHashDRep = {
+  type: DRepType.SCRIPT_HASH
+  scriptHash: ScriptHash
+}
+
+export type AbstainDRep = {
+  type: DRepType.ABSTAIN
+}
+
+export type NoConfidenceDRep = {
+  type: DRepType.NO_CONFIDENCE
+}
+
+export type DRep = KeyHashDRep | ScriptHashDRep | AbstainDRep | NoConfidenceDRep
+
+export type VoteDelegationCertificate = {
+  type: CertificateType.VOTE_DELEGATION
+  stakeCredential: Credential
+  dRep: DRep
+}
+
+export type StakeAndVoteDelegationCertificate = {
+  type: CertificateType.STAKE_AND_VOTE_DELEGATION
+  stakeCredential: Credential
+  poolKeyHash: FixLenBuffer<typeof POOL_KEY_HASH_LENGTH>
+  dRep: DRep
+}
+
+export type StakeRegistrationAndDelegationCertificate = {
+  type: CertificateType.STAKE_REGISTRATION_AND_DELEGATION
+  stakeCredential: Credential
+  poolKeyHash: FixLenBuffer<typeof POOL_KEY_HASH_LENGTH>
+  deposit: Coin
+}
+
+export type StakeRegistrationWithVoteDelegationCertificate = {
+  type: CertificateType.STAKE_REGISTRATION_WITH_VOTE_DELEGATION
+  stakeCredential: Credential
+  dRep: DRep
+  deposit: Coin
+}
+
+export type StakeRegistrationWithStakeAndVoteDelegationCertificate = {
+  type: CertificateType.STAKE_REGISTRATION_WITH_STAKE_AND_VOTE_DELEGATION
+  stakeCredential: Credential
+  poolKeyHash: FixLenBuffer<typeof POOL_KEY_HASH_LENGTH>
+  dRep: DRep
+  deposit: Coin
+}
+
+export type Anchor = {
+  url: MaxLenString<typeof URL_MAX_LENGTH>
+  dataHash: FixLenBuffer<typeof ANCHOR_DATA_HASH_LENGTH>
+}
+
+export type AuthorizeCommitteeHotCertificate = {
+  type: CertificateType.AUTHORIZE_COMMITTEE_HOT
+  coldCredential: Credential
+  hotCredential: Credential
+}
+
+export type ResignCommitteeColdCertificate = {
+  type: CertificateType.RESIGN_COMMITTEE_COLD
+  coldCredential: Credential
+  anchor: Anchor | null
+}
+
+export type DRepRegistrationCertificate = {
+  type: CertificateType.DREP_REGISTRATION
+  dRepCredential: Credential
+  deposit: Coin
+  anchor: Anchor | null
+}
+
+export type DRepDeregistrationCertificate = {
+  type: CertificateType.DREP_DEREGISTRATION
+  dRepCredential: Credential
+  deposit: Coin
+}
+
+export type DRepUpdateCertificate = {
+  type: CertificateType.DREP_UPDATE
+  dRepCredential: Credential
+  anchor: Anchor | null
+}
+
 export type Certificate =
   | StakeRegistrationCertificate
   | StakeDeregistrationCertificate
@@ -243,6 +383,18 @@ export type Certificate =
   | PoolRetirementCertificate
   | GenesisKeyDelegation
   | MoveInstantaneousRewardsCertificate
+  | StakeRegistrationConwayCertificate
+  | StakeDeregistrationConwayCertificate
+  | VoteDelegationCertificate
+  | StakeAndVoteDelegationCertificate
+  | StakeRegistrationAndDelegationCertificate
+  | StakeRegistrationWithVoteDelegationCertificate
+  | StakeRegistrationWithStakeAndVoteDelegationCertificate
+  | AuthorizeCommitteeHotCertificate
+  | ResignCommitteeColdCertificate
+  | DRepRegistrationCertificate
+  | DRepDeregistrationCertificate
+  | DRepUpdateCertificate
 
 // Withdrawal
 export type Withdrawal = {
@@ -256,25 +408,103 @@ export type Mint = Multiasset<Int>
 // Required signer
 export type RequiredSigner = FixLenBuffer<typeof KEY_HASH_LENGTH>
 
+export enum VoterType {
+  COMMITTEE_KEY = 0,
+  COMMITTEE_SCRIPT = 1,
+  DREP_KEY = 2,
+  DREP_SCRIPT = 3,
+  STAKE_POOL = 4,
+}
+
+export type CommitteeKeyVoter = {
+  type: VoterType.COMMITTEE_KEY
+  hash: KeyHash
+}
+
+export type CommitteeScriptVoter = {
+  type: VoterType.COMMITTEE_SCRIPT
+  hash: ScriptHash
+}
+
+export type DRepKeyVoter = {
+  type: VoterType.DREP_KEY
+  hash: KeyHash
+}
+
+export type DRepScriptVoter = {
+  type: VoterType.DREP_SCRIPT
+  hash: ScriptHash
+}
+
+export type StakePoolVoter = {
+  type: VoterType.STAKE_POOL
+  hash: KeyHash
+}
+
+export type Voter =
+  | CommitteeKeyVoter
+  | CommitteeScriptVoter
+  | DRepKeyVoter
+  | DRepScriptVoter
+  | StakePoolVoter
+
+// Governance action id
+export type GovActionId = {
+  transactionId: FixLenBuffer<typeof TX_ID_HASH_LENGTH>
+  index: Uint
+}
+
+export enum VoteOption {
+  NO = 0,
+  YES = 1,
+  ABSTAIN = 2,
+}
+
+export type VotingProcedure = {
+  voteOption: VoteOption
+  anchor: Anchor | null
+}
+
+export type Vote = {
+  govActionId: GovActionId
+  votingProcedure: VotingProcedure
+}
+
+export type VoterVotes = {
+  voter: Voter
+  votes: Vote[]
+}
+
+export type ProposalProcedure = {
+  deposit: Coin
+  rewardAccount: RewardAccount
+  govAction: Unparsed
+  anchor: Anchor
+}
+
 // Transaction body
 export type TransactionBody = {
-  inputs: TransactionInput[]
+  inputs: CddlSet<TransactionInput>
   outputs: TransactionOutput[]
   fee: Coin
   ttl?: Uint
-  certificates?: Certificate[]
+  certificates?: CddlNonEmptyOrderedSet<Certificate>
   withdrawals?: Withdrawal[]
   update?: Unparsed
   auxiliaryDataHash?: FixLenBuffer<typeof AUXILIARY_DATA_HASH_LENGTH>
   validityIntervalStart?: Uint
   mint?: Mint
   scriptDataHash?: FixLenBuffer<typeof SCRIPT_DATA_HASH_LENGTH>
-  collateralInputs?: TransactionInput[]
-  requiredSigners?: RequiredSigner[]
+  collateralInputs?: CddlNonEmptySet<TransactionInput>
+  requiredSigners?: CddlNonEmptySet<RequiredSigner>
   networkId?: Uint
   collateralReturnOutput?: TransactionOutput
   totalCollateral?: Coin
-  referenceInputs?: TransactionInput[]
+  referenceInputs?: CddlNonEmptySet<TransactionInput>
+  votingProcedures?: VoterVotes[]
+  proposalProcedures?: CddlNonEmptyOrderedSet<ProposalProcedure>
+  treasury?: Coin
+  donation?: Coin
 }
 
 export type Transaction = {
