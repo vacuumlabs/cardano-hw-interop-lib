@@ -1,5 +1,5 @@
 import blake2b from 'blake2b'
-import cbor from 'cbor'
+import cbor, {Tagged} from 'cbor'
 
 import type {FixLenBuffer, RewardAccount} from './types'
 import {CredentialType} from './types'
@@ -15,22 +15,20 @@ export function unreachable(_val: never): never {
 
 export enum CborTag {
   ENCODED_CBOR = 24,
-  TUPLE = 30,
+
+  // called unit interval in the CDDL, but means a fraction from [0, 1]
+  UNIT_INTERVAL = 30,
+
+  // used for arrays interpreted as sets
+  SET = 258,
 }
 
 export const decodeCbor = (buffer: Buffer) =>
   cbor.decode(buffer, {
     preventDuplicateKeys: true,
     tags: {
-      // Specifies that tag 30 should be parsed only as a tuple. For example
-      // the CDDL specifies unit_interval as:
-      // unit_interval = #6.30([uint, uint])
-      [CborTag.TUPLE]: (v: unknown) => {
-        if (!Array.isArray(v) || v.length !== 2) {
-          throw new Error('Invalid tuple')
-        }
-        return v
-      },
+      // we want to parse CDDL sets on our own
+      [CborTag.SET]: (x) => new Tagged(CborTag.SET, x),
     },
   })
 
@@ -98,6 +96,10 @@ export enum TransactionBodyKeys {
   COLLATERAL_RETURN_OUTPUT = 16,
   TOTAL_COLLATERAL = 17,
   REFERENCE_INPUTS = 18,
+  VOTING_PROCEDURES = 19,
+  PROPOSAL_PROCEDURES = 20,
+  TREASURY = 21,
+  DONATION = 22,
 }
 
 export const blake2b256 = (data: unknown): FixLenBuffer<32> =>

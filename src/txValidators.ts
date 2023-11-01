@@ -16,6 +16,9 @@ import type {
   TransactionOutput,
   Uint,
   Withdrawal,
+  CddlSet,
+  CddlNonEmptySet,
+  CddlNonEmptyOrderedSet,
 } from './types'
 import {AmountType, CertificateType, DatumType, TxOutputFormat} from './types'
 import {bind, getRewardAccountStakeCredentialType, unreachable} from './utils'
@@ -83,15 +86,21 @@ const validateInt64 = (n: Int, position: string) =>
     err(ValidationErrorReason.INTEGER_NOT_INT64, position),
   )
 
-function* validateTxInputs(txInputs: TransactionInput[]): ValidatorReturnType {
-  yield* validateListConstraints(txInputs, 'transaction_body.inputs', true)
+function* validateTxInputs(
+  txInputs: CddlSet<TransactionInput>,
+): ValidatorReturnType {
+  yield* validateListConstraints(
+    txInputs.items,
+    'transaction_body.inputs',
+    true,
+  )
 
-  for (const [i, input] of txInputs.entries()) {
+  for (const [i, input] of txInputs.items.entries()) {
     yield* validateUint64(input.index, `transaction_body.inputs[${i}].index`)
   }
 }
 
-function* validateMultiasset<T>(
+function* validateMultiasset<T extends Int | Uint>(
   multiasset: Multiasset<T>,
   validateAmount: (n: T, position: string) => ValidatorReturnType,
   position: string,
@@ -186,15 +195,15 @@ function* validateTxOutputs(outputs: TransactionOutput[]): ValidatorReturnType {
 }
 
 function* validateCertificates(
-  certificates: Certificate[],
+  certificates: CddlNonEmptyOrderedSet<Certificate>,
 ): ValidatorReturnType {
   yield* validateListConstraints(
-    certificates,
+    certificates.items,
     'transaction_body.certificates',
     false,
   )
 
-  for (const [i, certificate] of certificates.entries()) {
+  for (const [i, certificate] of certificates.items.entries()) {
     switch (certificate.type) {
       case CertificateType.POOL_REGISTRATION:
         yield* validateUint64(
@@ -238,6 +247,49 @@ function* validateCertificates(
           ),
         )
         break
+      case CertificateType.STAKE_AND_VOTE_DELEGATION:
+        yield* validate(
+          false,
+          err(
+            ValidationErrorReason.UNSUPPORTED_CERTIFICATE_STAKE_VOTE_DELEG,
+            `transaction_body.certificates[${i}]`,
+          ),
+        )
+        break
+      case CertificateType.STAKE_REGISTRATION_AND_DELEGATION:
+        yield* validate(
+          false,
+          err(
+            ValidationErrorReason.UNSUPPORTED_CERTIFICATE_STAKE_REG_DELEG,
+            `transaction_body.certificates[${i}]`,
+          ),
+        )
+        break
+      case CertificateType.STAKE_REGISTRATION_WITH_VOTE_DELEGATION:
+        yield* validate(
+          false,
+          err(
+            ValidationErrorReason.UNSUPPORTED_CERTIFICATE_VOTE_REG_DELEG,
+            `transaction_body.certificates[${i}]`,
+          ),
+        )
+        break
+      case CertificateType.STAKE_REGISTRATION_WITH_STAKE_AND_VOTE_DELEGATION:
+        yield* validate(
+          false,
+          err(
+            ValidationErrorReason.UNSUPPORTED_CERTIFICATE_STAKE_VOTE_REG_DELEG,
+            `transaction_body.certificates[${i}]`,
+          ),
+        )
+        break
+      case CertificateType.STAKE_REGISTRATION_CONWAY:
+      case CertificateType.STAKE_DEREGISTRATION_CONWAY:
+        yield* validateUint64(
+          certificate.deposit,
+          `transaction_body.certificates[${i}].deposit`,
+        )
+        break
       default:
         break
     }
@@ -259,6 +311,7 @@ function* validateWithdrawals(withdrawals: Withdrawal[]): ValidatorReturnType {
   }
 }
 
+// TODO does this make sense for Plutus? there can be mixed credentials? probably remove the whole function
 function* validateStakeCredentials(
   certificates: Certificate[] | undefined,
   withdrawals: Withdrawal[] | undefined,
@@ -267,6 +320,7 @@ function* validateStakeCredentials(
   const withdrawalStakeCredentialTypes: Set<CredentialType> = new Set()
 
   if (certificates) {
+    // TODO add Conway?
     // We must first filter out the certificates that contain stake credentials
     const certificatesWithStakeCredentials = certificates.filter(
       ({type}) =>
@@ -334,15 +388,15 @@ const validateMint = (mint: Mint) =>
   validateMultiasset(mint, validateInt64, 'transaction_body.mint')
 
 function* validateCollateralInputs(
-  collateralInputs: TransactionInput[],
+  collateralInputs: CddlNonEmptySet<TransactionInput>,
 ): ValidatorReturnType {
   yield* validateListConstraints(
-    collateralInputs,
+    collateralInputs.items,
     'transaction_body.collateral_inputs',
     false,
   )
 
-  for (const [i, collateralInput] of collateralInputs.entries()) {
+  for (const [i, collateralInput] of collateralInputs.items.entries()) {
     yield* validateUint64(
       collateralInput.index,
       `transaction_body.collateral_inputs[${i}].index`,
@@ -351,25 +405,25 @@ function* validateCollateralInputs(
 }
 
 function* validateRequiredSigners(
-  requiredSigners: RequiredSigner[],
+  requiredSigners: CddlNonEmptySet<RequiredSigner>,
 ): ValidatorReturnType {
   yield* validateListConstraints(
-    requiredSigners,
+    requiredSigners.items,
     'transaction_body.required_signers',
     false,
   )
 }
 
 function* validateReferenceInputs(
-  referenceInputs: TransactionInput[],
+  referenceInputs: CddlNonEmptySet<TransactionInput>,
 ): ValidatorReturnType {
   yield* validateListConstraints(
-    referenceInputs,
+    referenceInputs.items,
     'transaction_body.reference_inputs',
     false,
   )
 
-  for (const [i, input] of referenceInputs.entries()) {
+  for (const [i, input] of referenceInputs.items.entries()) {
     yield* validateUint64(
       input.index,
       `transaction_body.reference_inputs[${i}].index`,
@@ -414,8 +468,8 @@ function* validatePoolRegistrationTransaction(
   // If the transaction doesn't contain pool registration certificates we can
   // skip all the validations.
   if (
-    !txBody.certificates ||
-    txBody.certificates.find(
+    txBody.certificates === undefined ||
+    txBody.certificates.items.find(
       ({type}) => type === CertificateType.POOL_REGISTRATION,
     ) === undefined
   ) {
@@ -423,7 +477,7 @@ function* validatePoolRegistrationTransaction(
   }
 
   yield* validate(
-    txBody.certificates.length === 1,
+    txBody.certificates.items.length === 1,
     err(
       ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_OTHER_CERTIFICATES,
       'transaction_body.certificates',
@@ -436,7 +490,7 @@ function* validatePoolRegistrationTransaction(
   // which is not fixable. This could lead to a scenario where a potentially
   // fixable transaction would have an unfixable validation error reported.
   yield* validate(
-    !txBody.withdrawals || txBody.withdrawals.length === 0,
+    txBody.withdrawals === undefined || txBody.withdrawals.length === 0,
     err(
       ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_WITHDRAWALS,
       'transaction_body.withdrawals',
@@ -445,7 +499,7 @@ function* validatePoolRegistrationTransaction(
   // The same applies here, but mint has a nested array for the tokens that
   // needs to be checked in a similar way
   yield* validate(
-    !txBody.mint ||
+    txBody.mint === undefined ||
       txBody.mint.length === 0 ||
       txBody.mint.every(({tokens}) => tokens.length === 0),
     err(
@@ -469,7 +523,10 @@ function* validateTxBody(txBody: TransactionBody): ValidatorReturnType {
   )
   yield* validateOptional(txBody.certificates, validateCertificates)
   yield* validateOptional(txBody.withdrawals, validateWithdrawals)
-  yield* validateStakeCredentials(txBody.certificates, txBody.withdrawals)
+  yield* validateStakeCredentials(
+    txBody.certificates?.items,
+    txBody.withdrawals,
+  )
   yield* validate(
     txBody.update === undefined,
     err(ValidationErrorReason.UNSUPPORTED_TX_UPDATE, 'transaction_body.update'),
@@ -498,6 +555,22 @@ function* validateTxBody(txBody: TransactionBody): ValidatorReturnType {
     bind(validateUint64, 'transaction_body.total_collateral'),
   )
   yield* validateOptional(txBody.referenceInputs, validateReferenceInputs)
+  // TODO validate voting procedures
+  yield* validate(
+    txBody.proposalProcedures === undefined,
+    err(
+      ValidationErrorReason.UNSUPPORTED_TX_PROPOSAL_PROCEDURES,
+      'transaction_body.proposal_procedures',
+    ),
+  )
+  yield* validateOptional(
+    txBody.treasury,
+    bind(validateUint64, 'transaction_body.treasury'),
+  )
+  yield* validateOptional(
+    txBody.donation,
+    bind(validateUint64, 'transaction_body.donation'),
+  )
 }
 
 /**

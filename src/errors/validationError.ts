@@ -1,8 +1,13 @@
 export enum ValidationErrorReason {
   // Unfixable validation errors
   UNSUPPORTED_TX_UPDATE = 'The transaction body entry update must not be included',
+  UNSUPPORTED_TX_PROPOSAL_PROCEDURES = 'The transaction body entry proposal_procedures must not be included',
   UNSUPPORTED_CERTIFICATE_GENESIS_KEY_DELEGATION = 'Certificate of type genesis_key_delegation is not supported and must not be included',
   UNSUPPORTED_CERTIFICATE_MOVE_INSTANTANEOUS_REWARDS_CERT = 'Certificate of type move_instantaneous_rewards_cert is not supported and must not be included',
+  UNSUPPORTED_CERTIFICATE_STAKE_VOTE_DELEG = 'Certificate of type stake_vote_deleg_cert is not supported and must not be included',
+  UNSUPPORTED_CERTIFICATE_STAKE_REG_DELEG = 'Certificate of type stake_reg_deleg_cert is not supported and must not be included',
+  UNSUPPORTED_CERTIFICATE_VOTE_REG_DELEG = 'Certificate of type vote_reg_deleg_cert is not supported and must not be included',
+  UNSUPPORTED_CERTIFICATE_STAKE_VOTE_REG_DELEG = 'Certificate of type stake_vote_reg_deleg_cert is not supported and must not be included',
   INTEGER_NOT_INT64 = 'Hardware wallets support integers up to int64, integers from -2^63 to 2^63-1',
   UNSIGNED_INTEGER_NOT_UINT64 = 'Hardware wallets support unsigned integers up to uint64, unsigned integers from 0 to 2^64-1',
   NUMBER_OF_ELEMENTS_EXCEEDS_UINT16 = 'The number of transaction elements individually must not exceed UINT16_MAX, i.e. 65535',
@@ -28,9 +33,15 @@ const UNFIXABLE = false
 
 const validationErrorFixability: Record<ValidationErrorReason, boolean> = {
   [ValidationErrorReason.UNSUPPORTED_TX_UPDATE]: UNFIXABLE,
+  [ValidationErrorReason.UNSUPPORTED_TX_PROPOSAL_PROCEDURES]: UNFIXABLE,
   [ValidationErrorReason.UNSUPPORTED_CERTIFICATE_GENESIS_KEY_DELEGATION]:
     UNFIXABLE,
   [ValidationErrorReason.UNSUPPORTED_CERTIFICATE_MOVE_INSTANTANEOUS_REWARDS_CERT]:
+    UNFIXABLE,
+  [ValidationErrorReason.UNSUPPORTED_CERTIFICATE_STAKE_VOTE_DELEG]: UNFIXABLE,
+  [ValidationErrorReason.UNSUPPORTED_CERTIFICATE_STAKE_REG_DELEG]: UNFIXABLE,
+  [ValidationErrorReason.UNSUPPORTED_CERTIFICATE_VOTE_REG_DELEG]: UNFIXABLE,
+  [ValidationErrorReason.UNSUPPORTED_CERTIFICATE_STAKE_VOTE_REG_DELEG]:
     UNFIXABLE,
   [ValidationErrorReason.INTEGER_NOT_INT64]: UNFIXABLE,
   [ValidationErrorReason.UNSIGNED_INTEGER_NOT_UINT64]: UNFIXABLE,

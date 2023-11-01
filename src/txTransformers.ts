@@ -3,11 +3,13 @@ import type {
   AUXILIARY_DATA_HASH_LENGTH,
   Datum,
   FixLenBuffer,
+  Int,
   Multiasset,
   ReferenceScript,
   Transaction,
   TransactionBody,
   TransactionOutput,
+  Uint,
   Unparsed,
 } from './types'
 import {AmountType, DatumType, TxOutputFormat} from './types'
@@ -16,7 +18,7 @@ import {blake2b256, encodeToCbor, unreachable} from './utils'
 const transformOptionalList = <T>(optionalList?: T[]): T[] | undefined =>
   optionalList?.length === 0 ? undefined : optionalList
 
-const transformMultiasset = <T>(
+const transformMultiasset = <T extends Int | Uint>(
   multiasset?: Multiasset<T>,
 ): Multiasset<T> | undefined =>
   multiasset === undefined
@@ -124,18 +126,15 @@ export const transformTxBody = (
 ): TransactionBody => ({
   ...txBody,
   outputs: txBody.outputs.map(transformTxOutput),
-  certificates: transformOptionalList(txBody.certificates),
   withdrawals: transformOptionalList(txBody.withdrawals),
-  collateralInputs: transformOptionalList(txBody.collateralInputs),
-  requiredSigners: transformOptionalList(txBody.requiredSigners),
-  collateralReturnOutput:
-    txBody.collateralReturnOutput &&
-    transformTxOutput(txBody.collateralReturnOutput),
-  referenceInputs: transformOptionalList(txBody.referenceInputs),
   auxiliaryDataHash: transformAuxiliaryDataHash(
     txBody.auxiliaryDataHash,
     auxiliaryData,
   ),
+  collateralReturnOutput:
+    txBody.collateralReturnOutput &&
+    transformTxOutput(txBody.collateralReturnOutput),
+  votingProcedures: transformOptionalList(txBody.votingProcedures),
 })
 
 export const transformTx = (tx: Transaction): Transaction => ({

@@ -1,6 +1,10 @@
 import {Tagged} from 'cbor'
-
-import type {
+import {
+  AmountType,
+  CertificateType,
+  DatumType,
+  RelayType,
+  TxOutputFormat,
   Amount,
   AssetName,
   BabbageTransactionOutput,
@@ -21,13 +25,17 @@ import type {
   TransactionInput,
   TransactionOutput,
   Withdrawal,
-} from './types'
-import {
-  AmountType,
-  CertificateType,
-  DatumType,
-  RelayType,
-  TxOutputFormat,
+  DRep,
+  DRepType,
+  Anchor,
+  VoterVotes,
+  Voter,
+  GovActionId,
+  VotingProcedure,
+  ProposalProcedure,
+  Uint,
+  Int,
+  CddlSetBase,
 } from './types'
 import {
   BabbageTransactionOutputKeys,
@@ -37,14 +45,39 @@ import {
   unreachable,
 } from './utils'
 
-const identity = <T>(x: T): T => x
+export const identity = <T>(x: T): T => x
 
-const serializeTxInput = (input: TransactionInput) => [
+export type Serializer<T> = (data: T) => unknown
+
+const serializeCddlSetBase = <T>(
+  set: CddlSetBase<T>,
+  serializeEntry: Serializer<T>,
+) => {
+  const data = set.items.map(serializeEntry)
+  if (set.hasTag) {
+    return new Tagged(CborTag.SET, data)
+  } else {
+    return data
+  }
+}
+
+const serializeCddlSetBaseOrUndefined = <T>(
+  set: CddlSetBase<T> | undefined,
+  serializeEntry: Serializer<T>,
+) => {
+  if (set === undefined) {
+    return undefined
+  }
+  return serializeCddlSetBase(set, serializeEntry)
+}
+
+// export needed because of uniqueness check during parsing
+export const serializeTxInput = (input: TransactionInput) => [
   input.transactionId,
   input.index,
 ]
 
-const serializeMultiasset = <T>(
+const serializeMultiasset = <T extends Int | Uint>(
   multiasset: Multiasset<T>,
 ): Map<PolicyId, Map<AssetName, T>> =>
   new Map(
@@ -138,9 +171,9 @@ const serializePoolParams = (poolParams: PoolParams) => [
   poolParams.vrfKeyHash,
   poolParams.pledge,
   poolParams.cost,
-  new Tagged(CborTag.TUPLE, poolParams.margin),
+  new Tagged(CborTag.UNIT_INTERVAL, poolParams.margin),
   poolParams.rewardAccount,
-  poolParams.poolOwners,
+  serializeCddlSetBase(poolParams.poolOwners, identity),
   poolParams.relays.map(serializeRelay),
   poolParams.poolMetadata && serializePoolMetadata(poolParams.poolMetadata),
 ]
@@ -150,7 +183,29 @@ const serializeCredential = (credential: Credential) => [
   credential.hash,
 ]
 
-const serializeCertificate = (certificate: Certificate) => {
+const serializeDRep = (dRep: DRep) => {
+  switch (dRep.type) {
+    case DRepType.KEY_HASH:
+      return [dRep.type, dRep.keyHash]
+    case DRepType.SCRIPT_HASH:
+      return [dRep.type, dRep.scriptHash]
+    case DRepType.ALWAYS_ABSTAIN:
+    case DRepType.ALWAYS_NO_CONFIDENCE:
+      return [dRep.type]
+    default:
+      unreachable(dRep)
+  }
+}
+
+const serializeAnchor = (anchor: Anchor | null) => {
+  if (anchor === null) {
+    return null
+  }
+  return [anchor.url, anchor.dataHash]
+}
+
+// export needed because of uniqueness check during parsing
+export const serializeCertificate = (certificate: Certificate) => {
   switch (certificate.type) {
     case CertificateType.STAKE_REGISTRATION:
     case CertificateType.STAKE_DEREGISTRATION:
@@ -171,25 +226,138 @@ const serializeCertificate = (certificate: Certificate) => {
     case CertificateType.GENESIS_KEY_DELEGATION:
     case CertificateType.MOVE_INSTANTANEOUS_REWARDS_CERT:
       return [certificate.type, ...certificate.restOfData]
+    case CertificateType.STAKE_REGISTRATION_CONWAY:
+    case CertificateType.STAKE_DEREGISTRATION_CONWAY:
+      return [
+        certificate.type,
+        serializeCredential(certificate.stakeCredential),
+        certificate.deposit,
+      ]
+    case CertificateType.VOTE_DELEGATION:
+      return [
+        certificate.type,
+        serializeCredential(certificate.stakeCredential),
+        serializeDRep(certificate.dRep),
+      ]
+    case CertificateType.STAKE_AND_VOTE_DELEGATION:
+      return [
+        certificate.type,
+        serializeCredential(certificate.stakeCredential),
+        certificate.poolKeyHash,
+        serializeDRep(certificate.dRep),
+      ]
+    case CertificateType.STAKE_REGISTRATION_AND_DELEGATION:
+      return [
+        certificate.type,
+        serializeCredential(certificate.stakeCredential),
+        certificate.poolKeyHash,
+        certificate.deposit,
+      ]
+    case CertificateType.STAKE_REGISTRATION_WITH_VOTE_DELEGATION:
+      return [
+        certificate.type,
+        serializeCredential(certificate.stakeCredential),
+        serializeDRep(certificate.dRep),
+        certificate.deposit,
+      ]
+    case CertificateType.STAKE_REGISTRATION_WITH_STAKE_AND_VOTE_DELEGATION:
+      return [
+        certificate.type,
+        serializeCredential(certificate.stakeCredential),
+        certificate.poolKeyHash,
+        serializeDRep(certificate.dRep),
+        certificate.deposit,
+      ]
+    case CertificateType.AUTHORIZE_COMMITTEE_HOT:
+      return [
+        certificate.type,
+        serializeCredential(certificate.coldCredential),
+        serializeCredential(certificate.hotCredential),
+      ]
+    case CertificateType.RESIGN_COMMITTEE_COLD:
+      return [
+        certificate.type,
+        serializeCredential(certificate.coldCredential),
+        serializeAnchor(certificate.anchor),
+      ]
+    case CertificateType.DREP_REGISTRATION:
+      return [
+        certificate.type,
+        serializeCredential(certificate.dRepCredential),
+        certificate.deposit,
+        serializeAnchor(certificate.anchor),
+      ]
+    case CertificateType.DREP_DEREGISTRATION:
+      return [
+        certificate.type,
+        serializeCredential(certificate.dRepCredential),
+        certificate.deposit,
+      ]
+    case CertificateType.DREP_UPDATE:
+      return [
+        certificate.type,
+        serializeCredential(certificate.dRepCredential),
+        serializeAnchor(certificate.anchor),
+      ]
     default:
       unreachable(certificate)
   }
 }
 
-const serializeCollateralInput = (collateralInput: TransactionInput) => [
+// export needed because of uniqueness check during parsing
+export const serializeCollateralInput = (collateralInput: TransactionInput) => [
   collateralInput.transactionId,
   collateralInput.index,
 ]
 
+const serializeVoter = (voter: Voter) => [voter.type, voter.hash]
+
+const serializeGovActionId = (govActionId: GovActionId) => [
+  govActionId.transactionId,
+  govActionId.index,
+]
+
+const serializeVotingProcedure = (votingProcedure: VotingProcedure) => [
+  votingProcedure.voteOption,
+  serializeAnchor(votingProcedure.anchor),
+]
+
+const serializeVotingProcedures = (ballots: VoterVotes[]) =>
+  new Map(
+    ballots.map(({voter, votes}) => [
+      serializeVoter(voter),
+      new Map(
+        votes.map(({govActionId, votingProcedure}) => [
+          serializeGovActionId(govActionId),
+          serializeVotingProcedure(votingProcedure),
+        ]),
+      ),
+    ]),
+  )
+
+// export needed because of uniqueness check during parsing
+export const serializeProposalProcedure = (procedure: ProposalProcedure) => [
+  procedure.deposit,
+  procedure.rewardAccount,
+  procedure.govAction,
+  serializeAnchor(procedure.anchor),
+]
+
 export const serializeTxBody = (txBody: TransactionBody) =>
   filteredMap<TransactionBodyKeys, unknown>([
-    [TransactionBodyKeys.INPUTS, txBody.inputs.map(serializeTxInput)],
+    [
+      TransactionBodyKeys.INPUTS,
+      serializeCddlSetBase(txBody.inputs, serializeTxInput),
+    ],
     [TransactionBodyKeys.OUTPUTS, txBody.outputs.map(serializeTxOutput)],
     [TransactionBodyKeys.FEE, identity(txBody.fee)],
     [TransactionBodyKeys.TTL, identity(txBody.ttl)],
     [
       TransactionBodyKeys.CERTIFICATES,
-      txBody.certificates?.map(serializeCertificate),
+      serializeCddlSetBaseOrUndefined(
+        txBody.certificates,
+        serializeCertificate,
+      ),
     ],
     [
       TransactionBodyKeys.WITHDRAWALS,
@@ -208,9 +376,15 @@ export const serializeTxBody = (txBody: TransactionBody) =>
     [TransactionBodyKeys.SCRIPT_DATA_HASH, identity(txBody.scriptDataHash)],
     [
       TransactionBodyKeys.COLLATERAL_INPUTS,
-      txBody.collateralInputs?.map(serializeCollateralInput),
+      serializeCddlSetBaseOrUndefined(
+        txBody.collateralInputs,
+        serializeCollateralInput,
+      ),
     ],
-    [TransactionBodyKeys.REQUIRED_SIGNERS, identity(txBody.requiredSigners)],
+    [
+      TransactionBodyKeys.REQUIRED_SIGNERS,
+      serializeCddlSetBaseOrUndefined(txBody.requiredSigners, identity),
+    ],
     [TransactionBodyKeys.NETWORK_ID, identity(txBody.networkId)],
     [
       TransactionBodyKeys.COLLATERAL_RETURN_OUTPUT,
@@ -220,8 +394,22 @@ export const serializeTxBody = (txBody: TransactionBody) =>
     [TransactionBodyKeys.TOTAL_COLLATERAL, identity(txBody.totalCollateral)],
     [
       TransactionBodyKeys.REFERENCE_INPUTS,
-      txBody.referenceInputs?.map(serializeTxInput),
+      serializeCddlSetBaseOrUndefined(txBody.referenceInputs, serializeTxInput),
     ],
+    [
+      TransactionBodyKeys.VOTING_PROCEDURES,
+      txBody.votingProcedures &&
+        serializeVotingProcedures(txBody.votingProcedures),
+    ],
+    [
+      TransactionBodyKeys.PROPOSAL_PROCEDURES,
+      serializeCddlSetBaseOrUndefined(
+        txBody.proposalProcedures,
+        serializeProposalProcedure,
+      ),
+    ],
+    [TransactionBodyKeys.TREASURY, identity(txBody.treasury)],
+    [TransactionBodyKeys.DONATION, identity(txBody.donation)],
   ])
 
 export const serializeTx = (tx: Transaction) => {

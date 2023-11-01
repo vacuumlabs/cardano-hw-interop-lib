@@ -21,13 +21,16 @@
     "bech",
     "cardano",
     "cbor",
+    "Deleg",
     "deregistration",
-    "ipfs",
+    "DREP",
     "fixability",
+    "ipfs",
     "multiasset",
     "multiassets",
     "reserialized",
     "unfixable",
+    "UNREG",
     "vacuumlabs"
   ]
 }
