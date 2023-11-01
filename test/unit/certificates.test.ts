@@ -5,7 +5,7 @@ import {
   Port,
   CertificateType,
   RelayType,
-  StakeCredentialType,
+  CredentialType,
 } from '../../src/types'
 import {
   ipv4ToBuffer,
@@ -26,7 +26,7 @@ const ValidCertificatesTestCases: ValidParseTestCase<Certificate[]>[] = [
       {
         type: CertificateType.STAKE_REGISTRATION,
         stakeCredential: {
-          type: StakeCredentialType.KEY_HASH,
+          type: CredentialType.KEY_HASH,
           hash: toFixLenBuffer(
             '2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d',
             28,
@@ -42,7 +42,7 @@ const ValidCertificatesTestCases: ValidParseTestCase<Certificate[]>[] = [
       {
         type: CertificateType.STAKE_REGISTRATION,
         stakeCredential: {
-          type: StakeCredentialType.KEY_HASH,
+          type: CredentialType.KEY_HASH,
           hash: toFixLenBuffer(
             '2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d',
             28,
@@ -52,7 +52,7 @@ const ValidCertificatesTestCases: ValidParseTestCase<Certificate[]>[] = [
       {
         type: CertificateType.STAKE_REGISTRATION,
         stakeCredential: {
-          type: StakeCredentialType.KEY_HASH,
+          type: CredentialType.KEY_HASH,
           hash: toFixLenBuffer(
             'c1d58a7602c3bd8104cd2a871a2d1cb68f6f6669bd37a7688618ee55',
             28,
@@ -68,7 +68,7 @@ const ValidCertificatesTestCases: ValidParseTestCase<Certificate[]>[] = [
       {
         type: CertificateType.STAKE_REGISTRATION,
         stakeCredential: {
-          type: StakeCredentialType.KEY_HASH,
+          type: CredentialType.KEY_HASH,
           hash: toFixLenBuffer(
             '2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d',
             28,
@@ -78,7 +78,7 @@ const ValidCertificatesTestCases: ValidParseTestCase<Certificate[]>[] = [
       {
         type: CertificateType.STAKE_DEREGISTRATION,
         stakeCredential: {
-          type: StakeCredentialType.SCRIPT_HASH,
+          type: CredentialType.SCRIPT_HASH,
           hash: toFixLenBuffer(
             'c1d58a7602c3bd8104cd2a871a2d1cb68f6f6669bd37a7688618ee55',
             28,
@@ -88,7 +88,7 @@ const ValidCertificatesTestCases: ValidParseTestCase<Certificate[]>[] = [
       {
         type: CertificateType.STAKE_DELEGATION,
         stakeCredential: {
-          type: StakeCredentialType.KEY_HASH,
+          type: CredentialType.KEY_HASH,
           hash: toFixLenBuffer(
             '2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d',
             28,
@@ -189,17 +189,17 @@ const InvalidCertificatesTestCases: InvalidParseTestCase[] = [
   {
     testName: 'Invalid stake registration credential',
     cbor: '8182008100',
-    errMsg: ParseErrorReason.INVALID_STAKE_CREDENTIAL,
+    errMsg: ParseErrorReason.INVALID_CREDENTIAL,
   },
   {
     testName: 'Invalid stake registration credential type',
     cbor: '8182008202581c2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d',
-    errMsg: ParseErrorReason.INVALID_STAKE_CREDENTIAL_TYPE,
+    errMsg: ParseErrorReason.INVALID_CREDENTIAL_TYPE,
   },
   {
     testName: 'Invalid stake registration key hash',
     cbor: '8182008200581d2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1dff',
-    errMsg: ParseErrorReason.INVALID_STAKE_CREDENTIAL_KEY_HASH,
+    errMsg: ParseErrorReason.INVALID_CREDENTIAL_KEY_HASH,
   },
   {
     testName: 'Invalid pool registration owner',

@@ -40,8 +40,8 @@ import type {
   RelaySingleHostAddress,
   RelaySingleHostName,
   RequiredSigner,
-  StakeCredentialKey,
-  StakeCredentialScript,
+  KeyCredential,
+  ScriptCredential,
   StakeDelegationCertificate,
   StakeDeregistrationCertificate,
   StakeRegistrationCertificate,
@@ -70,7 +70,7 @@ import {
   REWARD_ACCOUNT_LENGTH,
   SCRIPT_DATA_HASH_LENGTH,
   SCRIPT_HASH_LENGTH,
-  StakeCredentialType,
+  CredentialType,
   TX_ID_HASH_LENGTH,
   TxOutputFormat,
   URL_MAX_LENGTH,
@@ -291,46 +291,44 @@ export const parseWithdrawals = (
   }))
 }
 
-const parseStakeCredentialType = (
-  unparsedStakeCredentialType: unknown,
-): StakeCredentialType => {
+const parseCredentialType = (
+  unparsedCredentialType: unknown,
+): CredentialType => {
   validate(
-    isNumber(unparsedStakeCredentialType),
-    ParseErrorReason.INVALID_STAKE_CREDENTIAL_TYPE,
+    isNumber(unparsedCredentialType),
+    ParseErrorReason.INVALID_CREDENTIAL_TYPE,
   )
   validate(
-    unparsedStakeCredentialType in StakeCredentialType,
-    ParseErrorReason.INVALID_STAKE_CREDENTIAL_TYPE,
+    unparsedCredentialType in CredentialType,
+    ParseErrorReason.INVALID_CREDENTIAL_TYPE,
   )
-  return unparsedStakeCredentialType
+  return unparsedCredentialType
 }
 
-const parseStakeCredentialKey = (
-  data: unknown[],
-): WithoutType<StakeCredentialKey> => ({
+const parseKeyCredential = (data: unknown[]): WithoutType<KeyCredential> => ({
   hash: parseBufferOfLength(
     data[0],
     KEY_HASH_LENGTH,
-    ParseErrorReason.INVALID_STAKE_CREDENTIAL_KEY_HASH,
+    ParseErrorReason.INVALID_CREDENTIAL_KEY_HASH,
   ),
 })
 
-const parseStakeCredentialScript = (
+const parseScriptCredential = (
   data: unknown[],
-): WithoutType<StakeCredentialScript> => ({
+): WithoutType<ScriptCredential> => ({
   hash: parseBufferOfLength(
     data[0],
     SCRIPT_HASH_LENGTH,
-    ParseErrorReason.INVALID_STAKE_CREDENTIAL_SCRIPT_HASH,
+    ParseErrorReason.INVALID_CREDENTIAL_SCRIPT_HASH,
   ),
 })
 
-const parseStakeCredential = createParser(
+const parseCredential = createParser(
   parseBasedOnType,
-  ParseErrorReason.INVALID_STAKE_CREDENTIAL,
-  parseStakeCredentialType,
-  parseStakeCredentialKey,
-  parseStakeCredentialScript,
+  ParseErrorReason.INVALID_CREDENTIAL,
+  parseCredentialType,
+  parseKeyCredential,
+  parseScriptCredential,
 )
 
 const parsePoolKeyHash = createParser(
@@ -496,19 +494,19 @@ const parseCertificateType = (
 const parseStakeRegistrationCertificate = (
   data: unknown[],
 ): WithoutType<StakeRegistrationCertificate> => ({
-  stakeCredential: parseStakeCredential(data[0]),
+  stakeCredential: parseCredential(data[0]),
 })
 
 const parseStakeDeregistrationCertificate = (
   data: unknown[],
 ): WithoutType<StakeDeregistrationCertificate> => ({
-  stakeCredential: parseStakeCredential(data[0]),
+  stakeCredential: parseCredential(data[0]),
 })
 
 const parseStakeDelegationCertificate = (
   data: unknown[],
 ): WithoutType<StakeDelegationCertificate> => ({
-  stakeCredential: parseStakeCredential(data[0]),
+  stakeCredential: parseCredential(data[0]),
   poolKeyHash: parsePoolKeyHash(data[1]),
 })
 

@@ -15,7 +15,7 @@ import type {
   ReferenceScript,
   Relay,
   RewardAccount,
-  StakeCredential,
+  Credential,
   Transaction,
   TransactionBody,
   TransactionInput,
@@ -145,9 +145,9 @@ const serializePoolParams = (poolParams: PoolParams) => [
   poolParams.poolMetadata && serializePoolMetadata(poolParams.poolMetadata),
 ]
 
-const serializeStakeCredential = (stakeCredential: StakeCredential) => [
-  stakeCredential.type,
-  stakeCredential.hash,
+const serializeCredential = (credential: Credential) => [
+  credential.type,
+  credential.hash,
 ]
 
 const serializeCertificate = (certificate: Certificate) => {
@@ -156,12 +156,12 @@ const serializeCertificate = (certificate: Certificate) => {
     case CertificateType.STAKE_DEREGISTRATION:
       return [
         certificate.type,
-        serializeStakeCredential(certificate.stakeCredential),
+        serializeCredential(certificate.stakeCredential),
       ]
     case CertificateType.STAKE_DELEGATION:
       return [
         certificate.type,
-        serializeStakeCredential(certificate.stakeCredential),
+        serializeCredential(certificate.stakeCredential),
         certificate.poolKeyHash,
       ]
     case CertificateType.POOL_REGISTRATION:
