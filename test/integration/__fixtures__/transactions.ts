@@ -352,7 +352,7 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
             type: CertificateType.STAKE_REGISTRATION,
             stakeCredential: {
               type: CredentialType.KEY_HASH,
-              hash: toFixLenBuffer(
+              keyHash: toFixLenBuffer(
                 '2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d',
                 28,
               ),
@@ -362,7 +362,7 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
             type: CertificateType.STAKE_DEREGISTRATION,
             stakeCredential: {
               type: CredentialType.SCRIPT_HASH,
-              hash: toFixLenBuffer(
+              scriptHash: toFixLenBuffer(
                 'c1d58a7602c3bd8104cd2a871a2d1cb68f6f6669bd37a7688618ee55',
                 28,
               ),
@@ -372,7 +372,7 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
             type: CertificateType.STAKE_DELEGATION,
             stakeCredential: {
               type: CredentialType.KEY_HASH,
-              hash: toFixLenBuffer(
+              keyHash: toFixLenBuffer(
                 '2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d',
                 28,
               ),
@@ -576,6 +576,119 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
           ),
         ],
         hasTag: false,
+      } as CddlNonEmptySet<RequiredSigner>,
+      networkId: toUint(1),
+      collateralReturnOutput: undefined,
+      totalCollateral: undefined,
+      referenceInputs: undefined,
+      votingProcedures: undefined,
+      proposalProcedures: undefined,
+      treasury: undefined,
+      donation: undefined,
+    },
+  },
+  {
+    testName: 'Tx body with tag 258 in collateral inputs and required signers',
+    cbor: 'a800818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018283583d105e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e28dd419e1a006ca7935820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce18883583930167f6dbf610ae030f043adb1f3af78754ed9595ad4ac1f7ed9ff6466760fb6955d1217b1f1f208df6d45ab23c9e17b0c984a2d3a22bbbfb8821a0001e91fa1581cd7a7c6999786354b6dbee181a2f562a628a75fce126f4da40ce5d9b2a146546f6b656e3101582000ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce102182a030a0b5820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce1880dd90102818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000ed9010282581cfea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a581ceea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a0f01',
+    txBody: {
+      inputs: {
+        items: [
+          {
+            transactionId: toFixLenBuffer(
+              '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
+              32,
+            ),
+            index: toUint(0),
+          },
+        ],
+        hasTag: false,
+      } as CddlSet<TransactionInput>,
+      outputs: [
+        {
+          format: TxOutputFormat.ARRAY_LEGACY,
+          address: fromBech32(
+            'addr_test1zp0z7zqwhya6mpk5q929ur897g3pp9kkgalpreny8y304rfw6j2jxnwq6enuzvt0lp89wgcsufj7mvcnxpzgkd4hz70z3h2pnc8lhq8r',
+          ),
+          amount: {
+            type: AmountType.WITHOUT_MULTIASSET,
+            coin: toUint(7120787),
+          },
+          datumHash: {
+            type: DatumType.HASH,
+            hash: toFixLenBuffer(
+              'ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188',
+              32,
+            ),
+          },
+        },
+        {
+          format: TxOutputFormat.ARRAY_LEGACY,
+          address: fromBech32(
+            'addr_test1xqt87mdlvy9wqv8sgwkmrua00p65ak2ett22c8m7m8lkgenkp7mf2hgjz7clrusgmak5t2ere8shkrycfgkn5g4mh7uqvcq039',
+          ),
+          amount: {
+            type: AmountType.WITH_MULTIASSET,
+            coin: toUint(125215),
+            multiasset: [
+              {
+                policyId: toFixLenBuffer(
+                  'd7a7c6999786354b6dbee181a2f562a628a75fce126f4da40ce5d9b2',
+                  28,
+                ),
+                tokens: [
+                  {
+                    assetName: Buffer.from('Token1') as MaxLenBuffer<32>,
+                    amount: toUint(1),
+                  },
+                ],
+              },
+            ],
+          },
+          datumHash: {
+            type: DatumType.HASH,
+            hash: toFixLenBuffer(
+              '00ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce1',
+              32,
+            ),
+          },
+        },
+      ],
+      fee: toUint(42),
+      ttl: toUint(10),
+      certificates: undefined,
+      withdrawals: undefined,
+      update: undefined,
+      auxiliaryDataHash: undefined,
+      validityIntervalStart: undefined,
+      mint: undefined,
+      scriptDataHash: toFixLenBuffer(
+        'ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188',
+        32,
+      ),
+      collateralInputs: {
+        items: [
+          {
+            transactionId: toFixLenBuffer(
+              '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
+              32,
+            ),
+            index: toUint(0),
+          },
+        ],
+        hasTag: true,
+      } as CddlNonEmptySet<TransactionInput>,
+      requiredSigners: {
+        items: [
+          toFixLenBuffer(
+            'fea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a',
+            28,
+          ),
+          toFixLenBuffer(
+            'eea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a',
+            28,
+          ),
+        ],
+        hasTag: true,
       } as CddlNonEmptySet<RequiredSigner>,
       networkId: toUint(1),
       collateralReturnOutput: undefined,
@@ -896,7 +1009,7 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
             type: CertificateType.VOTE_DELEGATION,
             stakeCredential: {
               type: CredentialType.KEY_HASH,
-              hash: toFixLenBuffer(
+              keyHash: toFixLenBuffer(
                 '86dcecee2ca5017ed3a8bef8386f4ea19411872975818b6c8e40d101',
                 28,
               ),
@@ -913,7 +1026,7 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
             type: CertificateType.DREP_REGISTRATION,
             dRepCredential: {
               type: CredentialType.KEY_HASH,
-              hash: toFixLenBuffer(
+              keyHash: toFixLenBuffer(
                 '7293814591e7543561361bafe399d9b5012d537c46cf70fa5e4faa9f',
                 28,
               ),
@@ -931,7 +1044,7 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
             type: CertificateType.DREP_UPDATE,
             dRepCredential: {
               type: CredentialType.KEY_HASH,
-              hash: toFixLenBuffer(
+              keyHash: toFixLenBuffer(
                 '7293814591e7543561361bafe399d9b5012d537c46cf70fa5e4faa9f',
                 28,
               ),
@@ -948,7 +1061,7 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
             type: CertificateType.DREP_DEREGISTRATION,
             dRepCredential: {
               type: CredentialType.KEY_HASH,
-              hash: toFixLenBuffer(
+              keyHash: toFixLenBuffer(
                 '7293814591e7543561361bafe399d9b5012d537c46cf70fa5e4faa9f',
                 28,
               ),
@@ -959,7 +1072,7 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
             type: CertificateType.STAKE_AND_VOTE_DELEGATION,
             stakeCredential: {
               type: CredentialType.KEY_HASH,
-              hash: toFixLenBuffer(
+              keyHash: toFixLenBuffer(
                 '86dcecee2ca5017ed3a8bef8386f4ea19411872975818b6c8e40d101',
                 28,
               ),
@@ -980,7 +1093,7 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
             type: CertificateType.STAKE_REGISTRATION_AND_DELEGATION,
             stakeCredential: {
               type: CredentialType.KEY_HASH,
-              hash: toFixLenBuffer(
+              keyHash: toFixLenBuffer(
                 '86dcecee2ca5017ed3a8bef8386f4ea19411872975818b6c8e40d101',
                 28,
               ),
@@ -995,7 +1108,7 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
             type: CertificateType.STAKE_REGISTRATION_WITH_VOTE_DELEGATION,
             stakeCredential: {
               type: CredentialType.KEY_HASH,
-              hash: toFixLenBuffer(
+              keyHash: toFixLenBuffer(
                 '86dcecee2ca5017ed3a8bef8386f4ea19411872975818b6c8e40d101',
                 28,
               ),
@@ -1013,7 +1126,7 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
             type: CertificateType.STAKE_REGISTRATION_WITH_STAKE_AND_VOTE_DELEGATION,
             stakeCredential: {
               type: CredentialType.KEY_HASH,
-              hash: toFixLenBuffer(
+              keyHash: toFixLenBuffer(
                 '86dcecee2ca5017ed3a8bef8386f4ea19411872975818b6c8e40d101',
                 28,
               ),

@@ -7,10 +7,6 @@ import type {
   Mint,
   Multiasset,
   RequiredSigner,
-  CredentialType,
-  StakeDelegationCertificate,
-  StakeDeregistrationCertificate,
-  StakeRegistrationCertificate,
   TransactionBody,
   TransactionInput,
   TransactionOutput,
@@ -19,9 +15,10 @@ import type {
   CddlSet,
   CddlNonEmptySet,
   CddlNonEmptyOrderedSet,
+  VoterVotes,
 } from './types'
 import {AmountType, CertificateType, DatumType, TxOutputFormat} from './types'
-import {bind, getRewardAccountStakeCredentialType, unreachable} from './utils'
+import {bind, unreachable} from './utils'
 
 const UINT16_MAX = 65535
 const MAX_UINT_64_STR = '18446744073709551615'
@@ -311,79 +308,6 @@ function* validateWithdrawals(withdrawals: Withdrawal[]): ValidatorReturnType {
   }
 }
 
-// TODO does this make sense for Plutus? there can be mixed credentials? probably remove the whole function
-function* validateStakeCredentials(
-  certificates: Certificate[] | undefined,
-  withdrawals: Withdrawal[] | undefined,
-): ValidatorReturnType {
-  const certificateStakeCredentialTypes: Set<CredentialType> = new Set()
-  const withdrawalStakeCredentialTypes: Set<CredentialType> = new Set()
-
-  if (certificates) {
-    // TODO add Conway?
-    // We must first filter out the certificates that contain stake credentials
-    const certificatesWithStakeCredentials = certificates.filter(
-      ({type}) =>
-        type === CertificateType.STAKE_REGISTRATION ||
-        type === CertificateType.STAKE_DEREGISTRATION ||
-        type === CertificateType.STAKE_DELEGATION,
-    ) as (
-      | StakeRegistrationCertificate
-      | StakeDeregistrationCertificate
-      | StakeDelegationCertificate
-    )[]
-    certificatesWithStakeCredentials.forEach(({stakeCredential}) =>
-      certificateStakeCredentialTypes.add(stakeCredential.type),
-    )
-    // We check the set of stake credential types to be less or equal to one,
-    // because if there are 0 types it means there were no certificates with
-    // stake credentials which is possible and it shouldn't trigger this error
-    yield* validate(
-      certificateStakeCredentialTypes.size <= 1,
-      err(
-        ValidationErrorReason.WITHDRAWALS_MUST_HAVE_THE_SAME_TYPE_OF_STAKE_CREDENTIAL,
-        'transaction_body.certificates',
-      ),
-    )
-  }
-
-  if (withdrawals) {
-    withdrawals.forEach(({rewardAccount}) =>
-      withdrawalStakeCredentialTypes.add(
-        getRewardAccountStakeCredentialType(rewardAccount),
-      ),
-    )
-    // Here we also check the number of stake credential types to be less or
-    // equal to one, because we could have been dealing with an empty array
-    // and that's a ValidationError that is caught elsewhere and shouldn't
-    // be caught by this check
-    yield* validate(
-      withdrawalStakeCredentialTypes.size <= 1,
-      err(
-        ValidationErrorReason.WITHDRAWALS_MUST_HAVE_THE_SAME_TYPE_OF_STAKE_CREDENTIAL,
-        'transaction_body.withdrawals',
-      ),
-    )
-  }
-
-  if (
-    certificateStakeCredentialTypes.size === 1 &&
-    withdrawalStakeCredentialTypes.size === 1
-  ) {
-    // We only trigger this check if both certificates and withdrawals have
-    // consistent stake credential types otherwise it is useless to check
-    // whether they are consistent in respect to each other.
-    yield* validate(
-      [...certificateStakeCredentialTypes][0] ===
-        [...withdrawalStakeCredentialTypes][0],
-      err(
-        ValidationErrorReason.CERTIFICATES_AND_WITHDRAWALS_STAKE_CREDENTIAL_TYPES_MUST_BE_CONSISTENT,
-        'transaction_body',
-      ),
-    )
-  }
-}
-
 const validateMint = (mint: Mint) =>
   validateMultiasset(mint, validateInt64, 'transaction_body.mint')
 
@@ -458,8 +382,43 @@ function* validateTxCollateralReturnOutput(
   }
 }
 
+function* validateVotingProcedures(
+  voterVotesArray: VoterVotes[],
+): ValidatorReturnType {
+  yield* validateListConstraints(
+    voterVotesArray,
+    'transaction_body.voting_procedures',
+    true,
+  )
+
+  yield* validate(
+    voterVotesArray.length <= 1,
+    err(
+      ValidationErrorReason.TOO_MANY_VOTERS_IN_VOTING_PROCEDURES,
+      `transaction_body.voting_procedures`,
+    ),
+  )
+
+  for (const [i, voterVotes] of voterVotesArray.entries()) {
+    yield* validate(
+      voterVotes.votes.length === 1,
+      err(
+        ValidationErrorReason.INVALID_NUMBER_OF_VOTING_PROCEDURES,
+        `transaction_body.voting_procedures[${i}].votes`,
+      ),
+    )
+
+    for (const [j, voterVote] of voterVotes.votes.entries()) {
+      yield* validateUint64(
+        voterVote.govActionId.index,
+        `transaction_body.voting_procedures[${i}].votes[${j}].govActionId.index`,
+      )
+    }
+  }
+}
+
 /**
- * Checks if a transaction contains pool registration certificate, if it does
+ * Checks if a transaction contains pool registration certificate; if it does,
  * runs a series of validators for pool registration transactions.
  */
 function* validatePoolRegistrationTransaction(
@@ -483,6 +442,7 @@ function* validatePoolRegistrationTransaction(
       'transaction_body.certificates',
     ),
   )
+
   // We consider the transaction to have no withdrawals if the field is not
   // present or if the array length is 0. Checking only whether the field is
   // not present is not sufficient because the transaction could contain an
@@ -496,6 +456,7 @@ function* validatePoolRegistrationTransaction(
       'transaction_body.withdrawals',
     ),
   )
+
   // The same applies here, but mint has a nested array for the tokens that
   // needs to be checked in a similar way
   yield* validate(
@@ -505,6 +466,106 @@ function* validatePoolRegistrationTransaction(
     err(
       ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_MINT_ENTRY,
       'transaction_body.mint',
+    ),
+  )
+
+  // no Plutus elements in tx outputs
+  yield* validate(
+    txBody.outputs.every((output) => {
+      switch (output.format) {
+        case TxOutputFormat.MAP_BABBAGE:
+          if (output.datum !== undefined) {
+            return false
+          }
+          if (output.referenceScript !== undefined) {
+            return false
+          }
+          break
+        case TxOutputFormat.ARRAY_LEGACY:
+          if (output.datumHash !== undefined) {
+            return false
+          }
+          break
+        default:
+          unreachable(output)
+      }
+      return true
+    }),
+    err(
+      ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_PLUTUS_OUTPUTS,
+      'transaction_body.outputs',
+    ),
+  )
+
+  yield* validate(
+    txBody.scriptDataHash !== undefined,
+    err(
+      ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_SCRIPT_DATA_HASH,
+      'transaction_body.script_data_hash',
+    ),
+  )
+
+  yield* validate(
+    txBody.collateralInputs !== undefined,
+    err(
+      ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_COLLATERAL_INPUTS,
+      'transaction_body.collateral_inputs',
+    ),
+  )
+
+  yield* validate(
+    txBody.requiredSigners !== undefined,
+    err(
+      ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_REQUIRED_SIGNERS,
+      'transaction_body.required_signers',
+    ),
+  )
+
+  yield* validate(
+    txBody.collateralReturnOutput !== undefined,
+    err(
+      ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_COLLATERAL_RETURN_OUTPUT,
+      'transaction_body.collateral_return_output',
+    ),
+  )
+
+  yield* validate(
+    txBody.totalCollateral !== undefined,
+    err(
+      ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_TOTAL_COLLATERAL,
+      'transaction_body.total_collateral',
+    ),
+  )
+
+  yield* validate(
+    txBody.referenceInputs !== undefined,
+    err(
+      ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_REFERENCE_INPUTS,
+      'transaction_body.reference_inputs',
+    ),
+  )
+
+  yield* validate(
+    txBody.votingProcedures !== undefined,
+    err(
+      ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_VOTING_PROCEDURES,
+      'transaction_body.voting_procedures',
+    ),
+  )
+
+  yield* validate(
+    txBody.treasury !== undefined,
+    err(
+      ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_TREASURY,
+      'transaction_body.treasury',
+    ),
+  )
+
+  yield* validate(
+    txBody.donation !== undefined,
+    err(
+      ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_DONATION,
+      'transaction_body.donation',
     ),
   )
 }
@@ -523,10 +584,6 @@ function* validateTxBody(txBody: TransactionBody): ValidatorReturnType {
   )
   yield* validateOptional(txBody.certificates, validateCertificates)
   yield* validateOptional(txBody.withdrawals, validateWithdrawals)
-  yield* validateStakeCredentials(
-    txBody.certificates?.items,
-    txBody.withdrawals,
-  )
   yield* validate(
     txBody.update === undefined,
     err(ValidationErrorReason.UNSUPPORTED_TX_UPDATE, 'transaction_body.update'),
@@ -542,7 +599,6 @@ function* validateTxBody(txBody: TransactionBody): ValidatorReturnType {
     txBody.networkId,
     bind(validateUint64, 'transaction_body.network_id'),
   )
-  yield* validatePoolRegistrationTransaction(txBody)
   yield* validateOptional(
     txBody.collateralReturnOutput,
     bind(
@@ -555,7 +611,7 @@ function* validateTxBody(txBody: TransactionBody): ValidatorReturnType {
     bind(validateUint64, 'transaction_body.total_collateral'),
   )
   yield* validateOptional(txBody.referenceInputs, validateReferenceInputs)
-  // TODO validate voting procedures
+  yield* validateOptional(txBody.votingProcedures, validateVotingProcedures)
   yield* validate(
     txBody.proposalProcedures === undefined,
     err(
@@ -571,6 +627,9 @@ function* validateTxBody(txBody: TransactionBody): ValidatorReturnType {
     txBody.donation,
     bind(validateUint64, 'transaction_body.donation'),
   )
+
+  // extra checks for transactions containing stake pool registration certificates
+  yield* validatePoolRegistrationTransaction(txBody)
 }
 
 /**

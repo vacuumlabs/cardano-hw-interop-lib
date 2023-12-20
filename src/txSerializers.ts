@@ -36,6 +36,7 @@ import {
   Uint,
   Int,
   CddlSetBase,
+  CredentialType,
 } from './types'
 import {
   BabbageTransactionOutputKeys,
@@ -49,7 +50,7 @@ export const identity = <T>(x: T): T => x
 
 export type Serializer<T> = (data: T) => unknown
 
-const serializeCddlSetBase = <T>(
+export const serializeCddlSetBase = <T>(
   set: CddlSetBase<T>,
   serializeEntry: Serializer<T>,
 ) => {
@@ -61,7 +62,7 @@ const serializeCddlSetBase = <T>(
   }
 }
 
-const serializeCddlSetBaseOrUndefined = <T>(
+export const serializeCddlSetBaseOrUndefined = <T>(
   set: CddlSetBase<T> | undefined,
   serializeEntry: Serializer<T>,
 ) => {
@@ -71,7 +72,6 @@ const serializeCddlSetBaseOrUndefined = <T>(
   return serializeCddlSetBase(set, serializeEntry)
 }
 
-// export needed because of uniqueness check during parsing
 export const serializeTxInput = (input: TransactionInput) => [
   input.transactionId,
   input.index,
@@ -178,10 +178,16 @@ const serializePoolParams = (poolParams: PoolParams) => [
   poolParams.poolMetadata && serializePoolMetadata(poolParams.poolMetadata),
 ]
 
-const serializeCredential = (credential: Credential) => [
-  credential.type,
-  credential.hash,
-]
+const serializeCredential = (credential: Credential) => {
+  switch (credential.type) {
+    case CredentialType.KEY_HASH:
+      return [credential.type, credential.keyHash]
+    case CredentialType.SCRIPT_HASH:
+      return [credential.type, credential.scriptHash]
+    default:
+      unreachable(credential)
+  }
+}
 
 const serializeDRep = (dRep: DRep) => {
   switch (dRep.type) {
@@ -189,8 +195,8 @@ const serializeDRep = (dRep: DRep) => {
       return [dRep.type, dRep.keyHash]
     case DRepType.SCRIPT_HASH:
       return [dRep.type, dRep.scriptHash]
-    case DRepType.ALWAYS_ABSTAIN:
-    case DRepType.ALWAYS_NO_CONFIDENCE:
+    case DRepType.ABSTAIN:
+    case DRepType.NO_CONFIDENCE:
       return [dRep.type]
     default:
       unreachable(dRep)
@@ -204,7 +210,6 @@ const serializeAnchor = (anchor: Anchor | null) => {
   return [anchor.url, anchor.dataHash]
 }
 
-// export needed because of uniqueness check during parsing
 export const serializeCertificate = (certificate: Certificate) => {
   switch (certificate.type) {
     case CertificateType.STAKE_REGISTRATION:
@@ -304,7 +309,6 @@ export const serializeCertificate = (certificate: Certificate) => {
   }
 }
 
-// export needed because of uniqueness check during parsing
 export const serializeCollateralInput = (collateralInput: TransactionInput) => [
   collateralInput.transactionId,
   collateralInput.index,
@@ -335,7 +339,6 @@ const serializeVotingProcedures = (ballots: VoterVotes[]) =>
     ]),
   )
 
-// export needed because of uniqueness check during parsing
 export const serializeProposalProcedure = (procedure: ProposalProcedure) => [
   procedure.deposit,
   procedure.rewardAccount,

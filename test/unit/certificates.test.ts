@@ -9,6 +9,7 @@ import {
   CddlSet,
   KeyHash,
   CddlNonEmptyOrderedSet,
+  DRepType,
 } from '../../src/types'
 import {
   ipv4ToBuffer,
@@ -33,7 +34,7 @@ const ValidCertificatesTestCases: ValidParseTestCase<
           type: CertificateType.STAKE_REGISTRATION,
           stakeCredential: {
             type: CredentialType.KEY_HASH,
-            hash: toFixLenBuffer(
+            keyHash: toFixLenBuffer(
               '2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d',
               28,
             ),
@@ -52,7 +53,7 @@ const ValidCertificatesTestCases: ValidParseTestCase<
           type: CertificateType.STAKE_REGISTRATION_CONWAY,
           stakeCredential: {
             type: CredentialType.KEY_HASH,
-            hash: toFixLenBuffer(
+            keyHash: toFixLenBuffer(
               '2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d',
               28,
             ),
@@ -72,7 +73,7 @@ const ValidCertificatesTestCases: ValidParseTestCase<
           type: CertificateType.STAKE_REGISTRATION,
           stakeCredential: {
             type: CredentialType.KEY_HASH,
-            hash: toFixLenBuffer(
+            keyHash: toFixLenBuffer(
               '2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d',
               28,
             ),
@@ -82,7 +83,7 @@ const ValidCertificatesTestCases: ValidParseTestCase<
           type: CertificateType.STAKE_REGISTRATION,
           stakeCredential: {
             type: CredentialType.KEY_HASH,
-            hash: toFixLenBuffer(
+            keyHash: toFixLenBuffer(
               'c1d58a7602c3bd8104cd2a871a2d1cb68f6f6669bd37a7688618ee55',
               28,
             ),
@@ -93,15 +94,15 @@ const ValidCertificatesTestCases: ValidParseTestCase<
     } as CddlNonEmptyOrderedSet<Certificate>,
   },
   {
-    testName: 'Each certificate type once',
-    cbor: '8883078200581c2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d0683088201581cc1d58a7602c3bd8104cd2a871a2d1cb68f6f6669bd37a7688618ee550683028200581c2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d581c001337292eec9b3eefc6802f71cb34c21a7963eb12466d52836aa3908a03581c4dfbc0559b2e1d6af62c447f0a0d6290a8b05e075ef08db38c1b81a8582067c5c0b45db55e8c82752263207b9a92c2d5fa6c671aceed9df451cad3fac7a31a0001e2401a05f5e100d81e82031819581de1d7d8a321633b3d1ab1651eeb258ad898ebcef1d348b54148f18e15da82581c2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d581cf699c6400f85bdca54e44d0cad1f6141ce049a411c0d695fc30c3f7384840019029af650004706260000004700000000111100008301f676616464726573732e76616375756d6c6162732e636f6d8202781e616e6f746865722e616464726573732e76616375756d6c6162732e636f6d840019ffff447f0000fff682782468747470733a2f2f706f6f6c2d6d657461646174612e76616375756d6c6162732e636f6d5820e318d62e3d5cc3cc23ca1123438e439d7aac6c6c423320f670d159726ac9d11f8304581c4dfbc0559b2e1d6af62c447f0a0d6290a8b05e075ef08db38c1b81a81a0001dfbe84108200581c1033bbc7db733c057fed63fa085113dfb570566eb708d548d2f7cce8008276616464726573732e76616375756d6c6162732e636f6d5820E318D62E3D5CC3CC23CA1123438E439D7AAC6C6C423320F670D159726AC9D11F83118200581c1033bbc7db733c057fed63fa085113dfb570566eb708d548d2f7cce80083128200581c1033bbc7db733c057fed63fa085113dfb570566eb708d548d2f7cce88276616464726573732e76616375756d6c6162732e636f6d5820E318D62E3D5CC3CC23CA1123438E439D7AAC6C6C423320F670D159726AC9D11F',
+    testName: 'Stake certificates',
+    cbor: '8383078200581c2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d0683088201581cc1d58a7602c3bd8104cd2a871a2d1cb68f6f6669bd37a7688618ee550683028200581c2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d581c001337292eec9b3eefc6802f71cb34c21a7963eb12466d52836aa390',
     parsed: {
       items: [
         {
           type: CertificateType.STAKE_REGISTRATION_CONWAY,
           stakeCredential: {
             type: CredentialType.KEY_HASH,
-            hash: toFixLenBuffer(
+            keyHash: toFixLenBuffer(
               '2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d',
               28,
             ),
@@ -112,7 +113,7 @@ const ValidCertificatesTestCases: ValidParseTestCase<
           type: CertificateType.STAKE_DEREGISTRATION_CONWAY,
           stakeCredential: {
             type: CredentialType.SCRIPT_HASH,
-            hash: toFixLenBuffer(
+            scriptHash: toFixLenBuffer(
               'c1d58a7602c3bd8104cd2a871a2d1cb68f6f6669bd37a7688618ee55',
               28,
             ),
@@ -123,7 +124,7 @@ const ValidCertificatesTestCases: ValidParseTestCase<
           type: CertificateType.STAKE_DELEGATION,
           stakeCredential: {
             type: CredentialType.KEY_HASH,
-            hash: toFixLenBuffer(
+            keyHash: toFixLenBuffer(
               '2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d',
               28,
             ),
@@ -133,6 +134,15 @@ const ValidCertificatesTestCases: ValidParseTestCase<
             28,
           ),
         },
+      ],
+      hasTag: false,
+    } as CddlNonEmptyOrderedSet<Certificate>,
+  },
+  {
+    testName: 'Stake pool certificates',
+    cbor: '828a03581c4dfbc0559b2e1d6af62c447f0a0d6290a8b05e075ef08db38c1b81a8582067c5c0b45db55e8c82752263207b9a92c2d5fa6c671aceed9df451cad3fac7a31a0001e2401a05f5e100d81e82031819581de1d7d8a321633b3d1ab1651eeb258ad898ebcef1d348b54148f18e15da82581c2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d581cf699c6400f85bdca54e44d0cad1f6141ce049a411c0d695fc30c3f7384840019029af650004706260000004700000000111100008301f676616464726573732e76616375756d6c6162732e636f6d8202781e616e6f746865722e616464726573732e76616375756d6c6162732e636f6d840019ffff447f0000fff682782468747470733a2f2f706f6f6c2d6d657461646174612e76616375756d6c6162732e636f6d5820e318d62e3d5cc3cc23ca1123438e439d7aac6c6c423320f670d159726ac9d11f8304581c4dfbc0559b2e1d6af62c447f0a0d6290a8b05e075ef08db38c1b81a81a0001dfbe',
+    parsed: {
+      items: [
         {
           type: CertificateType.POOL_REGISTRATION,
           poolParams: {
@@ -203,21 +213,20 @@ const ValidCertificatesTestCases: ValidParseTestCase<
           ),
           epoch: toUint(122814),
         },
-        /*
-        TODO missing
-        | VoteDelegCertificate
-        | StakeVoteDelegCertificate
-        | StakeRegDelegCertificate
-        | VoteRegDelegCertificate
-        | StakeVoteRegDelegCertificate
-        | AuthCommitteeHotCertificate
-        | ResignCommitteeColdCertificate
-        */
+      ],
+      hasTag: false,
+    } as CddlNonEmptyOrderedSet<Certificate>,
+  },
+  {
+    testName: 'DRep certificates',
+    cbor: '8384108200581c1033bbc7db733c057fed63fa085113dfb570566eb708d548d2f7cce8008276616464726573732e76616375756d6c6162732e636f6d5820E318D62E3D5CC3CC23CA1123438E439D7AAC6C6C423320F670D159726AC9D11F83118200581c1033bbc7db733c057fed63fa085113dfb570566eb708d548d2f7cce80083128200581c1033bbc7db733c057fed63fa085113dfb570566eb708d548d2f7cce88276616464726573732e76616375756d6c6162732e636f6d5820E318D62E3D5CC3CC23CA1123438E439D7AAC6C6C423320F670D159726AC9D11F',
+    parsed: {
+      items: [
         {
           type: CertificateType.DREP_REGISTRATION,
           dRepCredential: {
             type: CredentialType.KEY_HASH,
-            hash: toFixLenBuffer(
+            keyHash: toFixLenBuffer(
               '1033bbc7db733c057fed63fa085113dfb570566eb708d548d2f7cce8',
               28,
             ),
@@ -235,7 +244,7 @@ const ValidCertificatesTestCases: ValidParseTestCase<
           type: CertificateType.DREP_DEREGISTRATION,
           dRepCredential: {
             type: CredentialType.KEY_HASH,
-            hash: toFixLenBuffer(
+            keyHash: toFixLenBuffer(
               '1033bbc7db733c057fed63fa085113dfb570566eb708d548d2f7cce8',
               28,
             ),
@@ -246,7 +255,7 @@ const ValidCertificatesTestCases: ValidParseTestCase<
           type: CertificateType.DREP_UPDATE,
           dRepCredential: {
             type: CredentialType.KEY_HASH,
-            hash: toFixLenBuffer(
+            keyHash: toFixLenBuffer(
               '1033bbc7db733c057fed63fa085113dfb570566eb708d548d2f7cce8',
               28,
             ),
@@ -263,6 +272,135 @@ const ValidCertificatesTestCases: ValidParseTestCase<
       hasTag: false,
     } as CddlNonEmptyOrderedSet<Certificate>,
   },
+  {
+    testName: 'Vote delegation certificates',
+    cbor: '8483098200581c1033bbc7db733c057fed63fa085113dfb570566eb708d548d2f7cce88200581cabcdefc7db733c057fed63fa085113dfb570566eb708d548d2f7cce883098201581c1033bbc7db733c057fed63fa085113dfb570566eb708d548d2f7cce88201581cabcdefc7db733c057fed63fa085113dfb570566eb708d548d2f7cce883098200581c1033bbc7db733c057fed63fa085113dfb570566eb708d548d2f7cce8810283098200581c1033bbc7db733c057fed63fa085113dfb570566eb708d548d2f7cce88103',
+    parsed: {
+      items: [
+        {
+          type: CertificateType.VOTE_DELEGATION,
+          stakeCredential: {
+            type: CredentialType.KEY_HASH,
+            keyHash: toFixLenBuffer(
+              '1033bbc7db733c057fed63fa085113dfb570566eb708d548d2f7cce8',
+              28,
+            ),
+          },
+          dRep: {
+            type: DRepType.KEY_HASH,
+            keyHash: toFixLenBuffer(
+              'abcdefc7db733c057fed63fa085113dfb570566eb708d548d2f7cce8',
+              28,
+            ),
+          },
+        },
+        {
+          type: CertificateType.VOTE_DELEGATION,
+          stakeCredential: {
+            type: CredentialType.SCRIPT_HASH,
+            scriptHash: toFixLenBuffer(
+              '1033bbc7db733c057fed63fa085113dfb570566eb708d548d2f7cce8',
+              28,
+            ),
+          },
+          dRep: {
+            type: DRepType.SCRIPT_HASH,
+            scriptHash: toFixLenBuffer(
+              'abcdefc7db733c057fed63fa085113dfb570566eb708d548d2f7cce8',
+              28,
+            ),
+          },
+        },
+        {
+          type: CertificateType.VOTE_DELEGATION,
+          stakeCredential: {
+            type: CredentialType.KEY_HASH,
+            keyHash: toFixLenBuffer(
+              '1033bbc7db733c057fed63fa085113dfb570566eb708d548d2f7cce8',
+              28,
+            ),
+          },
+          dRep: {
+            type: DRepType.ABSTAIN,
+          },
+        },
+        {
+          type: CertificateType.VOTE_DELEGATION,
+          stakeCredential: {
+            type: CredentialType.KEY_HASH,
+            keyHash: toFixLenBuffer(
+              '1033bbc7db733c057fed63fa085113dfb570566eb708d548d2f7cce8',
+              28,
+            ),
+          },
+          dRep: {
+            type: DRepType.NO_CONFIDENCE,
+          },
+        },
+      ],
+      hasTag: false,
+    } as CddlNonEmptyOrderedSet<Certificate>,
+  },
+  {
+    testName: 'Constitutional committee certificates',
+    cbor: '82830e8200581c1033bbc7db733c057fed63fa085113dfb570566eb708d548d2f7cce88200581c1033bbc7db733c057fed63fa085113dfb570566eb708d548d2f7cce8830f8201581c1033bbc7db733c057fed63fa085113dfb570566eb708d548d2f7cce8f6',
+    parsed: {
+      items: [
+        {
+          type: CertificateType.AUTHORIZE_COMMITTEE_HOT,
+          coldCredential: {
+            type: CredentialType.KEY_HASH,
+            keyHash: toFixLenBuffer(
+              '1033bbc7db733c057fed63fa085113dfb570566eb708d548d2f7cce8',
+              28,
+            ),
+          },
+          hotCredential: {
+            type: CredentialType.KEY_HASH,
+            keyHash: toFixLenBuffer(
+              '1033bbc7db733c057fed63fa085113dfb570566eb708d548d2f7cce8',
+              28,
+            ),
+          },
+        },
+        {
+          type: CertificateType.RESIGN_COMMITTEE_COLD,
+          coldCredential: {
+            type: CredentialType.SCRIPT_HASH,
+            scriptHash: toFixLenBuffer(
+              '1033bbc7db733c057fed63fa085113dfb570566eb708d548d2f7cce8',
+              28,
+            ),
+          },
+          anchor: null,
+        },
+      ],
+      hasTag: false,
+    } as CddlNonEmptyOrderedSet<Certificate>,
+  },
+  /* TODO
+  {
+    testName: 'Combined certificates',
+    cbor: '80',
+    parsed: {
+      items: [
+        {
+          type: CertificateType.STAKE_AND_VOTE_DELEGATION,
+        },
+        {
+          type: CertificateType.STAKE_REGISTRATION_AND_DELEGATION,
+        },
+        {
+          type: CertificateType.STAKE_REGISTRATION_WITH_VOTE_DELEGATION,
+        },
+        {
+          type: CertificateType.STAKE_REGISTRATION_WITH_STAKE_AND_VOTE_DELEGATION,
+        },
+      ],
+      hasTag: false,
+    } as CddlNonEmptyOrderedSet<Certificate>,
+  },
+*/
 ]
 
 const InvalidCertificatesTestCases: InvalidParseTestCase[] = [

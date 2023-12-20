@@ -143,8 +143,8 @@ export enum CertificateType {
   STAKE_DELEGATION = 2,
   POOL_REGISTRATION = 3,
   POOL_RETIREMENT = 4,
-  GENESIS_KEY_DELEGATION = 5, // deprecated since Conway
-  MOVE_INSTANTANEOUS_REWARDS_CERT = 6, // deprecated since Conway
+  GENESIS_KEY_DELEGATION = 5, // removed in Conway
+  MOVE_INSTANTANEOUS_REWARDS_CERT = 6, // removed in Conway
   STAKE_REGISTRATION_CONWAY = 7,
   STAKE_DEREGISTRATION_CONWAY = 8,
   VOTE_DELEGATION = 9,
@@ -166,12 +166,12 @@ export enum CredentialType {
 
 export type KeyCredential = {
   type: CredentialType.KEY_HASH
-  hash: KeyHash
+  keyHash: KeyHash
 }
 
 export type ScriptCredential = {
   type: CredentialType.SCRIPT_HASH
-  hash: ScriptHash
+  scriptHash: ScriptHash
 }
 
 export type Credential = KeyCredential | ScriptCredential
@@ -280,8 +280,8 @@ export type StakeDeregistrationConwayCertificate = {
 export enum DRepType {
   KEY_HASH = 0,
   SCRIPT_HASH = 1,
-  ALWAYS_ABSTAIN = 2,
-  ALWAYS_NO_CONFIDENCE = 3,
+  ABSTAIN = 2,
+  NO_CONFIDENCE = 3,
 }
 
 export type KeyHashDRep = {
@@ -294,19 +294,15 @@ export type ScriptHashDRep = {
   scriptHash: ScriptHash
 }
 
-export type AlwaysAbstainDRep = {
-  type: DRepType.ALWAYS_ABSTAIN
+export type AbstainDRep = {
+  type: DRepType.ABSTAIN
 }
 
-export type AlwaysNoConfidenceDRep = {
-  type: DRepType.ALWAYS_NO_CONFIDENCE
+export type NoConfidenceDRep = {
+  type: DRepType.NO_CONFIDENCE
 }
 
-export type DRep =
-  | KeyHashDRep
-  | ScriptHashDRep
-  | AlwaysAbstainDRep
-  | AlwaysNoConfidenceDRep
+export type DRep = KeyHashDRep | ScriptHashDRep | AbstainDRep | NoConfidenceDRep
 
 export type VoteDelegationCertificate = {
   type: CertificateType.VOTE_DELEGATION

@@ -68,8 +68,8 @@ import {
   DRepType,
   KeyHashDRep,
   ScriptHashDRep,
-  AlwaysAbstainDRep,
-  AlwaysNoConfidenceDRep,
+  AbstainDRep,
+  NoConfidenceDRep,
   StakeAndVoteDelegationCertificate,
   StakeRegistrationAndDelegationCertificate,
   StakeRegistrationWithVoteDelegationCertificate,
@@ -129,6 +129,8 @@ import {Tagged} from 'cbor'
 
 // ======================== universal parsers / parsers for CDDL data types
 
+// parsers for tx body elements and certain CDDL "datatypes" are exported
+
 const doNotParse: Parser<Unparsed> = (data: unknown) => data
 
 export const parseCoin = createParser(parseUint, ParseErrorReason.INVALID_COIN)
@@ -150,7 +152,7 @@ const parseCredentialType = (
 const parseKeyCredential = (data: unknown[]): WithoutType<KeyCredential> => {
   validate(data.length === 1, ParseErrorReason.INVALID_CREDENTIAL)
   return {
-    hash: parseBufferOfLength(
+    keyHash: parseBufferOfLength(
       data[0],
       KEY_HASH_LENGTH,
       ParseErrorReason.INVALID_CREDENTIAL_KEY_HASH,
@@ -163,7 +165,7 @@ const parseScriptCredential = (
 ): WithoutType<ScriptCredential> => {
   validate(data.length === 1, ParseErrorReason.INVALID_CREDENTIAL)
   return {
-    hash: parseBufferOfLength(
+    scriptHash: parseBufferOfLength(
       data[0],
       SCRIPT_HASH_LENGTH,
       ParseErrorReason.INVALID_CREDENTIAL_SCRIPT_HASH,
@@ -203,7 +205,7 @@ export const parseInputs = createParser(
   ParseErrorReason.INVALID_TX_INPUTS,
 )
 
-export const parseRewardAccount = createParser(
+const parseRewardAccount = createParser(
   parseBufferOfLength,
   REWARD_ACCOUNT_LENGTH,
   ParseErrorReason.INVALID_REWARD_ACCOUNT,
@@ -500,7 +502,7 @@ const parsePoolMetadata = (unparsedPoolMetadata: unknown): PoolMetadata => {
   return {url, metadataHash}
 }
 
-export const parsePoolParams = (unparsedPoolParams: unknown): PoolParams => {
+const parsePoolParams = (unparsedPoolParams: unknown): PoolParams => {
   const [
     operator,
     vrfKeyHash,
@@ -579,17 +581,15 @@ const parseScriptHashDRep = (data: unknown[]): WithoutType<ScriptHashDRep> => {
   }
 }
 
-const parseAlwaysAbstainDRep = (
-  data: unknown[],
-): WithoutType<AlwaysAbstainDRep> => {
+const parseAbstainDRep = (data: unknown[]): WithoutType<AbstainDRep> => {
   // nothing to parse
   validate(data.length === 0, ParseErrorReason.INVALID_DREP)
   return {}
 }
 
-const parseAlwaysNoConfidenceDRep = (
+const parseNoConfidenceDRep = (
   data: unknown[],
-): WithoutType<AlwaysNoConfidenceDRep> => {
+): WithoutType<NoConfidenceDRep> => {
   // nothing to parse
   validate(data.length === 0, ParseErrorReason.INVALID_DREP)
   return {}
@@ -619,8 +619,8 @@ export const parseDRep = createParser(
   parseDRepType,
   parseKeyHashDRep,
   parseScriptHashDRep,
-  parseAlwaysAbstainDRep,
-  parseAlwaysNoConfidenceDRep,
+  parseAbstainDRep,
+  parseNoConfidenceDRep,
 )
 
 const parseCertificateType = (
@@ -683,20 +683,23 @@ const parsePoolRetirementCertificate = (
   }
 }
 
+// removed in Conway, but we keep it here because it might appear
+// in erroneous / previously-built transactions
 const parseGenesisKeyDelegation = (
   data: unknown[],
 ): WithoutType<GenesisKeyDelegation> => ({
   restOfData: data,
 })
 
-// TODO these are removed in Conway
+// removed in Conway, but we keep it here because it might appear
+// in erroneous / previously-built transactions
 const parseMoveInstantaneousRewardsCertificate = (
   data: unknown[],
 ): WithoutType<MoveInstantaneousRewardsCertificate> => ({
   restOfData: data,
 })
 
-const parseStakeRegCertificate = (
+const parseStakeRegistrationConwayCertificate = (
   data: unknown[],
 ): WithoutType<StakeRegistrationConwayCertificate> => {
   validate(data.length === 2, ParseErrorReason.INVALID_CERTIFICATE)
@@ -706,7 +709,7 @@ const parseStakeRegCertificate = (
   }
 }
 
-const parseStakeUnregCertificate = (
+const parseStakeDeregistrationConwayCertificate = (
   data: unknown[],
 ): WithoutType<StakeDeregistrationConwayCertificate> => {
   validate(data.length === 2, ParseErrorReason.INVALID_CERTIFICATE)
@@ -716,7 +719,7 @@ const parseStakeUnregCertificate = (
   }
 }
 
-const parseVoteDelegCertificate = (
+const parseVoteDelegationCertificate = (
   data: unknown[],
 ): WithoutType<VoteDelegationCertificate> => {
   validate(data.length === 2, ParseErrorReason.INVALID_CERTIFICATE)
@@ -726,7 +729,7 @@ const parseVoteDelegCertificate = (
   }
 }
 
-const parseStakeVoteDelegCertificate = (
+const parseStakeAndVoteDelegationCertificate = (
   data: unknown[],
 ): WithoutType<StakeAndVoteDelegationCertificate> => {
   validate(data.length === 3, ParseErrorReason.INVALID_CERTIFICATE)
@@ -737,7 +740,7 @@ const parseStakeVoteDelegCertificate = (
   }
 }
 
-const parseStakeRegDelegCertificate = (
+const parseStakeRegistrationAndDelegationCertificate = (
   data: unknown[],
 ): WithoutType<StakeRegistrationAndDelegationCertificate> => {
   validate(data.length === 3, ParseErrorReason.INVALID_CERTIFICATE)
@@ -748,7 +751,7 @@ const parseStakeRegDelegCertificate = (
   }
 }
 
-const parseVoteRegDelegCertificate = (
+const parseStakeRegistrationWithVoteDelegationCertificate = (
   data: unknown[],
 ): WithoutType<StakeRegistrationWithVoteDelegationCertificate> => {
   validate(data.length === 3, ParseErrorReason.INVALID_CERTIFICATE)
@@ -759,7 +762,7 @@ const parseVoteRegDelegCertificate = (
   }
 }
 
-const parseStakeVoteRegDelegCertificate = (
+const parseStakeRegistrationWithStakeAndVoteDelegationCertificate = (
   data: unknown[],
 ): WithoutType<StakeRegistrationWithStakeAndVoteDelegationCertificate> => {
   validate(data.length === 4, ParseErrorReason.INVALID_CERTIFICATE)
@@ -771,7 +774,7 @@ const parseStakeVoteRegDelegCertificate = (
   }
 }
 
-const parseAuthCommitteeHotCertificate = (
+const parseAuthorizeCommitteeHotCertificate = (
   data: unknown[],
 ): WithoutType<AuthorizeCommitteeHotCertificate> => {
   validate(data.length === 2, ParseErrorReason.INVALID_CERTIFICATE)
@@ -791,7 +794,7 @@ const parseResignCommitteeColdCertificate = (
   }
 }
 
-const parseDRepRegCertificate = (
+const parseDRepRegistrationCertificate = (
   data: unknown[],
 ): WithoutType<DRepRegistrationCertificate> => {
   validate(data.length === 3, ParseErrorReason.INVALID_CERTIFICATE)
@@ -802,7 +805,7 @@ const parseDRepRegCertificate = (
   }
 }
 
-const parseDRepUnregCertificate = (
+const parseDRepDeregistrationCertificate = (
   data: unknown[],
 ): WithoutType<DRepDeregistrationCertificate> => {
   validate(data.length === 2, ParseErrorReason.INVALID_CERTIFICATE)
@@ -833,17 +836,17 @@ export const parseCertificate = createParser(
   parsePoolRetirementCertificate,
   parseGenesisKeyDelegation,
   parseMoveInstantaneousRewardsCertificate,
-  parseStakeRegCertificate,
-  parseStakeUnregCertificate,
-  parseVoteDelegCertificate,
-  parseStakeVoteDelegCertificate,
-  parseStakeRegDelegCertificate,
-  parseVoteRegDelegCertificate,
-  parseStakeVoteRegDelegCertificate,
-  parseAuthCommitteeHotCertificate,
+  parseStakeRegistrationConwayCertificate,
+  parseStakeDeregistrationConwayCertificate,
+  parseVoteDelegationCertificate,
+  parseStakeAndVoteDelegationCertificate,
+  parseStakeRegistrationAndDelegationCertificate,
+  parseStakeRegistrationWithVoteDelegationCertificate,
+  parseStakeRegistrationWithStakeAndVoteDelegationCertificate,
+  parseAuthorizeCommitteeHotCertificate,
   parseResignCommitteeColdCertificate,
-  parseDRepRegCertificate,
-  parseDRepUnregCertificate,
+  parseDRepRegistrationCertificate,
+  parseDRepDeregistrationCertificate,
   parseDRepUpdateCertificate,
 )
 
@@ -1050,7 +1053,7 @@ const parseVoteOption = (unparsed: unknown): VoteOption => {
   return unparsed
 }
 
-const parseVotingProcedure = (unparsed: unknown): VotingProcedure => {
+export const parseVotingProcedure = (unparsed: unknown): VotingProcedure => {
   const [voteOption, anchor] = parseTuple(
     unparsed,
     ParseErrorReason.INVALID_VOTING_PROCEDURE,
@@ -1118,6 +1121,7 @@ export const parseProposalProcedure = (
     anchor,
   }
 }
+
 export const parseProposalProcedures = createParser(
   parseCddlNonEmptyOrderedSet,
   parseProposalProcedure,
