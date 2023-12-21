@@ -35,6 +35,7 @@ export enum ValidationErrorReason {
   REFERENCE_SCRIPT_MUST_NOT_BE_EMPTY_IF_DEFINED = 'Reference script must not be empty if defined',
   COLLATERAL_RETURN_MUST_NOT_CONTAIN_DATUM = 'Collateral return must not contain datum',
   COLLATERAL_RETURN_MUST_NOT_CONTAIN_REFERENCE_SCRIPT = 'Collateral return must not contain reference script',
+  TX_INCONSISTENT_SET_TAGS = 'Inconsistent set tags 258 across the transaction body',
 }
 
 const FIXABLE = true
@@ -97,6 +98,7 @@ const validationErrorFixability: Record<ValidationErrorReason, boolean> = {
   [ValidationErrorReason.COLLATERAL_RETURN_MUST_NOT_CONTAIN_DATUM]: FIXABLE,
   [ValidationErrorReason.COLLATERAL_RETURN_MUST_NOT_CONTAIN_REFERENCE_SCRIPT]:
     FIXABLE,
+  [ValidationErrorReason.TX_INCONSISTENT_SET_TAGS]: FIXABLE,
 }
 
 export type ValidationError = {

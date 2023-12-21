@@ -1,3 +1,4 @@
+import {ValidationError, ValidationErrorReason} from '../../../src/errors'
 import {
   MaxLenBuffer,
   Port,
@@ -588,119 +589,6 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
     },
   },
   {
-    testName: 'Tx body with tag 258 in collateral inputs and required signers',
-    cbor: 'a800818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018283583d105e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e28dd419e1a006ca7935820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce18883583930167f6dbf610ae030f043adb1f3af78754ed9595ad4ac1f7ed9ff6466760fb6955d1217b1f1f208df6d45ab23c9e17b0c984a2d3a22bbbfb8821a0001e91fa1581cd7a7c6999786354b6dbee181a2f562a628a75fce126f4da40ce5d9b2a146546f6b656e3101582000ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce102182a030a0b5820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce1880dd90102818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000ed9010282581cfea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a581ceea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a0f01',
-    txBody: {
-      inputs: {
-        items: [
-          {
-            transactionId: toFixLenBuffer(
-              '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
-              32,
-            ),
-            index: toUint(0),
-          },
-        ],
-        hasTag: false,
-      } as CddlSet<TransactionInput>,
-      outputs: [
-        {
-          format: TxOutputFormat.ARRAY_LEGACY,
-          address: fromBech32(
-            'addr_test1zp0z7zqwhya6mpk5q929ur897g3pp9kkgalpreny8y304rfw6j2jxnwq6enuzvt0lp89wgcsufj7mvcnxpzgkd4hz70z3h2pnc8lhq8r',
-          ),
-          amount: {
-            type: AmountType.WITHOUT_MULTIASSET,
-            coin: toUint(7120787),
-          },
-          datumHash: {
-            type: DatumType.HASH,
-            hash: toFixLenBuffer(
-              'ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188',
-              32,
-            ),
-          },
-        },
-        {
-          format: TxOutputFormat.ARRAY_LEGACY,
-          address: fromBech32(
-            'addr_test1xqt87mdlvy9wqv8sgwkmrua00p65ak2ett22c8m7m8lkgenkp7mf2hgjz7clrusgmak5t2ere8shkrycfgkn5g4mh7uqvcq039',
-          ),
-          amount: {
-            type: AmountType.WITH_MULTIASSET,
-            coin: toUint(125215),
-            multiasset: [
-              {
-                policyId: toFixLenBuffer(
-                  'd7a7c6999786354b6dbee181a2f562a628a75fce126f4da40ce5d9b2',
-                  28,
-                ),
-                tokens: [
-                  {
-                    assetName: Buffer.from('Token1') as MaxLenBuffer<32>,
-                    amount: toUint(1),
-                  },
-                ],
-              },
-            ],
-          },
-          datumHash: {
-            type: DatumType.HASH,
-            hash: toFixLenBuffer(
-              '00ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce1',
-              32,
-            ),
-          },
-        },
-      ],
-      fee: toUint(42),
-      ttl: toUint(10),
-      certificates: undefined,
-      withdrawals: undefined,
-      update: undefined,
-      auxiliaryDataHash: undefined,
-      validityIntervalStart: undefined,
-      mint: undefined,
-      scriptDataHash: toFixLenBuffer(
-        'ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188',
-        32,
-      ),
-      collateralInputs: {
-        items: [
-          {
-            transactionId: toFixLenBuffer(
-              '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
-              32,
-            ),
-            index: toUint(0),
-          },
-        ],
-        hasTag: true,
-      } as CddlNonEmptySet<TransactionInput>,
-      requiredSigners: {
-        items: [
-          toFixLenBuffer(
-            'fea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a',
-            28,
-          ),
-          toFixLenBuffer(
-            'eea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a',
-            28,
-          ),
-        ],
-        hasTag: true,
-      } as CddlNonEmptySet<RequiredSigner>,
-      networkId: toUint(1),
-      collateralReturnOutput: undefined,
-      totalCollateral: undefined,
-      referenceInputs: undefined,
-      votingProcedures: undefined,
-      proposalProcedures: undefined,
-      treasury: undefined,
-      donation: undefined,
-    },
-  },
-  {
     testName:
       'Tx body with inline datum, reference script, collateral return, total collateral and reference input',
     cbor: 'a8008182582094461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d000181a4005839008b3303988371208dd0916cc4548c4eafc2fd3d6205ea8ec180c1b1d9e0820d5929d99bce8aa81e86195fd2b824e6550820a03af325f6ff220100028201d81841a003d8185846820158425840010000332233322222253353004333573466ebc00c00801801440204c98d4c01ccd5ce2481094e6f7420457175616c000084984880084880048004480048004102000b5820853cbe68f7fccdeeeb0fd7b711ea147912190c35ac52d9d94080ae82809b2f840d8182582094461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d0110a2005839008b3303988371208dd0916cc4548c4eafc2fd3d6205ea8ec180c1b1d9e0820d5929d99bce8aa81e86195fd2b824e6550820a03af325f6ff220100110a128182582094461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d02',
@@ -1170,6 +1058,7 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
 type TransformTransactionBodyTestCase = {
   testName: string
   cbor: string
+  validationErrors: ValidationError[]
   auxiliaryData?: unknown
   txBody: TransactionBody
 }
@@ -1179,6 +1068,7 @@ export const TransformTransactionTestCases: TransformTransactionBodyTestCase[] =
     {
       testName: 'Simple tx body with canonical auxiliary data',
       cbor: 'a50081825820bc8bf52ea894fb8e442fe3eea628be87d0c9a37baef185b70eb00a5c8a849d3b000181825839000743d16cfe3c4fcc0c11c2403bbc10dbc7ecdd4477e053481a368e7a06e2ae44dff6770dc0f4ada3cf4cf2605008e27aecdb332ad349fda71a0023583c021a00029b75031a01a3bd8f075820fb7099a47afd6efb4f9cccf9d0f8745331a19eb8b3f50548ffadae9de8551743',
+      validationErrors: [],
       auxiliaryData: CanonicalAuxiliaryData.data,
       txBody: {
         inputs: {
@@ -1230,6 +1120,7 @@ export const TransformTransactionTestCases: TransformTransactionBodyTestCase[] =
     {
       testName: 'Simple tx body with non canonical auxiliary data',
       cbor: 'a50081825820bc8bf52ea894fb8e442fe3eea628be87d0c9a37baef185b70eb00a5c8a849d3b000181825839000743d16cfe3c4fcc0c11c2403bbc10dbc7ecdd4477e053481a368e7a06e2ae44dff6770dc0f4ada3cf4cf2605008e27aecdb332ad349fda71a0023583c021a00029b75031a01a3bd8f075820fb7099a47afd6efb4f9cccf9d0f8745331a19eb8b3f50548ffadae9de8551743',
+      validationErrors: [],
       auxiliaryData: NonCanonicalAuxiliaryData.data,
       txBody: {
         inputs: {
@@ -1281,6 +1172,7 @@ export const TransformTransactionTestCases: TransformTransactionBodyTestCase[] =
     {
       testName: 'Simple tx body with auxiliary data hash but no auxiliary data',
       cbor: 'a50081825820bc8bf52ea894fb8e442fe3eea628be87d0c9a37baef185b70eb00a5c8a849d3b000181825839000743d16cfe3c4fcc0c11c2403bbc10dbc7ecdd4477e053481a368e7a06e2ae44dff6770dc0f4ada3cf4cf2605008e27aecdb332ad349fda71a0023583c021a00029b75031a01a3bd8f075820fb7099a47afd6efb4f9cccf9d0f8745331a19eb8b3f50548ffadae9de8551743',
+      validationErrors: [],
       auxiliaryData: null,
       txBody: {
         inputs: {
@@ -1323,6 +1215,127 @@ export const TransformTransactionTestCases: TransformTransactionBodyTestCase[] =
         collateralInputs: undefined,
         requiredSigners: undefined,
         networkId: undefined,
+        collateralReturnOutput: undefined,
+        totalCollateral: undefined,
+        referenceInputs: undefined,
+        votingProcedures: undefined,
+        proposalProcedures: undefined,
+        treasury: undefined,
+        donation: undefined,
+      },
+    },
+    {
+      testName:
+        'Tx body with tag 258 in collateral inputs and required signers, but not inputs',
+      cbor: 'a800818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018283583d105e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e28dd419e1a006ca7935820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce18883583930167f6dbf610ae030f043adb1f3af78754ed9595ad4ac1f7ed9ff6466760fb6955d1217b1f1f208df6d45ab23c9e17b0c984a2d3a22bbbfb8821a0001e91fa1581cd7a7c6999786354b6dbee181a2f562a628a75fce126f4da40ce5d9b2a146546f6b656e3101582000ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce102182a030a0b5820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce1880dd90102818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000ed9010282581cfea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a581ceea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a0f01',
+      validationErrors: [
+        {
+          fixable: true,
+          reason: ValidationErrorReason.TX_INCONSISTENT_SET_TAGS,
+          position: 'transaction_body',
+        },
+      ],
+      txBody: {
+        inputs: {
+          items: [
+            {
+              transactionId: toFixLenBuffer(
+                '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
+                32,
+              ),
+              index: toUint(0),
+            },
+          ],
+          hasTag: true,
+        } as CddlSet<TransactionInput>,
+        outputs: [
+          {
+            format: TxOutputFormat.ARRAY_LEGACY,
+            address: fromBech32(
+              'addr_test1zp0z7zqwhya6mpk5q929ur897g3pp9kkgalpreny8y304rfw6j2jxnwq6enuzvt0lp89wgcsufj7mvcnxpzgkd4hz70z3h2pnc8lhq8r',
+            ),
+            amount: {
+              type: AmountType.WITHOUT_MULTIASSET,
+              coin: toUint(7120787),
+            },
+            datumHash: {
+              type: DatumType.HASH,
+              hash: toFixLenBuffer(
+                'ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188',
+                32,
+              ),
+            },
+          },
+          {
+            format: TxOutputFormat.ARRAY_LEGACY,
+            address: fromBech32(
+              'addr_test1xqt87mdlvy9wqv8sgwkmrua00p65ak2ett22c8m7m8lkgenkp7mf2hgjz7clrusgmak5t2ere8shkrycfgkn5g4mh7uqvcq039',
+            ),
+            amount: {
+              type: AmountType.WITH_MULTIASSET,
+              coin: toUint(125215),
+              multiasset: [
+                {
+                  policyId: toFixLenBuffer(
+                    'd7a7c6999786354b6dbee181a2f562a628a75fce126f4da40ce5d9b2',
+                    28,
+                  ),
+                  tokens: [
+                    {
+                      assetName: Buffer.from('Token1') as MaxLenBuffer<32>,
+                      amount: toUint(1),
+                    },
+                  ],
+                },
+              ],
+            },
+            datumHash: {
+              type: DatumType.HASH,
+              hash: toFixLenBuffer(
+                '00ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce1',
+                32,
+              ),
+            },
+          },
+        ],
+        fee: toUint(42),
+        ttl: toUint(10),
+        certificates: undefined,
+        withdrawals: undefined,
+        update: undefined,
+        auxiliaryDataHash: undefined,
+        validityIntervalStart: undefined,
+        mint: undefined,
+        scriptDataHash: toFixLenBuffer(
+          'ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188',
+          32,
+        ),
+        collateralInputs: {
+          items: [
+            {
+              transactionId: toFixLenBuffer(
+                '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
+                32,
+              ),
+              index: toUint(0),
+            },
+          ],
+          hasTag: true,
+        } as CddlNonEmptySet<TransactionInput>,
+        requiredSigners: {
+          items: [
+            toFixLenBuffer(
+              'fea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a',
+              28,
+            ),
+            toFixLenBuffer(
+              'eea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a',
+              28,
+            ),
+          ],
+          hasTag: true,
+        } as CddlNonEmptySet<RequiredSigner>,
+        networkId: toUint(1),
         collateralReturnOutput: undefined,
         totalCollateral: undefined,
         referenceInputs: undefined,
@@ -1685,6 +1698,125 @@ export const ValidTransactionTestCases: ValidTransactionTestCase[] = [
           ],
         ],
       ]),
+      scriptValidity: true,
+      auxiliaryData: null,
+    },
+  },
+  {
+    testName:
+      'Tx with tag 258 in collateral inputs and required signers, but not inputs',
+    cbor: '84a800818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018283583d105e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e28dd419e1a006ca7935820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce18883583930167f6dbf610ae030f043adb1f3af78754ed9595ad4ac1f7ed9ff6466760fb6955d1217b1f1f208df6d45ab23c9e17b0c984a2d3a22bbbfb8821a0001e91fa1581cd7a7c6999786354b6dbee181a2f562a628a75fce126f4da40ce5d9b2a146546f6b656e3101582000ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce102182a030a0b5820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce1880dd90102818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000ed9010282581cfea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a581ceea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a0f01a0f5f6',
+    tx: {
+      body: {
+        inputs: {
+          items: [
+            {
+              transactionId: toFixLenBuffer(
+                '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
+                32,
+              ),
+              index: toUint(0),
+            },
+          ],
+          hasTag: false,
+        } as CddlSet<TransactionInput>,
+        outputs: [
+          {
+            format: TxOutputFormat.ARRAY_LEGACY,
+            address: fromBech32(
+              'addr_test1zp0z7zqwhya6mpk5q929ur897g3pp9kkgalpreny8y304rfw6j2jxnwq6enuzvt0lp89wgcsufj7mvcnxpzgkd4hz70z3h2pnc8lhq8r',
+            ),
+            amount: {
+              type: AmountType.WITHOUT_MULTIASSET,
+              coin: toUint(7120787),
+            },
+            datumHash: {
+              type: DatumType.HASH,
+              hash: toFixLenBuffer(
+                'ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188',
+                32,
+              ),
+            },
+          },
+          {
+            format: TxOutputFormat.ARRAY_LEGACY,
+            address: fromBech32(
+              'addr_test1xqt87mdlvy9wqv8sgwkmrua00p65ak2ett22c8m7m8lkgenkp7mf2hgjz7clrusgmak5t2ere8shkrycfgkn5g4mh7uqvcq039',
+            ),
+            amount: {
+              type: AmountType.WITH_MULTIASSET,
+              coin: toUint(125215),
+              multiasset: [
+                {
+                  policyId: toFixLenBuffer(
+                    'd7a7c6999786354b6dbee181a2f562a628a75fce126f4da40ce5d9b2',
+                    28,
+                  ),
+                  tokens: [
+                    {
+                      assetName: Buffer.from('Token1') as MaxLenBuffer<32>,
+                      amount: toUint(1),
+                    },
+                  ],
+                },
+              ],
+            },
+            datumHash: {
+              type: DatumType.HASH,
+              hash: toFixLenBuffer(
+                '00ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce1',
+                32,
+              ),
+            },
+          },
+        ],
+        fee: toUint(42),
+        ttl: toUint(10),
+        certificates: undefined,
+        withdrawals: undefined,
+        update: undefined,
+        auxiliaryDataHash: undefined,
+        validityIntervalStart: undefined,
+        mint: undefined,
+        scriptDataHash: toFixLenBuffer(
+          'ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188',
+          32,
+        ),
+        collateralInputs: {
+          items: [
+            {
+              transactionId: toFixLenBuffer(
+                '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
+                32,
+              ),
+              index: toUint(0),
+            },
+          ],
+          hasTag: true,
+        } as CddlNonEmptySet<TransactionInput>,
+        requiredSigners: {
+          items: [
+            toFixLenBuffer(
+              'fea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a',
+              28,
+            ),
+            toFixLenBuffer(
+              'eea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a',
+              28,
+            ),
+          ],
+          hasTag: true,
+        } as CddlNonEmptySet<RequiredSigner>,
+        networkId: toUint(1),
+        collateralReturnOutput: undefined,
+        totalCollateral: undefined,
+        referenceInputs: undefined,
+        votingProcedures: undefined,
+        proposalProcedures: undefined,
+        treasury: undefined,
+        donation: undefined,
+      },
+      witnessSet: {},
       scriptValidity: true,
       auxiliaryData: null,
     },

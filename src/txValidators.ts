@@ -16,6 +16,7 @@ import type {
   CddlNonEmptySet,
   CddlNonEmptyOrderedSet,
   VoterVotes,
+  PoolRegistrationCertificate,
 } from './types'
 import {AmountType, CertificateType, DatumType, TxOutputFormat} from './types'
 import {bind, unreachable} from './utils'
@@ -630,6 +631,27 @@ function* validateTxBody(txBody: TransactionBody): ValidatorReturnType {
 
   // extra checks for transactions containing stake pool registration certificates
   yield* validatePoolRegistrationTransaction(txBody)
+
+  // check for consistency of set tags
+  const poolRegistrationCertificate = txBody.certificates?.items.find(
+    ({type}) => type === CertificateType.POOL_REGISTRATION,
+  ) as PoolRegistrationCertificate
+  const allSets = [
+    txBody.inputs,
+    txBody.certificates,
+    txBody.collateralInputs,
+    txBody.requiredSigners,
+    txBody.referenceInputs,
+    txBody.proposalProcedures,
+    poolRegistrationCertificate?.poolParams.poolOwners,
+  ]
+  const tagIsPresent = allSets.some((s) => s !== undefined && s.hasTag)
+  const tagIsAbsent = allSets.some((s) => s !== undefined && !s.hasTag)
+  const tagsAreInconsistent = tagIsPresent && tagIsAbsent
+  yield* validate(
+    !tagsAreInconsistent,
+    err(ValidationErrorReason.TX_INCONSISTENT_SET_TAGS, 'transaction_body'),
+  )
 }
 
 /**
