@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "blake2b": "^2.1.4",
-    "cbor": "^8.1.0"
+    "cbor": "^9.0.1"
   },
   "bugs": {
     "url": "https://github.com/vacuumlabs/cardano-hw-interop-lib/issues"

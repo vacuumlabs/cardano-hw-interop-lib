@@ -207,6 +207,57 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
     },
   },
   {
+    testName: 'Tx body with empty withdrawals',
+    cbor: 'a60081825820bc8bf52ea894fb8e442fe3eea628be87d0c9a37baef185b70eb00a5c8a849d3b0001818258390180f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b42771a0023583c021a00029b75031a01a3bd8f05a0061a01a3bd8f',
+    txBody: {
+      inputs: {
+        items: [
+          {
+            transactionId: toFixLenBuffer(
+              'bc8bf52ea894fb8e442fe3eea628be87d0c9a37baef185b70eb00a5c8a849d3b',
+              32,
+            ),
+            index: toUint(0),
+          },
+        ],
+        hasTag: false,
+      } as CddlSet<TransactionInput>,
+      outputs: [
+        {
+          format: TxOutputFormat.ARRAY_LEGACY,
+          address: toFixLenBuffer(
+            '0180f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277',
+            57,
+          ),
+          amount: {
+            type: AmountType.WITHOUT_MULTIASSET,
+            coin: toUint(2316348),
+          },
+          datumHash: undefined,
+        },
+      ],
+      fee: toUint(170869),
+      ttl: toUint(27508111),
+      certificates: undefined,
+      withdrawals: [],
+      update: toUint(27508111),
+      auxiliaryDataHash: undefined,
+      validityIntervalStart: undefined,
+      mint: undefined,
+      scriptDataHash: undefined,
+      collateralInputs: undefined,
+      requiredSigners: undefined,
+      networkId: undefined,
+      collateralReturnOutput: undefined,
+      totalCollateral: undefined,
+      referenceInputs: undefined,
+      votingProcedures: undefined,
+      proposalProcedures: undefined,
+      treasury: undefined,
+      donation: undefined,
+    },
+  },
+  {
     testName: 'Tx body with multiple outputs and multiassets',
     cbor: 'a40081825820b64ae44e1195b04663ab863b62337e626c65b0c9855a9fbb9ef4458f81a6f5ee1bffffffffffffffff018282583930167f6dbf610ae030f043adb1f3af78754ed9595ad4ac1f7ed9ff6466760fb6955d1217b1f1f208df6d45ab23c9e17b0c984a2d3a22bbbfb8821a0001e91fa1581cd7a7c6999786354b6dbee181a2f562a628a75fce126f4da40ce5d9b2a146546f6b656e3101825839000743d16cfe3c4fcc0c11c2403bbc10dbc7ecdd4477e053481a368e7a06e2ae44dff6770dc0f4ada3cf4cf2605008e27aecdb332ad349fda7821a3dbb8b21a1581cd7a7c6999786354b6dbee181a2f562a628a75fce126f4da40ce5d9b2a246546f6b656e311a00155d9746546f6b656e321a00beeff1021a0003050309a1581cd7a7c6999786354b6dbee181a2f562a628a75fce126f4da40ce5d9b2a246546f6b656e313a0098967f46546f6b656e321b7fffffffffffffff',
     txBody: {

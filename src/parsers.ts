@@ -173,12 +173,31 @@ export function createParser<T, A extends unknown[]>(
 }
 /* eslint-enable no-redeclare */
 
+// inspired by lodash _isEmpty
+// https://github.com/lodash/lodash/blob/ddfd9b11a0126db2302cb70ec9973b66baec0975/lodash.js#L11479
+const _isEmptyObject = (data: unknown): boolean => {
+  const mapTag = '[object Map]'
+  const setTag = '[object Set]'
+  const tag = Object.prototype.toString.call(data)
+  if (tag === mapTag || tag === setTag) {
+    return false
+  } else {
+    return data instanceof Object && Object.keys(data).length === 0
+  }
+}
+
 export const parseMap = <K, V>(
   data: unknown,
   parseKey: Parser<K>,
   parseValue: Parser<V>,
   errMsg: ParseErrorReason,
 ): Map<K, V> => {
+  // an empty map (CBOR a0) is parsed as an empty object by the cbor library
+  if (_isEmptyObject(data)) {
+    return new Map()
+  }
+
+  // non-empty map
   validate(isMap(data), errMsg)
   return new Map(
     Array.from(data.entries()).map(([key, value]) => [
