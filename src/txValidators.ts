@@ -499,7 +499,7 @@ function* validatePoolRegistrationTransaction(
   )
 
   yield* validate(
-    txBody.scriptDataHash !== undefined,
+    txBody.scriptDataHash === undefined,
     err(
       ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_SCRIPT_DATA_HASH,
       'transaction_body.script_data_hash',
@@ -507,7 +507,7 @@ function* validatePoolRegistrationTransaction(
   )
 
   yield* validate(
-    txBody.collateralInputs !== undefined,
+    txBody.collateralInputs === undefined,
     err(
       ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_COLLATERAL_INPUTS,
       'transaction_body.collateral_inputs',
@@ -515,7 +515,7 @@ function* validatePoolRegistrationTransaction(
   )
 
   yield* validate(
-    txBody.requiredSigners !== undefined,
+    txBody.requiredSigners === undefined,
     err(
       ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_REQUIRED_SIGNERS,
       'transaction_body.required_signers',
@@ -523,7 +523,7 @@ function* validatePoolRegistrationTransaction(
   )
 
   yield* validate(
-    txBody.collateralReturnOutput !== undefined,
+    txBody.collateralReturnOutput === undefined,
     err(
       ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_COLLATERAL_RETURN_OUTPUT,
       'transaction_body.collateral_return_output',
@@ -531,7 +531,7 @@ function* validatePoolRegistrationTransaction(
   )
 
   yield* validate(
-    txBody.totalCollateral !== undefined,
+    txBody.totalCollateral === undefined,
     err(
       ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_TOTAL_COLLATERAL,
       'transaction_body.total_collateral',
@@ -539,7 +539,7 @@ function* validatePoolRegistrationTransaction(
   )
 
   yield* validate(
-    txBody.referenceInputs !== undefined,
+    txBody.referenceInputs === undefined,
     err(
       ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_REFERENCE_INPUTS,
       'transaction_body.reference_inputs',
@@ -547,7 +547,7 @@ function* validatePoolRegistrationTransaction(
   )
 
   yield* validate(
-    txBody.votingProcedures !== undefined,
+    txBody.votingProcedures === undefined,
     err(
       ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_VOTING_PROCEDURES,
       'transaction_body.voting_procedures',
@@ -555,7 +555,7 @@ function* validatePoolRegistrationTransaction(
   )
 
   yield* validate(
-    txBody.treasury !== undefined,
+    txBody.treasury === undefined,
     err(
       ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_TREASURY,
       'transaction_body.treasury',
@@ -563,7 +563,7 @@ function* validatePoolRegistrationTransaction(
   )
 
   yield* validate(
-    txBody.donation !== undefined,
+    txBody.donation === undefined,
     err(
       ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_DONATION,
       'transaction_body.donation',
