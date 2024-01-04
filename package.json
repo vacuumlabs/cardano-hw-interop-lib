@@ -1,6 +1,6 @@
 {
   "name": "cardano-hw-interop-lib",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "files": [
     "dist"
   ],
