@@ -21,6 +21,8 @@ import {
   KeyHash,
   RequiredSigner,
   ProposalProcedure,
+  DNS_NAME_MAX_LENGTH,
+  URL_MAX_LENGTH,
 } from '../../../src/types'
 import {
   fromBech32,
@@ -474,11 +476,17 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
                 {
                   type: RelayType.SINGLE_HOST_NAME,
                   port: null,
-                  dnsName: toMaxLenString('address.vacuumlabs.com', 64),
+                  dnsName: toMaxLenString(
+                    'address.vacuumlabs.com',
+                    DNS_NAME_MAX_LENGTH,
+                  ),
                 },
                 {
                   type: RelayType.MULTI_HOST_NAME,
-                  dnsName: toMaxLenString('another.address.vacuumlabs.com', 64),
+                  dnsName: toMaxLenString(
+                    'another.address.vacuumlabs.com',
+                    DNS_NAME_MAX_LENGTH,
+                  ),
                 },
                 {
                   type: RelayType.SINGLE_HOST_ADDRESS,
@@ -488,7 +496,10 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
                 },
               ],
               poolMetadata: {
-                url: toMaxLenString('https://pool-metadata.vacuumlabs.com', 64),
+                url: toMaxLenString(
+                  'https://pool-metadata.vacuumlabs.com',
+                  URL_MAX_LENGTH,
+                ),
                 metadataHash: toFixLenBuffer(
                   'E318D62E3D5CC3CC23CA1123438E439D7AAC6C6C423320F670D159726AC9D11F',
                   32,
@@ -883,7 +894,7 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
               ],
             ],
             anchor: {
-              url: toMaxLenString('https://shorturl.at/xMS15', 64),
+              url: toMaxLenString('https://shorturl.at/xMS15', URL_MAX_LENGTH),
               dataHash: toFixLenBuffer(
                 '6f890de0c6e418e6526e2b1aa821850cb87aee94a6d77dc2a2e440116abc8e09',
                 32,
@@ -972,7 +983,7 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
             },
             deposit: toUint(2000000),
             anchor: {
-              url: toMaxLenString('https://google.com', 64),
+              url: toMaxLenString('https://google.com', URL_MAX_LENGTH),
               dataHash: toFixLenBuffer(
                 '339ec66289039dbf9fa803be62b2b4f294b51adb719d7feef3f35619b3aee73e',
                 32,
@@ -989,7 +1000,7 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
               ),
             },
             anchor: {
-              url: toMaxLenString('https://yahoo.com', 64),
+              url: toMaxLenString('https://yahoo.com', URL_MAX_LENGTH),
               dataHash: toFixLenBuffer(
                 'a248769f4e4f23a2984548e7ee53cbe00c0596b54206bdac1023d485138a3e07',
                 32,

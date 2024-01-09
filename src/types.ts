@@ -43,8 +43,8 @@ export const IPV4_LENGTH = 4
 export const IPV6_LENGTH = 16
 
 export const ASSET_NAME_MAX_LENGTH = 32
-export const URL_MAX_LENGTH = 64
-export const DNS_NAME_MAX_LENGTH = 64
+export const URL_MAX_LENGTH = 128
+export const DNS_NAME_MAX_LENGTH = 128
 
 export const PORT_MAX_SIZE = 65535
 

@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## [3.0.0] - [December 21th 2023]
+## [3.0.2] - [December 21th 2023]
 
 ### Added
 
@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - credential types are generalized
+- URL and DNS name max length changed to 128
 
 ### Fixed
 

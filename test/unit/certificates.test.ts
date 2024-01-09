@@ -10,6 +10,8 @@ import {
   KeyHash,
   CddlNonEmptyOrderedSet,
   DRepType,
+  URL_MAX_LENGTH,
+  DNS_NAME_MAX_LENGTH,
 } from '../../src/types'
 import {
   ipv4ToBuffer,
@@ -183,11 +185,17 @@ const ValidCertificatesTestCases: ValidParseTestCase<
               {
                 type: RelayType.SINGLE_HOST_NAME,
                 port: null,
-                dnsName: toMaxLenString('address.vacuumlabs.com', 64),
+                dnsName: toMaxLenString(
+                  'address.vacuumlabs.com',
+                  URL_MAX_LENGTH,
+                ),
               },
               {
                 type: RelayType.MULTI_HOST_NAME,
-                dnsName: toMaxLenString('another.address.vacuumlabs.com', 64),
+                dnsName: toMaxLenString(
+                  'another.address.vacuumlabs.com',
+                  DNS_NAME_MAX_LENGTH,
+                ),
               },
               {
                 type: RelayType.SINGLE_HOST_ADDRESS,
@@ -197,7 +205,10 @@ const ValidCertificatesTestCases: ValidParseTestCase<
               },
             ],
             poolMetadata: {
-              url: toMaxLenString('https://pool-metadata.vacuumlabs.com', 64),
+              url: toMaxLenString(
+                'https://pool-metadata.vacuumlabs.com',
+                URL_MAX_LENGTH,
+              ),
               metadataHash: toFixLenBuffer(
                 'E318D62E3D5CC3CC23CA1123438E439D7AAC6C6C423320F670D159726AC9D11F',
                 32,
@@ -233,7 +244,7 @@ const ValidCertificatesTestCases: ValidParseTestCase<
           },
           deposit: toUint(0),
           anchor: {
-            url: toMaxLenString('address.vacuumlabs.com', 64),
+            url: toMaxLenString('address.vacuumlabs.com', URL_MAX_LENGTH),
             dataHash: toFixLenBuffer(
               'E318D62E3D5CC3CC23CA1123438E439D7AAC6C6C423320F670D159726AC9D11F',
               32,
@@ -261,7 +272,7 @@ const ValidCertificatesTestCases: ValidParseTestCase<
             ),
           },
           anchor: {
-            url: toMaxLenString('address.vacuumlabs.com', 64),
+            url: toMaxLenString('address.vacuumlabs.com', URL_MAX_LENGTH),
             dataHash: toFixLenBuffer(
               'E318D62E3D5CC3CC23CA1123438E439D7AAC6C6C423320F670D159726AC9D11F',
               32,
