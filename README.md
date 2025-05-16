@@ -40,6 +40,8 @@ The validation errors are of type `ValidationError` and we distinguish between _
 - only _fixable_ errors then a call to a `transform` function will solve the found errors and the _transaction_ will be compliant with CIP-0021.
 - _unfixable_ errors then the library is not able to transform the CBOR by itself.
 
+Note that if the input is not a valid CBOR, an error might be thrown.
+
 Available methods:
 
 ```ts

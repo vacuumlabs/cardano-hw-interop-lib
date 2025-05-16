@@ -55,6 +55,8 @@ export const encodeTx = (tx: Transaction): Buffer =>
  * Takes a Buffer of CBOR encoded transaction body and validates it according to
  * CIP-0021, returns an array of found validation errors.
  *
+ * Assumes that txBodyCbor is a valid CBOR. If not, this function might throw an error.
+ *
  * @param {Buffer} txBodyCbor The CBOR encoded transaction body
  * @returns Found validation errors
  */
@@ -67,6 +69,8 @@ export const validateTxBody = (txBodyCbor: Buffer): ValidationError[] => {
 /**
  * Takes a Buffer of CBOR encoded transaction and validates it according to
  * CIP-0021, returns an array of found validation errors.
+ *
+ * Assumes that txCbor is a valid CBOR. If not, this function might throw an error.
  *
  * @param {Buffer} txCbor The CBOR encoded transaction
  * @returns Found validation errors

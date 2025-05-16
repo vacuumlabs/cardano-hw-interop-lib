@@ -572,8 +572,10 @@ function* validatePoolRegistrationTransaction(
 }
 
 /**
- * Validates tx body according to CIP-0021. Properties that are enforced during parsing (e.g. hash
- * lengths) are not validated.
+ * Validates tx body according to CIP-0021.
+ * Properties that are enforced during parsing (e.g. hash lengths) are not validated.
+ *
+ * Assumes that txBody is a valid CBOR. If not, this function might throw an error.
  */
 function* validateTxBody(txBody: TransactionBody): ValidatorReturnType {
   yield* validateTxInputs(txBody.inputs)
