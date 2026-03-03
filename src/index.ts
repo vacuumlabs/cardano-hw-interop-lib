@@ -7,6 +7,8 @@ import type {Transaction, TransactionBody} from './types'
 import {decodeCbor, encodeToCbor} from './utils'
 
 export type {ValidationError} from './errors'
+export {PLUTUS_LANGUAGES} from './scriptDataHash'
+export type {PlutusLanguageDefinition} from './scriptDataHash'
 export * from './types'
 
 /**
@@ -100,7 +102,22 @@ export const transformTxBody = transformers.transformTxBody
  * (or even increase in some very rare cases).
  * Returns a new transformed transaction.
  *
+ * If the transaction contains a scriptDataHash (Plutus scripts), the cost
+ * models from protocol parameters must be provided so the hash can be
+ * recomputed after canonical re-encoding of the witness set. Throws if a
+ * scriptDataHash is present but no cost models are provided.
+ *
+ * Cost models are auto-filtered to language versions detected in witness
+ * scripts (PlutusV1/V2/V3 keys in witness set). If versions cannot be derived
+ * (e.g. reference scripts only), transformTx throws unless
+ * usedCostModelLanguages is provided explicitly.
+ *
+ *
  * @param {Transaction} tx
+ * @param {CostModels} [costModels] Cost models for languages used in the transaction.
+ * Keys are language names (PlutusV1/PlutusV2/PlutusV3).
+ * @param usedCostModelLanguages Explicit language names used when inference
+ * cannot be done from witness scripts (e.g. reference-script-only transactions).
  * @returns Transformed transaction
  */
 export const transformTx = transformers.transformTx

@@ -513,3 +513,11 @@ export type Transaction = {
   scriptValidity?: Unparsed
   auxiliaryData: Unparsed
 }
+
+/**
+ * Cost models for Plutus script languages, needed for script data hash computation.
+ * Values: arrays of integer cost model parameters from protocol parameters.
+ * Keys: PlutusV1, PlutusV2, PlutusV3
+ */
+export type CostModelLanguageName = 'PlutusV1' | 'PlutusV2' | 'PlutusV3'
+export type CostModels = Map<CostModelLanguageName, number[]>

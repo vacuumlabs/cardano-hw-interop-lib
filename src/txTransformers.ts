@@ -1,6 +1,7 @@
 import type {
   Amount,
   AUXILIARY_DATA_HASH_LENGTH,
+  CostModels,
   Datum,
   FixLenBuffer,
   Int,
@@ -12,8 +13,15 @@ import type {
   TransactionOutput,
   Uint,
   Unparsed,
+  CostModelLanguageName,
 } from './types'
-import {AmountType, CertificateType, DatumType, TxOutputFormat} from './types'
+import {
+  AmountType,
+  CertificateType,
+  DatumType,
+  TxOutputFormat,
+} from './types'
+import {transformScriptDataHash} from './scriptDataHash'
 import {blake2b256, encodeToCbor, unreachable} from './utils'
 
 const transformOptionalList = <T>(optionalList?: T[]): T[] | undefined =>
@@ -170,7 +178,25 @@ export const transformTxBody = (
   return makeSetTagsConsistent(transformedBody)
 }
 
-export const transformTx = (tx: Transaction): Transaction => ({
-  ...tx,
-  body: transformTxBody(tx.body, tx.auxiliaryData),
-})
+export const transformTx = (
+  tx: Transaction,
+  costModels?: CostModels,
+  usedCostModelLanguages?: CostModelLanguageName[],
+): Transaction => {
+  const transformedBody = transformTxBody(tx.body, tx.auxiliaryData)
+
+  const transformedBodyWithScriptHash = {
+    ...transformedBody,
+    scriptDataHash: transformScriptDataHash(
+      transformedBody.scriptDataHash,
+      tx.witnessSet,
+      costModels,
+      usedCostModelLanguages,
+    ),
+  }
+
+  return {
+    ...tx,
+    body: transformedBodyWithScriptHash,
+  }
+}

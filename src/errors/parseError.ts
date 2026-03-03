@@ -68,6 +68,13 @@ export enum ParseErrorReason {
   INVALID_MINT = 'Invalid transaction mint',
 
   INVALID_SCRIPT_DATA_HASH = 'Invalid transaction script data hash',
+  INVALID_COST_MODEL_LANGUAGE_NAME = 'Invalid cost model language name',
+  DUPLICATE_COST_MODEL_LANGUAGE = 'Duplicate cost model language',
+  INVALID_USED_COST_MODEL_LANGUAGES_EMPTY = 'Invalid used cost model languages --- empty list',
+  INVALID_USED_COST_MODEL_LANGUAGES = 'Invalid used cost model languages',
+  CANNOT_INFER_PLUTUS_LANGUAGE_VERSIONS = 'Could not infer Plutus language versions',
+  MISSING_COST_MODEL_FOR_REQUIRED_LANGUAGE = 'Missing cost model for required Plutus language',
+  MISSING_COST_MODELS_FOR_SCRIPT_DATA_HASH = 'Missing cost models for script data hash recomputation',
 
   INVALID_COLLATERAL_INPUT_INDEX = 'Invalid transaction collateral input index',
   INVALID_COLLATERAL_INPUT = 'Invalid transaction collateral input',
