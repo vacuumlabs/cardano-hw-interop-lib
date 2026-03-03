@@ -35,19 +35,17 @@ export const PLUTUS_LANGUAGES: PlutusLanguageDefinition[] = [
 const COST_MODEL_LANGUAGE_NAME_TO_ID = new Map<CostModelLanguageName, number>(
   PLUTUS_LANGUAGES.map(({name, id}) => [name, id]),
 )
-const PLUTUS_LANGUAGE_IDS = new Set(
-  PLUTUS_LANGUAGES.map(({id}) => id),
-)
+const PLUTUS_LANGUAGE_IDS = new Set(PLUTUS_LANGUAGES.map(({id}) => id))
 const WITNESS_SCRIPT_KEY_TO_LANGUAGE_ID = new Map(
   PLUTUS_LANGUAGES.map(({witnessScriptKey, id}) => [witnessScriptKey, id]),
 )
 
-const getCostModelLanguageId = (languageName: CostModelLanguageName): number => {
+const getCostModelLanguageId = (
+  languageName: CostModelLanguageName,
+): number => {
   const languageId = COST_MODEL_LANGUAGE_NAME_TO_ID.get(languageName)
   if (languageId === undefined) {
-    throw new ParseError(
-      ParseErrorReason.INVALID_COST_MODEL_LANGUAGE_NAME,
-    )
+    throw new ParseError(ParseErrorReason.INVALID_COST_MODEL_LANGUAGE_NAME)
   }
   return languageId
 }
@@ -102,7 +100,10 @@ const getUsedPlutusLanguages = (witnessSet: Unparsed): Set<number> => {
   if (!(witnessSet instanceof Map)) return new Set()
 
   const usedLanguages = new Set<number>()
-  for (const [witnessScriptKey, languageId] of WITNESS_SCRIPT_KEY_TO_LANGUAGE_ID) {
+  for (const [
+    witnessScriptKey,
+    languageId,
+  ] of WITNESS_SCRIPT_KEY_TO_LANGUAGE_ID) {
     if (witnessSet.get(witnessScriptKey) !== undefined) {
       usedLanguages.add(languageId)
     }
@@ -153,7 +154,9 @@ const selectUsedCostModels = (
     }
   }
 
-  return new Map([...costModels].filter(([language]) => usedLanguages.has(language)))
+  return new Map(
+    [...costModels].filter(([language]) => usedLanguages.has(language)),
+  )
 }
 
 /**
@@ -168,9 +171,7 @@ const selectUsedCostModels = (
  *
  */
 export const transformScriptDataHash = (
-  scriptDataHash:
-    | FixLenBuffer<typeof SCRIPT_DATA_HASH_LENGTH>
-    | undefined,
+  scriptDataHash: FixLenBuffer<typeof SCRIPT_DATA_HASH_LENGTH> | undefined,
   witnessSet: Unparsed,
   costModels?: CostModels,
   usedCostModelLanguages?: CostModelLanguageName[],
