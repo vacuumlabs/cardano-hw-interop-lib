@@ -4,7 +4,7 @@ import {encodeTx, encodeTxBody} from '../../src/index'
 import {
   ValidTransactionBodyTestCases,
   ValidTransactionTestCases,
-} from './__fixtures__/transactions'
+} from './__fixtures__/transactionBodies'
 
 describe('Serialize', () => {
   describe('Transaction bodies', () => {

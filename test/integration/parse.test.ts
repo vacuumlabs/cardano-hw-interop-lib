@@ -5,7 +5,7 @@ import {decodeTx, decodeTxBody} from '../../src/index'
 import {
   ValidTransactionBodyTestCases,
   ValidTransactionTestCases,
-} from './__fixtures__/transactions'
+} from './__fixtures__/transactionBodies'
 
 describe('Parse', () => {
   describe('Valid transaction bodies', () => {
