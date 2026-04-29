@@ -133,7 +133,6 @@ export type Parser<T> = (data: unknown) => T
  * returns a parser function that only requires the data to execute
  * @see Parser
  */
-/* eslint-disable no-redeclare */
 export function createParser<L extends number>(
   parser: (
     data: unknown,
@@ -171,7 +170,6 @@ export function createParser<T, A extends unknown[]>(
 ): Parser<T> {
   return (data: unknown) => parser(data, ...args)
 }
-/* eslint-enable no-redeclare */
 
 // inspired by lodash _isEmpty
 // https://github.com/lodash/lodash/blob/ddfd9b11a0126db2302cb70ec9973b66baec0975/lodash.js#L11479

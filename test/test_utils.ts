@@ -20,13 +20,13 @@ export const ipv4ToBuffer = (ipv4: string): FixLenBuffer<4> =>
 
 export const toFixLenBuffer = <N extends number>(
   str: string,
-  length: N,
-): FixLenBuffer<N> => Buffer.from(str, 'hex') as FixLenBuffer<typeof length>
+  _length: N,
+): FixLenBuffer<N> => Buffer.from(str, 'hex') as FixLenBuffer<N>
 
 export const toMaxLenString = <N extends number>(
   str: string,
-  length: N,
-): MaxLenString<N> => str as MaxLenString<typeof length>
+  _length: N,
+): MaxLenString<N> => str as MaxLenString<N>
 
 export const toUint = (n: string | number): Uint =>
   (typeof n === 'string' ? BigInt(n) : n) as Uint

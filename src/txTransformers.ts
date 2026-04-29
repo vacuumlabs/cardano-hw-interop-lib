@@ -82,8 +82,8 @@ const transformReferenceScript = (
   referenceScript === undefined
     ? undefined
     : referenceScript.length === 0
-    ? undefined
-    : referenceScript
+      ? undefined
+      : referenceScript
 
 const transformTxOutput = (output: TransactionOutput): TransactionOutput => {
   switch (output.format) {

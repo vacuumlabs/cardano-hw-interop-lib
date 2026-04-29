@@ -23,7 +23,9 @@
     "strictFunctionTypes": true,
     "strictNullChecks": true,
     "target": "ES2019",
+    "types": ["node", "mocha"],
     "typeRoots": ["./node_modules/@types", "./types"],
+    "ignoreDeprecations": "6.0",
     "noErrorTruncation": true,
     "baseUrl": "src",
     "paths": {
