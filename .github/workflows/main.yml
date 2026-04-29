@@ -15,6 +15,10 @@ jobs:
       - name: Set up yarn
         run: yarn
 
+      - name: Audit dependencies
+        continue-on-error: true
+        run: yarn npm audit --all --no-deprecations --recursive
+
       - name: Lint
         run: yarn lint
 
