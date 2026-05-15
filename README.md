@@ -57,7 +57,40 @@ Takes a `TransactionBody` or `Transaction` object and applies non-destructive tr
 
 ```ts
 transformTxBody(txBody: TransactionBody) => TransactionBody
-transformTx(tx: Transaction) => Transaction
+transformTx(
+  tx: Transaction,
+  costModels?: CostModels,
+  usedCostModelLanguages?: CostModelLanguageName[],
+) => Transaction
 ```
 
 Note: the length of the resulting CBOR might be increased or decreased which might affect the minimum required fee. An increase in CBOR length should be very rare.
+
+#### Cost models for Plutus transactions
+
+If the transaction contains a `scriptDataHash` (i.e. it uses Plutus scripts), `transformTx` must recompute the hash after canonically re-encoding the witness set, and therefore needs the cost models for the Plutus language versions used by the transaction.
+
+Cost models are part of the protocol parameters and can be obtained from any of the standard sources, for example:
+
+- `cardano-cli query protocol-parameters --mainnet` — look at the `costModels` field
+- Blockfrost — `GET /epochs/latest/parameters` returns `cost_models`
+- Koios — `/epoch_params`
+- Ogmios — `queryLedgerState/protocolParameters` returns `plutusCostModels`
+
+The `CostModels` type is a `Map` keyed by `CostModelLanguageName` (`'PlutusV1' | 'PlutusV2' | 'PlutusV3'`) with the per-language array of cost integers as the value. You only need to provide entries for languages that may appear in the transaction; entries for unused languages are ignored.
+
+```ts
+import {transformTx, CostModels} from 'cardano-hw-interop-lib'
+
+const costModels: CostModels = new Map([
+  ['PlutusV2', [/* ...cost integers from protocol parameters... */]],
+])
+
+const transformed = transformTx(tx, costModels)
+```
+
+By default, the languages used by the transaction are inferred from the inline Plutus scripts in the witness set. When inference is not possible — e.g. when scripts are supplied only as reference scripts — pass `usedCostModelLanguages` explicitly:
+
+```ts
+transformTx(tx, costModels, ['PlutusV2'])
+```

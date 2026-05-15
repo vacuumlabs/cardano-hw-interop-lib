@@ -102,22 +102,28 @@ export const transformTxBody = transformers.transformTxBody
  * (or even increase in some very rare cases).
  * Returns a new transformed transaction.
  *
- * If the transaction contains a scriptDataHash (Plutus scripts), the cost
- * models from protocol parameters must be provided so the hash can be
- * recomputed after canonical re-encoding of the witness set. Throws if a
- * scriptDataHash is present but no cost models are provided.
+ * If the transaction contains a `scriptDataHash` (i.e. uses Plutus scripts),
+ * `costModels` must be provided so the hash can be recomputed after canonical
+ * re-encoding of the witness set. Cost models are part of the protocol
+ * parameters and can be queried from a node via `cardano-cli query
+ * protocol-parameters`, or from any chain indexer that exposes them (e.g.
+ * Blockfrost's `/epochs/latest/parameters`, Koios, Ogmios). Pass only the
+ * languages that may appear in the transaction; entries for unused languages
+ * are ignored.
  *
- * Cost models are auto-filtered to language versions detected in witness
- * scripts (PlutusV1/V2/V3 keys in witness set). If versions cannot be derived
- * (e.g. reference scripts only), transformTx throws unless
- * usedCostModelLanguages is provided explicitly.
- *
+ * The languages used by the transaction are inferred from the witness set
+ * (PlutusV1/V2/V3 script keys). When inference is not possible — e.g. when
+ * scripts are supplied only as reference scripts — pass
+ * `usedCostModelLanguages` explicitly. Throws if a `scriptDataHash` is present
+ * but cost models for the used languages cannot be determined.
  *
  * @param {Transaction} tx
- * @param {CostModels} [costModels] Cost models for languages used in the transaction.
- * Keys are language names (PlutusV1/PlutusV2/PlutusV3).
- * @param usedCostModelLanguages Explicit language names used when inference
- * cannot be done from witness scripts (e.g. reference-script-only transactions).
+ * @param {CostModels} [costModels] Cost models keyed by language name
+ * (`PlutusV1` / `PlutusV2` / `PlutusV3`), as published in the current protocol
+ * parameters.
+ * @param {CostModelLanguageName[]} [usedCostModelLanguages] Explicit language
+ * names to use when the witness set does not contain inline Plutus scripts
+ * (e.g. reference-script-only transactions).
  * @returns Transformed transaction
  */
 export const transformTx = transformers.transformTx
