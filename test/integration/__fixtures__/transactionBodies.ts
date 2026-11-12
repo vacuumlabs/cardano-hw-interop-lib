@@ -6,6 +6,7 @@ import {
   TransactionBody,
   VoteOption,
   VoterType,
+  GovActionType,
   AmountType,
   CertificateType,
   DatumType,
@@ -878,21 +879,23 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
               'e082293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd',
               29,
             ),
-            govAction: [
-              5,
-              null,
-              [
-                // constitution
-                [
-                  'https://shorturl.at/asIJ6',
-                  toFixLenBuffer(
+            govAction: {
+              type: GovActionType.NEW_CONSTITUTION,
+              prevGovActionId: null,
+              constitution: {
+                anchor: {
+                  url: toMaxLenString(
+                    'https://shorturl.at/asIJ6',
+                    URL_MAX_LENGTH,
+                  ),
+                  dataHash: toFixLenBuffer(
                     'ee90ece16c47bf812b88edb89a01539e6683d6549a80b15383a4fb218ab9412d',
                     32,
                   ),
-                ],
-                null,
-              ],
-            ],
+                },
+                scriptHash: null,
+              },
+            },
             anchor: {
               url: toMaxLenString('https://shorturl.at/xMS15', URL_MAX_LENGTH),
               dataHash: toFixLenBuffer(

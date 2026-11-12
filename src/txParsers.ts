@@ -3,6 +3,7 @@ import {
   serializeCertificate,
   serializeCollateralInput,
   serializeProposalProcedure,
+  serializeCredential,
   identity,
 } from './txSerializers'
 import {ParseErrorReason} from './errors'
@@ -115,6 +116,15 @@ import {
   VoteOption,
   Coin,
   ProposalProcedure,
+  GovActionType,
+  ParameterChangeGovAction,
+  HardForkInitiationGovAction,
+  TreasuryWithdrawalsGovAction,
+  NoConfidenceGovAction,
+  UpdateCommitteeGovAction,
+  NewConstitutionGovAction,
+  InfoGovAction,
+  ProtocolParamUpdateEntry,
   Int,
   Uint,
   UnitInterval,
@@ -1102,6 +1112,154 @@ export const parseVotingProcedures = (unparsed: unknown): VoterVotes[] => {
   }))
 }
 
+const parseGovActionType = (unparsed: unknown): GovActionType => {
+  validate(isNumber(unparsed), ParseErrorReason.INVALID_GOV_ACTION_TYPE)
+  validate(unparsed in GovActionType, ParseErrorReason.INVALID_GOV_ACTION_TYPE)
+  return unparsed
+}
+
+const parsePrevGovActionId = createParser(parseNullable, parseGovActionId)
+
+const parsePolicyHash = createParser(
+  parseNullable,
+  createParser(
+    parseBufferOfLength,
+    SCRIPT_HASH_LENGTH,
+    ParseErrorReason.INVALID_GOV_ACTION,
+  ),
+)
+
+// protocol parameter values are kept unparsed, only the keys are parsed
+const parseProtocolParamUpdate = (
+  unparsed: unknown,
+): ProtocolParamUpdateEntry[] => {
+  const paramsMap = parseMap(
+    unparsed,
+    createParser(parseUint, ParseErrorReason.INVALID_GOV_ACTION),
+    doNotParse,
+    ParseErrorReason.INVALID_GOV_ACTION,
+  )
+  return Array.from(paramsMap).map(([key, value]) => ({key, value}))
+}
+
+const parseParameterChangeGovAction = (
+  data: unknown[],
+): WithoutType<ParameterChangeGovAction> => {
+  validate(data.length === 3, ParseErrorReason.INVALID_GOV_ACTION)
+  return {
+    prevGovActionId: parsePrevGovActionId(data[0]),
+    protocolParamUpdate: parseProtocolParamUpdate(data[1]),
+    policyHash: parsePolicyHash(data[2]),
+  }
+}
+
+const parseHardForkInitiationGovAction = (
+  data: unknown[],
+): WithoutType<HardForkInitiationGovAction> => {
+  validate(data.length === 2, ParseErrorReason.INVALID_GOV_ACTION)
+  const [major, minor] = parseTuple(
+    data[1],
+    ParseErrorReason.INVALID_GOV_ACTION,
+    createParser(parseUint, ParseErrorReason.INVALID_GOV_ACTION),
+    createParser(parseUint, ParseErrorReason.INVALID_GOV_ACTION),
+  )
+  return {
+    prevGovActionId: parsePrevGovActionId(data[0]),
+    protocolVersion: {major, minor},
+  }
+}
+
+const parseTreasuryWithdrawalsGovAction = (
+  data: unknown[],
+): WithoutType<TreasuryWithdrawalsGovAction> => {
+  validate(data.length === 2, ParseErrorReason.INVALID_GOV_ACTION)
+  const withdrawalsMap = parseMap(
+    data[0],
+    parseRewardAccount,
+    parseCoin,
+    ParseErrorReason.INVALID_GOV_ACTION,
+  )
+  return {
+    withdrawals: Array.from(withdrawalsMap).map(([rewardAccount, amount]) => ({
+      rewardAccount,
+      amount,
+    })),
+    policyHash: parsePolicyHash(data[1]),
+  }
+}
+
+const parseNoConfidenceGovAction = (
+  data: unknown[],
+): WithoutType<NoConfidenceGovAction> => {
+  validate(data.length === 1, ParseErrorReason.INVALID_GOV_ACTION)
+  return {
+    prevGovActionId: parsePrevGovActionId(data[0]),
+  }
+}
+
+const parseUpdateCommitteeGovAction = (
+  data: unknown[],
+): WithoutType<UpdateCommitteeGovAction> => {
+  validate(data.length === 4, ParseErrorReason.INVALID_GOV_ACTION)
+  const membersToAddMap = parseMap(
+    data[2],
+    parseCredential,
+    parseEpoch,
+    ParseErrorReason.INVALID_GOV_ACTION,
+  )
+  return {
+    prevGovActionId: parsePrevGovActionId(data[0]),
+    membersToRemove: parseCddlSet(
+      data[1],
+      parseCredential,
+      serializeCredential,
+      ParseErrorReason.INVALID_GOV_ACTION,
+    ),
+    membersToAdd: Array.from(membersToAddMap).map(
+      ([coldCredential, epoch]) => ({
+        coldCredential,
+        epoch,
+      }),
+    ),
+    quorum: parseUnitInterval(data[3]),
+  }
+}
+
+const parseNewConstitutionGovAction = (
+  data: unknown[],
+): WithoutType<NewConstitutionGovAction> => {
+  validate(data.length === 2, ParseErrorReason.INVALID_GOV_ACTION)
+  const [anchor, scriptHash] = parseTuple(
+    data[1],
+    ParseErrorReason.INVALID_GOV_ACTION,
+    parseAnchor,
+    parsePolicyHash,
+  )
+  return {
+    prevGovActionId: parsePrevGovActionId(data[0]),
+    constitution: {anchor, scriptHash},
+  }
+}
+
+const parseInfoGovAction = (data: unknown[]): WithoutType<InfoGovAction> => {
+  // nothing to parse
+  validate(data.length === 0, ParseErrorReason.INVALID_GOV_ACTION)
+  return {}
+}
+
+const parseGovAction = createParser(
+  parseBasedOnType,
+  ParseErrorReason.INVALID_GOV_ACTION,
+  parseGovActionType,
+  parseParameterChangeGovAction,
+  parseHardForkInitiationGovAction,
+  parseTreasuryWithdrawalsGovAction,
+  parseNoConfidenceGovAction,
+  parseUpdateCommitteeGovAction,
+  parseNewConstitutionGovAction,
+  parseInfoGovAction,
+)
+
 export const parseProposalProcedure = (
   unparsedProcedure: unknown,
 ): ProposalProcedure => {
@@ -1110,7 +1268,7 @@ export const parseProposalProcedure = (
     ParseErrorReason.INVALID_PROPOSAL_PROCEDURE,
     parseCoin,
     parseRewardAccount,
-    doNotParse,
+    parseGovAction,
     parseAnchor,
   )
 

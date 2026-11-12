@@ -33,6 +33,8 @@ import {
   GovActionId,
   VotingProcedure,
   ProposalProcedure,
+  GovAction,
+  GovActionType,
   Uint,
   Int,
   CddlSetBase,
@@ -178,7 +180,7 @@ const serializePoolParams = (poolParams: PoolParams) => [
   poolParams.poolMetadata && serializePoolMetadata(poolParams.poolMetadata),
 ]
 
-const serializeCredential = (credential: Credential) => {
+export const serializeCredential = (credential: Credential) => {
   switch (credential.type) {
     case CredentialType.KEY_HASH:
       return [credential.type, credential.keyHash]
@@ -339,10 +341,70 @@ const serializeVotingProcedures = (ballots: VoterVotes[]) =>
     ]),
   )
 
+const serializePrevGovActionId = (govActionId: GovActionId | null) =>
+  govActionId === null ? null : serializeGovActionId(govActionId)
+
+const serializeGovAction = (govAction: GovAction) => {
+  switch (govAction.type) {
+    case GovActionType.PARAMETER_CHANGE:
+      return [
+        govAction.type,
+        serializePrevGovActionId(govAction.prevGovActionId),
+        new Map(
+          govAction.protocolParamUpdate.map(({key, value}) => [key, value]),
+        ),
+        govAction.policyHash,
+      ]
+    case GovActionType.HARD_FORK_INITIATION:
+      return [
+        govAction.type,
+        serializePrevGovActionId(govAction.prevGovActionId),
+        [govAction.protocolVersion.major, govAction.protocolVersion.minor],
+      ]
+    case GovActionType.TREASURY_WITHDRAWALS:
+      return [
+        govAction.type,
+        serializeWithdrawals(govAction.withdrawals),
+        govAction.policyHash,
+      ]
+    case GovActionType.NO_CONFIDENCE:
+      return [
+        govAction.type,
+        serializePrevGovActionId(govAction.prevGovActionId),
+      ]
+    case GovActionType.UPDATE_COMMITTEE:
+      return [
+        govAction.type,
+        serializePrevGovActionId(govAction.prevGovActionId),
+        serializeCddlSetBase(govAction.membersToRemove, serializeCredential),
+        new Map(
+          govAction.membersToAdd.map(({coldCredential, epoch}) => [
+            serializeCredential(coldCredential),
+            epoch,
+          ]),
+        ),
+        new Tagged(CborTag.UNIT_INTERVAL, govAction.quorum),
+      ]
+    case GovActionType.NEW_CONSTITUTION:
+      return [
+        govAction.type,
+        serializePrevGovActionId(govAction.prevGovActionId),
+        [
+          serializeAnchor(govAction.constitution.anchor),
+          govAction.constitution.scriptHash,
+        ],
+      ]
+    case GovActionType.INFO:
+      return [govAction.type]
+    default:
+      unreachable(govAction)
+  }
+}
+
 export const serializeProposalProcedure = (procedure: ProposalProcedure) => [
   procedure.deposit,
   procedure.rewardAccount,
-  procedure.govAction,
+  serializeGovAction(procedure.govAction),
   serializeAnchor(procedure.anchor),
 ]
 
