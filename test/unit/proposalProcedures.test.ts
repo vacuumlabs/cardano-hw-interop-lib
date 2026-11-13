@@ -1,4 +1,5 @@
 import {expect} from 'chai'
+import {Tagged} from 'cbor'
 
 import {ParseErrorReason, ValidationErrorReason} from '../../src/errors'
 import {parseProposalProcedure} from '../../src/txParsers'
@@ -43,6 +44,30 @@ describe('Validate governance action', () => {
         fixable: false,
         reason: ValidationErrorReason.PARAMETER_CHANGE_ACTION_WITH_COST_MODELS,
         position: `${position}.protocol_param_update`,
+      },
+    ])
+  })
+
+  it('Parameter change with a key or a value that is not uint64', () => {
+    const govAction: GovAction = {
+      type: GovActionType.PARAMETER_CHANGE,
+      prevGovActionId: null,
+      protocolParamUpdate: [
+        {key: toUint(9), value: new Tagged(30, [1, BigInt(2) ** BigInt(64)])},
+        {key: toUint('18446744073709551616'), value: 1},
+      ],
+      policyHash: null,
+    }
+    expect([...validateGovAction(govAction, position)]).to.deep.equal([
+      {
+        fixable: false,
+        reason: ValidationErrorReason.UNSIGNED_INTEGER_NOT_UINT64,
+        position: `${position}.protocol_param_update[0]`,
+      },
+      {
+        fixable: false,
+        reason: ValidationErrorReason.UNSIGNED_INTEGER_NOT_UINT64,
+        position: `${position}.protocol_param_update[1]`,
       },
     ])
   })

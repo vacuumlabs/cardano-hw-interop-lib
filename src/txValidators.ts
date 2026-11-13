@@ -1,3 +1,5 @@
+import {Tagged} from 'cbor'
+
 import type {ValidationError} from './errors'
 import {err, ValidationErrorReason} from './errors'
 import type {
@@ -29,6 +31,7 @@ import {
   GovActionType,
   TxOutputFormat,
 } from './types'
+import {isInt, isUint} from './parsers'
 import {bind, unreachable} from './utils'
 
 const UINT16_MAX = 65535
@@ -447,6 +450,23 @@ const validateNoDuplicateKeys = (keys: string[], position: string) =>
     err(ValidationErrorReason.GOV_ACTION_MAP_WITH_DUPLICATE_KEYS, position),
   )
 
+function* validateUnparsedIntegers(
+  data: unknown,
+  position: string,
+): ValidatorReturnType {
+  if (isUint(data)) {
+    yield* validateUint64(data, position)
+  } else if (isInt(data)) {
+    yield* validateInt64(data, position)
+  } else if (data instanceof Tagged) {
+    yield* validateUnparsedIntegers(data.value, position)
+  } else if (Array.isArray(data)) {
+    for (const item of data) {
+      yield* validateUnparsedIntegers(item, position)
+    }
+  }
+}
+
 export function* validateGovAction(
   govAction: GovAction,
   position: string,
@@ -459,6 +479,11 @@ export function* validateGovAction(
 
   switch (govAction.type) {
     case GovActionType.PARAMETER_CHANGE: {
+      for (const [i, {key, value}] of govAction.protocolParamUpdate.entries()) {
+        const paramPosition = `${position}.protocol_param_update[${i}]`
+        yield* validateUint64(key, paramPosition)
+        yield* validateUnparsedIntegers(value, paramPosition)
+      }
       const keys = govAction.protocolParamUpdate.map(({key}) => Number(key))
       yield* validate(
         keys.length > 0,
