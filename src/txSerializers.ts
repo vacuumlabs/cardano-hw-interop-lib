@@ -8,6 +8,7 @@ import {
   Amount,
   AssetName,
   BabbageTransactionOutput,
+  BlsKey,
   Certificate,
   Coin,
   Datum,
@@ -166,17 +167,24 @@ const serializePoolMetadata = (poolMetadata: PoolMetadata) => [
   poolMetadata.metadataHash,
 ]
 
-const serializePoolParams = (poolParams: PoolParams) => [
-  poolParams.operator,
-  poolParams.vrfKeyHash,
-  poolParams.pledge,
-  poolParams.cost,
-  new Tagged(CborTag.UNIT_INTERVAL, poolParams.margin),
-  poolParams.rewardAccount,
-  serializeCddlSetBase(poolParams.poolOwners, identity),
-  poolParams.relays.map(serializeRelay),
-  poolParams.poolMetadata && serializePoolMetadata(poolParams.poolMetadata),
+const serializeBlsKey = (blsKey: BlsKey) => [
+  blsKey.publicKey,
+  blsKey.possessionProof,
 ]
+
+const serializePoolParams = (poolParams: PoolParams) =>
+  [
+    poolParams.operator,
+    poolParams.vrfKeyHash,
+    poolParams.blsKey && serializeBlsKey(poolParams.blsKey),
+    poolParams.pledge,
+    poolParams.cost,
+    new Tagged(CborTag.UNIT_INTERVAL, poolParams.margin),
+    poolParams.rewardAccount,
+    serializeCddlSetBase(poolParams.poolOwners, identity),
+    poolParams.relays.map(serializeRelay),
+    poolParams.poolMetadata && serializePoolMetadata(poolParams.poolMetadata),
+  ].filter((item) => item !== undefined)
 
 const serializeCredential = (credential: Credential) => {
   switch (credential.type) {

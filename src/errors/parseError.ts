@@ -32,6 +32,7 @@ export enum ParseErrorReason {
   INVALID_CREDENTIAL = 'Invalid credential',
   INVALID_POOL_KEY_HASH = 'Invalid pool key hash',
   INVALID_VRF_KEY_HASH = 'Invalid vrf key hash',
+  INVALID_BLS_KEY = 'Invalid BLS key',
   INVALID_POOL_PARAMS = 'Invalid pool params',
   INVALID_UNIT_INTERVAL = 'Invalid unit interval',
   INVALID_UNIT_INTERVAL_START = 'Invalid unit interval start',
