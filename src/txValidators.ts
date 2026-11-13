@@ -1,3 +1,5 @@
+import {Tagged} from 'cbor'
+
 import type {ValidationError} from './errors'
 import {err, ValidationErrorReason} from './errors'
 import type {
@@ -17,8 +19,19 @@ import type {
   CddlNonEmptyOrderedSet,
   VoterVotes,
   PoolRegistrationCertificate,
+  ProposalProcedure,
+  Credential,
+  GovAction,
 } from './types'
-import {AmountType, CertificateType, DatumType, TxOutputFormat} from './types'
+import {
+  AmountType,
+  CertificateType,
+  CredentialType,
+  DatumType,
+  GovActionType,
+  TxOutputFormat,
+} from './types'
+import {isInt, isUint} from './parsers'
 import {bind, unreachable} from './utils'
 
 const UINT16_MAX = 65535
@@ -418,6 +431,158 @@ function* validateVotingProcedures(
   }
 }
 
+const COST_MODELS_PROTOCOL_PARAM_KEY = 18
+
+const credentialToHex = (credential: Credential): string => {
+  switch (credential.type) {
+    case CredentialType.KEY_HASH:
+      return `${credential.type}:${credential.keyHash.toString('hex')}`
+    case CredentialType.SCRIPT_HASH:
+      return `${credential.type}:${credential.scriptHash.toString('hex')}`
+    default:
+      unreachable(credential)
+  }
+}
+
+const validateNoDuplicateKeys = (keys: string[], position: string) =>
+  validate(
+    new Set(keys).size === keys.length,
+    err(ValidationErrorReason.GOV_ACTION_MAP_WITH_DUPLICATE_KEYS, position),
+  )
+
+function* validateUnparsedIntegers(
+  data: unknown,
+  position: string,
+): ValidatorReturnType {
+  if (isUint(data)) {
+    yield* validateUint64(data, position)
+  } else if (isInt(data)) {
+    yield* validateInt64(data, position)
+  } else if (data instanceof Tagged) {
+    yield* validateUnparsedIntegers(data.value, position)
+  } else if (Array.isArray(data)) {
+    for (const item of data) {
+      yield* validateUnparsedIntegers(item, position)
+    }
+  }
+}
+
+export function* validateGovAction(
+  govAction: GovAction,
+  position: string,
+): ValidatorReturnType {
+  if ('prevGovActionId' in govAction) {
+    yield* validateOptional(govAction.prevGovActionId, (govActionId) =>
+      validateUint64(govActionId.index, `${position}.prev_gov_action_id.index`),
+    )
+  }
+
+  switch (govAction.type) {
+    case GovActionType.PARAMETER_CHANGE: {
+      for (const [i, {key, value}] of govAction.protocolParamUpdate.entries()) {
+        const paramPosition = `${position}.protocol_param_update[${i}]`
+        yield* validateUint64(key, paramPosition)
+        yield* validateUnparsedIntegers(value, paramPosition)
+      }
+      const keys = govAction.protocolParamUpdate.map(({key}) => Number(key))
+      yield* validate(
+        keys.length > 0,
+        err(
+          ValidationErrorReason.PARAMETER_CHANGE_ACTION_WITHOUT_PROTOCOL_PARAMETERS,
+          `${position}.protocol_param_update`,
+        ),
+      )
+      yield* validate(
+        !keys.includes(COST_MODELS_PROTOCOL_PARAM_KEY),
+        err(
+          ValidationErrorReason.PARAMETER_CHANGE_ACTION_WITH_COST_MODELS,
+          `${position}.protocol_param_update`,
+        ),
+      )
+      break
+    }
+    case GovActionType.HARD_FORK_INITIATION:
+      yield* validateUint64(
+        govAction.protocolVersion.major,
+        `${position}.protocol_version.major`,
+      )
+      yield* validateUint64(
+        govAction.protocolVersion.minor,
+        `${position}.protocol_version.minor`,
+      )
+      break
+    case GovActionType.TREASURY_WITHDRAWALS:
+      yield* validateListConstraints(
+        govAction.withdrawals,
+        `${position}.withdrawals`,
+        true,
+      )
+      yield* validateNoDuplicateKeys(
+        govAction.withdrawals.map(({rewardAccount}) =>
+          rewardAccount.toString('hex'),
+        ),
+        `${position}.withdrawals`,
+      )
+      for (const {rewardAccount, amount} of govAction.withdrawals) {
+        yield* validateUint64(
+          amount,
+          `${position}.withdrawals[${rewardAccount.toString('hex')}]`,
+        )
+      }
+      break
+    case GovActionType.UPDATE_COMMITTEE:
+      yield* validateListConstraints(
+        govAction.membersToRemove.items,
+        `${position}.members_to_remove`,
+        true,
+      )
+      yield* validateListConstraints(
+        govAction.membersToAdd,
+        `${position}.members_to_add`,
+        true,
+      )
+      yield* validateNoDuplicateKeys(
+        govAction.membersToAdd.map(({coldCredential}) =>
+          credentialToHex(coldCredential),
+        ),
+        `${position}.members_to_add`,
+      )
+      for (const [j, {epoch}] of govAction.membersToAdd.entries()) {
+        yield* validateUint64(epoch, `${position}.members_to_add[${j}].epoch`)
+      }
+      yield* validateUint64(govAction.quorum[0], `${position}.quorum[0]`)
+      yield* validateUint64(govAction.quorum[1], `${position}.quorum[1]`)
+      break
+    case GovActionType.NO_CONFIDENCE:
+    case GovActionType.NEW_CONSTITUTION:
+    case GovActionType.INFO:
+      break
+    default:
+      unreachable(govAction)
+  }
+}
+
+function* validateProposalProcedures(
+  proposalProcedures: CddlNonEmptyOrderedSet<ProposalProcedure>,
+): ValidatorReturnType {
+  yield* validateListConstraints(
+    proposalProcedures.items,
+    'transaction_body.proposal_procedures',
+    false,
+  )
+
+  for (const [i, {deposit, govAction}] of proposalProcedures.items.entries()) {
+    yield* validateUint64(
+      deposit,
+      `transaction_body.proposal_procedures[${i}].deposit`,
+    )
+    yield* validateGovAction(
+      govAction,
+      `transaction_body.proposal_procedures[${i}].gov_action`,
+    )
+  }
+}
+
 /**
  * Checks if a transaction contains pool registration certificate; if it does,
  * runs a series of validators for pool registration transactions.
@@ -555,6 +720,14 @@ function* validatePoolRegistrationTransaction(
   )
 
   yield* validate(
+    txBody.proposalProcedures === undefined,
+    err(
+      ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_PROPOSAL_PROCEDURES,
+      'transaction_body.proposal_procedures',
+    ),
+  )
+
+  yield* validate(
     txBody.treasury === undefined,
     err(
       ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_TREASURY,
@@ -615,13 +788,7 @@ function* validateTxBody(txBody: TransactionBody): ValidatorReturnType {
   )
   yield* validateOptional(txBody.referenceInputs, validateReferenceInputs)
   yield* validateOptional(txBody.votingProcedures, validateVotingProcedures)
-  yield* validate(
-    txBody.proposalProcedures === undefined,
-    err(
-      ValidationErrorReason.UNSUPPORTED_TX_PROPOSAL_PROCEDURES,
-      'transaction_body.proposal_procedures',
-    ),
-  )
+  yield* validateOptional(txBody.proposalProcedures, validateProposalProcedures)
   yield* validateOptional(
     txBody.treasury,
     bind(validateUint64, 'transaction_body.treasury'),
@@ -646,6 +813,11 @@ function* validateTxBody(txBody: TransactionBody): ValidatorReturnType {
     txBody.referenceInputs,
     txBody.proposalProcedures,
     poolRegistrationCertificate?.poolParams.poolOwners,
+    ...(txBody.proposalProcedures?.items ?? []).flatMap(({govAction}) =>
+      govAction.type === GovActionType.UPDATE_COMMITTEE
+        ? [govAction.membersToRemove]
+        : [],
+    ),
   ]
   const tagIsPresent = allSets.some((s) => s !== undefined && s.hasTag)
   const tagIsAbsent = allSets.some((s) => s !== undefined && !s.hasTag)

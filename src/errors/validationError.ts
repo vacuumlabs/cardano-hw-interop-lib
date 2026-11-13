@@ -1,6 +1,11 @@
 export enum ValidationErrorReason {
   // Unfixable validation errors
   UNSUPPORTED_TX_UPDATE = 'The transaction body entry update must not be included',
+  /**
+   * @deprecated Proposal procedures are now supported, so this error is no
+   * longer emitted. Kept for backward compatibility; it will be removed in
+   * the next major version.
+   */
   UNSUPPORTED_TX_PROPOSAL_PROCEDURES = 'The transaction body entry proposal_procedures must not be included',
   UNSUPPORTED_CERTIFICATE_GENESIS_KEY_DELEGATION = 'Certificate of type genesis_key_delegation is not supported and must not be included',
   UNSUPPORTED_CERTIFICATE_MOVE_INSTANTANEOUS_REWARDS_CERT = 'Certificate of type move_instantaneous_rewards_cert is not supported and must not be included',
@@ -22,10 +27,14 @@ export enum ValidationErrorReason {
   POOL_REGISTRATION_CERTIFICATE_WITH_TOTAL_COLLATERAL = 'If a transaction contains a pool registration certificate, then it must not contain total collateral',
   POOL_REGISTRATION_CERTIFICATE_WITH_REFERENCE_INPUTS = 'If a transaction contains a pool registration certificate, then it must not contain reference inputs',
   POOL_REGISTRATION_CERTIFICATE_WITH_VOTING_PROCEDURES = 'If a transaction contains a pool registration certificate, then it must not contain voting procedures',
+  POOL_REGISTRATION_CERTIFICATE_WITH_PROPOSAL_PROCEDURES = 'If a transaction contains a pool registration certificate, then it must not contain proposal procedures',
   POOL_REGISTRATION_CERTIFICATE_WITH_TREASURY = 'If a transaction contains a pool registration certificate, then it must not contain treasury value entry',
   POOL_REGISTRATION_CERTIFICATE_WITH_DONATION = 'If a transaction contains a pool registration certificate, then it must not contain treasury donation entry',
   TOO_MANY_VOTERS_IN_VOTING_PROCEDURES = 'Only a single voter is allowed in voting procedures',
   INVALID_NUMBER_OF_VOTING_PROCEDURES = 'There must be exactly one voting procedure per voter',
+  PARAMETER_CHANGE_ACTION_WITH_COST_MODELS = 'A protocol parameter update in a parameter change action must not contain cost models',
+  PARAMETER_CHANGE_ACTION_WITHOUT_PROTOCOL_PARAMETERS = 'A protocol parameter update in a parameter change action must contain at least one protocol parameter',
+  GOV_ACTION_MAP_WITH_DUPLICATE_KEYS = 'Maps in a governance action must not contain duplicate keys',
 
   // Fixable validation errors
   CBOR_IS_NOT_CANONICAL = 'CBOR is not canonical',
@@ -79,12 +88,18 @@ const validationErrorFixability: Record<ValidationErrorReason, boolean> = {
     UNFIXABLE,
   [ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_VOTING_PROCEDURES]:
     UNFIXABLE,
+  [ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_PROPOSAL_PROCEDURES]:
+    UNFIXABLE,
   [ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_TREASURY]:
     UNFIXABLE,
   [ValidationErrorReason.POOL_REGISTRATION_CERTIFICATE_WITH_DONATION]:
     UNFIXABLE,
   [ValidationErrorReason.TOO_MANY_VOTERS_IN_VOTING_PROCEDURES]: UNFIXABLE,
   [ValidationErrorReason.INVALID_NUMBER_OF_VOTING_PROCEDURES]: UNFIXABLE,
+  [ValidationErrorReason.PARAMETER_CHANGE_ACTION_WITH_COST_MODELS]: UNFIXABLE,
+  [ValidationErrorReason.PARAMETER_CHANGE_ACTION_WITHOUT_PROTOCOL_PARAMETERS]:
+    UNFIXABLE,
+  [ValidationErrorReason.GOV_ACTION_MAP_WITH_DUPLICATE_KEYS]: UNFIXABLE,
 
   // fixable
   [ValidationErrorReason.CBOR_IS_NOT_CANONICAL]: FIXABLE,

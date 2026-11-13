@@ -15,7 +15,13 @@ import type {
   Unparsed,
   CostModelLanguageName,
 } from './types'
-import {AmountType, CertificateType, DatumType, TxOutputFormat} from './types'
+import {
+  AmountType,
+  CertificateType,
+  DatumType,
+  GovActionType,
+  TxOutputFormat,
+} from './types'
 import {transformScriptDataHash} from './scriptDataHash'
 import {blake2b256, encodeToCbor, unreachable} from './utils'
 
@@ -141,6 +147,11 @@ export const makeSetTagsConsistent = (
     txBody.referenceInputs,
     txBody.proposalProcedures,
     poolRegistrationCertificate?.poolParams.poolOwners,
+    ...(txBody.proposalProcedures?.items ?? []).flatMap(({govAction}) =>
+      govAction.type === GovActionType.UPDATE_COMMITTEE
+        ? [govAction.membersToRemove]
+        : [],
+    ),
   ]
   const tagIsPresent = allSets.some((s) => s !== undefined && s.hasTag)
   if (tagIsPresent) {

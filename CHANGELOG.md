@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [4.0.0] - [November 13th 2026]
+
+### Added
+
+- support for proposal procedures: governance actions are parsed, serialized and validated according to CIP-0021
+
+### Changed
+
+- `ProposalProcedure.govAction` is typed as `GovAction` instead of `Unparsed` (protocol parameter values in parameter change actions stay unparsed)
+- proposal procedures (transaction body field 20) are accepted by validation instead of rejected
+
+
 ## [3.0.2] - [December 21th 2023]
 
 ### Added

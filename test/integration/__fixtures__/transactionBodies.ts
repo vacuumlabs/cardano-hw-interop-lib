@@ -6,6 +6,7 @@ import {
   TransactionBody,
   VoteOption,
   VoterType,
+  GovActionType,
   AmountType,
   CertificateType,
   DatumType,
@@ -14,6 +15,8 @@ import {
   TxOutputFormat,
   DRepType,
   CddlSet,
+  Credential,
+  CommitteeMember,
   TransactionInput,
   CddlNonEmptySet,
   Certificate,
@@ -878,25 +881,304 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
               'e082293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd',
               29,
             ),
-            govAction: [
-              5,
-              null,
-              [
-                // constitution
-                [
-                  'https://shorturl.at/asIJ6',
-                  toFixLenBuffer(
+            govAction: {
+              type: GovActionType.NEW_CONSTITUTION,
+              prevGovActionId: null,
+              constitution: {
+                anchor: {
+                  url: toMaxLenString(
+                    'https://shorturl.at/asIJ6',
+                    URL_MAX_LENGTH,
+                  ),
+                  dataHash: toFixLenBuffer(
                     'ee90ece16c47bf812b88edb89a01539e6683d6549a80b15383a4fb218ab9412d',
                     32,
                   ),
-                ],
-                null,
-              ],
-            ],
+                },
+                scriptHash: null,
+              },
+            },
             anchor: {
               url: toMaxLenString('https://shorturl.at/xMS15', URL_MAX_LENGTH),
               dataHash: toFixLenBuffer(
                 '6f890de0c6e418e6526e2b1aa821850cb87aee94a6d77dc2a2e440116abc8e09',
+                32,
+              ),
+            },
+          },
+        ],
+        hasTag: false,
+      } as CddlNonEmptyOrderedSet<ProposalProcedure>,
+      treasury: undefined,
+      donation: undefined,
+    },
+  },
+  {
+    // synthetic tx body containing one proposal procedure per governance action type
+    testName:
+      'Conway tx body: proposal procedures with all governance action types',
+    cbor: 'a40081825820017b91576a79a3602a02a65b600665ab71037ad14aa162538a26e64b3f5069fc000181a2005839002d745f050a8f7e263f4d0749a82284ed9cc065018c1f4f6a7c1b764882293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd011b0000000253d1efbc021a0002b3b11487841b000000174876e800581de082293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd8400825820017b91576a79a3602a02a65b600665ab71037ad14aa162538a26e64b3f5069fc00a100182c581cfa24fb305126805cf2164c161d852a0e7330cf988f1fe558cf7d4a6482782368747470733a2f2f6578616d706c652e636f6d2f70726f706f73616c2d302e6a736f6e58200000000000000000000000000000000000000000000000000000000000000000841b000000174876e800581de082293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd8301f6820a0082782368747470733a2f2f6578616d706c652e636f6d2f70726f706f73616c2d312e6a736f6e58200101010101010101010101010101010101010101010101010101010101010101841b000000174876e800581de082293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd8302a1581de082293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd1a000f4240f682782368747470733a2f2f6578616d706c652e636f6d2f70726f706f73616c2d322e6a736f6e58200202020202020202020202020202020202020202020202020202020202020202841b000000174876e800581de082293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd8203825820017b91576a79a3602a02a65b600665ab71037ad14aa162538a26e64b3f5069fc0182782368747470733a2f2f6578616d706c652e636f6d2f70726f706f73616c2d332e6a736f6e58200303030303030303030303030303030303030303030303030303030303030303841b000000174876e800581de082293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd8504f6818200581c7a5d8a3e2d8bd8d31d3b8a8ac6b8b0f5c4bd2f8e1a6f1f2c3b4d5e6fa18201581cfa24fb305126805cf2164c161d852a0e7330cf988f1fe558cf7d4a641901f4d81e82020382782368747470733a2f2f6578616d706c652e636f6d2f70726f706f73616c2d342e6a736f6e58200404040404040404040404040404040404040404040404040404040404040404841b000000174876e800581de082293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd8305f68282782468747470733a2f2f6578616d706c652e636f6d2f636f6e737469747574696f6e2e7478745820ee90ece16c47bf812b88edb89a01539e6683d6549a80b15383a4fb218ab9412d581cfa24fb305126805cf2164c161d852a0e7330cf988f1fe558cf7d4a6482782368747470733a2f2f6578616d706c652e636f6d2f70726f706f73616c2d352e6a736f6e58200505050505050505050505050505050505050505050505050505050505050505841b000000174876e800581de082293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd810682782368747470733a2f2f6578616d706c652e636f6d2f70726f706f73616c2d362e6a736f6e58200606060606060606060606060606060606060606060606060606060606060606',
+    txBody: {
+      inputs: {
+        items: [
+          {
+            transactionId: toFixLenBuffer(
+              '017b91576a79a3602a02a65b600665ab71037ad14aa162538a26e64b3f5069fc',
+              32,
+            ),
+            index: toUint(0),
+          },
+        ],
+        hasTag: false,
+      } as CddlSet<TransactionInput>,
+      outputs: [
+        {
+          format: TxOutputFormat.MAP_BABBAGE,
+          address: toFixLenBuffer(
+            '002d745f050a8f7e263f4d0749a82284ed9cc065018c1f4f6a7c1b764882293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd',
+            57,
+          ),
+          amount: {
+            type: AmountType.WITHOUT_MULTIASSET,
+            coin: toUint(9996201916),
+          },
+          datum: undefined,
+          referenceScript: undefined,
+        },
+      ],
+      fee: toUint(177073),
+      ttl: undefined,
+      certificates: undefined,
+      withdrawals: undefined,
+      update: undefined,
+      auxiliaryDataHash: undefined,
+      validityIntervalStart: undefined,
+      mint: undefined,
+      scriptDataHash: undefined,
+      collateralInputs: undefined,
+      requiredSigners: undefined,
+      networkId: undefined,
+      collateralReturnOutput: undefined,
+      totalCollateral: undefined,
+      referenceInputs: undefined,
+      votingProcedures: undefined,
+      proposalProcedures: {
+        items: [
+          {
+            deposit: toUint(100000000000),
+            rewardAccount: toFixLenBuffer(
+              'e082293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd',
+              29,
+            ),
+            // parameter_change_action
+            govAction: {
+              type: GovActionType.PARAMETER_CHANGE,
+              prevGovActionId: {
+                transactionId: toFixLenBuffer(
+                  '017b91576a79a3602a02a65b600665ab71037ad14aa162538a26e64b3f5069fc',
+                  32,
+                ),
+                index: toUint(0),
+              },
+              protocolParamUpdate: [{key: toUint(0), value: 44}],
+              policyHash: toFixLenBuffer(
+                'fa24fb305126805cf2164c161d852a0e7330cf988f1fe558cf7d4a64',
+                28,
+              ),
+            },
+            anchor: {
+              url: toMaxLenString(
+                'https://example.com/proposal-0.json',
+                URL_MAX_LENGTH,
+              ),
+              dataHash: toFixLenBuffer(
+                '0000000000000000000000000000000000000000000000000000000000000000',
+                32,
+              ),
+            },
+          },
+          {
+            deposit: toUint(100000000000),
+            rewardAccount: toFixLenBuffer(
+              'e082293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd',
+              29,
+            ),
+            // hard_fork_initiation_action
+            govAction: {
+              type: GovActionType.HARD_FORK_INITIATION,
+              prevGovActionId: null,
+              protocolVersion: {major: toUint(10), minor: toUint(0)},
+            },
+            anchor: {
+              url: toMaxLenString(
+                'https://example.com/proposal-1.json',
+                URL_MAX_LENGTH,
+              ),
+              dataHash: toFixLenBuffer(
+                '0101010101010101010101010101010101010101010101010101010101010101',
+                32,
+              ),
+            },
+          },
+          {
+            deposit: toUint(100000000000),
+            rewardAccount: toFixLenBuffer(
+              'e082293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd',
+              29,
+            ),
+            // treasury_withdrawals_action
+            govAction: {
+              type: GovActionType.TREASURY_WITHDRAWALS,
+              withdrawals: [
+                {
+                  rewardAccount: toFixLenBuffer(
+                    'e082293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd',
+                    29,
+                  ),
+                  amount: toUint(1000000),
+                },
+              ],
+              policyHash: null,
+            },
+            anchor: {
+              url: toMaxLenString(
+                'https://example.com/proposal-2.json',
+                URL_MAX_LENGTH,
+              ),
+              dataHash: toFixLenBuffer(
+                '0202020202020202020202020202020202020202020202020202020202020202',
+                32,
+              ),
+            },
+          },
+          {
+            deposit: toUint(100000000000),
+            rewardAccount: toFixLenBuffer(
+              'e082293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd',
+              29,
+            ),
+            // no_confidence
+            govAction: {
+              type: GovActionType.NO_CONFIDENCE,
+              prevGovActionId: {
+                transactionId: toFixLenBuffer(
+                  '017b91576a79a3602a02a65b600665ab71037ad14aa162538a26e64b3f5069fc',
+                  32,
+                ),
+                index: toUint(1),
+              },
+            },
+            anchor: {
+              url: toMaxLenString(
+                'https://example.com/proposal-3.json',
+                URL_MAX_LENGTH,
+              ),
+              dataHash: toFixLenBuffer(
+                '0303030303030303030303030303030303030303030303030303030303030303',
+                32,
+              ),
+            },
+          },
+          {
+            deposit: toUint(100000000000),
+            rewardAccount: toFixLenBuffer(
+              'e082293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd',
+              29,
+            ),
+            // update_committee
+            govAction: {
+              type: GovActionType.UPDATE_COMMITTEE,
+              prevGovActionId: null,
+              membersToRemove: {
+                items: [
+                  {
+                    type: CredentialType.KEY_HASH,
+                    keyHash: toFixLenBuffer(
+                      '7a5d8a3e2d8bd8d31d3b8a8ac6b8b0f5c4bd2f8e1a6f1f2c3b4d5e6f',
+                      28,
+                    ),
+                  },
+                ],
+                hasTag: false,
+              },
+              membersToAdd: [
+                {
+                  coldCredential: {
+                    type: CredentialType.SCRIPT_HASH,
+                    scriptHash: toFixLenBuffer(
+                      'fa24fb305126805cf2164c161d852a0e7330cf988f1fe558cf7d4a64',
+                      28,
+                    ),
+                  },
+                  epoch: toUint(500),
+                },
+              ],
+              quorum: [toUint(2), toUint(3)],
+            },
+            anchor: {
+              url: toMaxLenString(
+                'https://example.com/proposal-4.json',
+                URL_MAX_LENGTH,
+              ),
+              dataHash: toFixLenBuffer(
+                '0404040404040404040404040404040404040404040404040404040404040404',
+                32,
+              ),
+            },
+          },
+          {
+            deposit: toUint(100000000000),
+            rewardAccount: toFixLenBuffer(
+              'e082293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd',
+              29,
+            ),
+            // new_constitution
+            govAction: {
+              type: GovActionType.NEW_CONSTITUTION,
+              prevGovActionId: null,
+              constitution: {
+                anchor: {
+                  url: toMaxLenString(
+                    'https://example.com/constitution.txt',
+                    URL_MAX_LENGTH,
+                  ),
+                  dataHash: toFixLenBuffer(
+                    'ee90ece16c47bf812b88edb89a01539e6683d6549a80b15383a4fb218ab9412d',
+                    32,
+                  ),
+                },
+                scriptHash: toFixLenBuffer(
+                  'fa24fb305126805cf2164c161d852a0e7330cf988f1fe558cf7d4a64',
+                  28,
+                ),
+              },
+            },
+            anchor: {
+              url: toMaxLenString(
+                'https://example.com/proposal-5.json',
+                URL_MAX_LENGTH,
+              ),
+              dataHash: toFixLenBuffer(
+                '0505050505050505050505050505050505050505050505050505050505050505',
+                32,
+              ),
+            },
+          },
+          {
+            deposit: toUint(100000000000),
+            rewardAccount: toFixLenBuffer(
+              'e082293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd',
+              29,
+            ),
+            // info_action
+            govAction: {type: GovActionType.INFO},
+            anchor: {
+              url: toMaxLenString(
+                'https://example.com/proposal-6.json',
+                URL_MAX_LENGTH,
+              ),
+              dataHash: toFixLenBuffer(
+                '0606060606060606060606060606060606060606060606060606060606060606',
                 32,
               ),
             },
@@ -1288,6 +1570,91 @@ export const TransformTransactionTestCases: TransformTransactionBodyTestCase[] =
     },
     {
       testName:
+        'Tx body with tag 258 in inputs and proposal procedures, but not in members to remove of update committee',
+      cbor: 'a400d9010281825820017b91576a79a3602a02a65b600665ab71037ad14aa162538a26e64b3f5069fc000180021a0002b3b114d9010281841b000000174876e800581de082293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd8504f6818200581c7a5d8a3e2d8bd8d31d3b8a8ac6b8b0f5c4bd2f8e1a6f1f2c3b4d5e6fa0d81e82020382782168747470733a2f2f6578616d706c652e636f6d2f70726f706f73616c2e6a736f6e58200000000000000000000000000000000000000000000000000000000000000000',
+      validationErrors: [
+        {
+          fixable: true,
+          reason: ValidationErrorReason.TX_INCONSISTENT_SET_TAGS,
+          position: 'transaction_body',
+        },
+      ],
+      txBody: {
+        inputs: {
+          items: [
+            {
+              transactionId: toFixLenBuffer(
+                '017b91576a79a3602a02a65b600665ab71037ad14aa162538a26e64b3f5069fc',
+                32,
+              ),
+              index: toUint(0),
+            },
+          ],
+          hasTag: true,
+        } as CddlSet<TransactionInput>,
+        outputs: [],
+        fee: toUint(177073),
+        ttl: undefined,
+        certificates: undefined,
+        withdrawals: undefined,
+        update: undefined,
+        auxiliaryDataHash: undefined,
+        validityIntervalStart: undefined,
+        mint: undefined,
+        scriptDataHash: undefined,
+        collateralInputs: undefined,
+        requiredSigners: undefined,
+        networkId: undefined,
+        collateralReturnOutput: undefined,
+        totalCollateral: undefined,
+        referenceInputs: undefined,
+        votingProcedures: undefined,
+        proposalProcedures: {
+          items: [
+            {
+              deposit: toUint(100000000000),
+              rewardAccount: toFixLenBuffer(
+                'e082293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd',
+                29,
+              ),
+              govAction: {
+                type: GovActionType.UPDATE_COMMITTEE,
+                prevGovActionId: null,
+                membersToRemove: {
+                  items: [
+                    {
+                      type: CredentialType.KEY_HASH,
+                      keyHash: toFixLenBuffer(
+                        '7a5d8a3e2d8bd8d31d3b8a8ac6b8b0f5c4bd2f8e1a6f1f2c3b4d5e6f',
+                        28,
+                      ),
+                    },
+                  ],
+                  hasTag: true,
+                } as CddlSet<Credential>,
+                membersToAdd: [] as CommitteeMember[],
+                quorum: [toUint(2), toUint(3)],
+              },
+              anchor: {
+                url: toMaxLenString(
+                  'https://example.com/proposal.json',
+                  URL_MAX_LENGTH,
+                ),
+                dataHash: toFixLenBuffer(
+                  '0000000000000000000000000000000000000000000000000000000000000000',
+                  32,
+                ),
+              },
+            },
+          ],
+          hasTag: true,
+        } as CddlNonEmptyOrderedSet<ProposalProcedure>,
+        treasury: undefined,
+        donation: undefined,
+      },
+    },
+    {
+      testName:
         'Tx body with tag 258 in collateral inputs and required signers, but not inputs',
       cbor: 'a800818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018283583d105e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e28dd419e1a006ca7935820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce18883583930167f6dbf610ae030f043adb1f3af78754ed9595ad4ac1f7ed9ff6466760fb6955d1217b1f1f208df6d45ab23c9e17b0c984a2d3a22bbbfb8821a0001e91fa1581cd7a7c6999786354b6dbee181a2f562a628a75fce126f4da40ce5d9b2a146546f6b656e3101582000ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce102182a030a0b5820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce1880dd90102818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000ed9010282581cfea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a581ceea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a0f01',
       validationErrors: [
@@ -1403,6 +1770,97 @@ export const TransformTransactionTestCases: TransformTransactionBodyTestCase[] =
         referenceInputs: undefined,
         votingProcedures: undefined,
         proposalProcedures: undefined,
+        treasury: undefined,
+        donation: undefined,
+      },
+    },
+    {
+      testName: 'Conway tx body: proposal procedures',
+      cbor: 'a40081825820017b91576a79a3602a02a65b600665ab71037ad14aa162538a26e64b3f5069fc000181a2005839002d745f050a8f7e263f4d0749a82284ed9cc065018c1f4f6a7c1b764882293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd011b0000000253d1efbc021a0002b3b11481841a000f4240581de082293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd8305f68282781968747470733a2f2f73686f727475726c2e61742f6173494a365820ee90ece16c47bf812b88edb89a01539e6683d6549a80b15383a4fb218ab9412df682781968747470733a2f2f73686f727475726c2e61742f784d53313558206f890de0c6e418e6526e2b1aa821850cb87aee94a6d77dc2a2e440116abc8e09',
+      validationErrors: [],
+      txBody: {
+        inputs: {
+          items: [
+            {
+              transactionId: toFixLenBuffer(
+                '017b91576a79a3602a02a65b600665ab71037ad14aa162538a26e64b3f5069fc',
+                32,
+              ),
+              index: toUint(0),
+            },
+          ],
+          hasTag: false,
+        } as CddlSet<TransactionInput>,
+        outputs: [
+          {
+            format: TxOutputFormat.MAP_BABBAGE,
+            address: toFixLenBuffer(
+              '002d745f050a8f7e263f4d0749a82284ed9cc065018c1f4f6a7c1b764882293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd',
+              57,
+            ),
+            amount: {
+              type: AmountType.WITHOUT_MULTIASSET,
+              coin: toUint(9996201916),
+            },
+            datum: undefined,
+            referenceScript: undefined,
+          },
+        ],
+        fee: toUint(177073),
+        ttl: undefined,
+        certificates: undefined,
+        withdrawals: undefined,
+        update: undefined,
+        auxiliaryDataHash: undefined,
+        validityIntervalStart: undefined,
+        mint: undefined,
+        scriptDataHash: undefined,
+        collateralInputs: undefined,
+        requiredSigners: undefined,
+        networkId: undefined,
+        collateralReturnOutput: undefined,
+        totalCollateral: undefined,
+        referenceInputs: undefined,
+        votingProcedures: undefined,
+        proposalProcedures: {
+          items: [
+            {
+              deposit: toUint(1000000),
+              rewardAccount: toFixLenBuffer(
+                'e082293a49e3ef29a4f9c32e4c18f202f5324182db7790f48dccf7a6dd',
+                29,
+              ),
+              govAction: {
+                type: GovActionType.NEW_CONSTITUTION,
+                prevGovActionId: null,
+                constitution: {
+                  anchor: {
+                    url: toMaxLenString(
+                      'https://shorturl.at/asIJ6',
+                      URL_MAX_LENGTH,
+                    ),
+                    dataHash: toFixLenBuffer(
+                      'ee90ece16c47bf812b88edb89a01539e6683d6549a80b15383a4fb218ab9412d',
+                      32,
+                    ),
+                  },
+                  scriptHash: null,
+                },
+              },
+              anchor: {
+                url: toMaxLenString(
+                  'https://shorturl.at/xMS15',
+                  URL_MAX_LENGTH,
+                ),
+                dataHash: toFixLenBuffer(
+                  '6f890de0c6e418e6526e2b1aa821850cb87aee94a6d77dc2a2e440116abc8e09',
+                  32,
+                ),
+              },
+            },
+          ],
+          hasTag: false,
+        } as CddlNonEmptyOrderedSet<ProposalProcedure>,
         treasury: undefined,
         donation: undefined,
       },

@@ -99,6 +99,8 @@ export enum ParseErrorReason {
 
   INVALID_PROPOSAL_PROCEDURES = 'Invalid proposal procedures',
   INVALID_PROPOSAL_PROCEDURE = 'Invalid proposal procedure',
+  INVALID_GOV_ACTION_TYPE = 'Invalid governance action type',
+  INVALID_GOV_ACTION = 'Invalid governance action',
 
   INVALID_TREASURY = 'Invalid treasury',
 

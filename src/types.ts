@@ -475,10 +475,93 @@ export type VoterVotes = {
   votes: Vote[]
 }
 
+// Governance action
+export enum GovActionType {
+  PARAMETER_CHANGE = 0,
+  HARD_FORK_INITIATION = 1,
+  TREASURY_WITHDRAWALS = 2,
+  NO_CONFIDENCE = 3,
+  UPDATE_COMMITTEE = 4,
+  NEW_CONSTITUTION = 5,
+  INFO = 6,
+}
+
+// protocol parameter values are not parsed, only their keys
+export type ProtocolParamUpdateEntry = {
+  key: Uint
+  value: Unparsed
+}
+
+export type ProtocolVersion = {
+  major: Uint
+  minor: Uint
+}
+
+export type CommitteeMember = {
+  coldCredential: Credential
+  epoch: Epoch
+}
+
+export type Constitution = {
+  anchor: Anchor
+  scriptHash: ScriptHash | null
+}
+
+export type ParameterChangeGovAction = {
+  type: GovActionType.PARAMETER_CHANGE
+  prevGovActionId: GovActionId | null
+  protocolParamUpdate: ProtocolParamUpdateEntry[]
+  policyHash: ScriptHash | null
+}
+
+export type HardForkInitiationGovAction = {
+  type: GovActionType.HARD_FORK_INITIATION
+  prevGovActionId: GovActionId | null
+  protocolVersion: ProtocolVersion
+}
+
+export type TreasuryWithdrawalsGovAction = {
+  type: GovActionType.TREASURY_WITHDRAWALS
+  withdrawals: Withdrawal[]
+  policyHash: ScriptHash | null
+}
+
+export type NoConfidenceGovAction = {
+  type: GovActionType.NO_CONFIDENCE
+  prevGovActionId: GovActionId | null
+}
+
+export type UpdateCommitteeGovAction = {
+  type: GovActionType.UPDATE_COMMITTEE
+  prevGovActionId: GovActionId | null
+  membersToRemove: CddlSet<Credential>
+  membersToAdd: CommitteeMember[]
+  quorum: UnitInterval
+}
+
+export type NewConstitutionGovAction = {
+  type: GovActionType.NEW_CONSTITUTION
+  prevGovActionId: GovActionId | null
+  constitution: Constitution
+}
+
+export type InfoGovAction = {
+  type: GovActionType.INFO
+}
+
+export type GovAction =
+  | ParameterChangeGovAction
+  | HardForkInitiationGovAction
+  | TreasuryWithdrawalsGovAction
+  | NoConfidenceGovAction
+  | UpdateCommitteeGovAction
+  | NewConstitutionGovAction
+  | InfoGovAction
+
 export type ProposalProcedure = {
   deposit: Coin
   rewardAccount: RewardAccount
-  govAction: Unparsed
+  govAction: GovAction
   anchor: Anchor
 }
 
