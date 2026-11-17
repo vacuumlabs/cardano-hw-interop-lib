@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [Unreleased]
+
+### Added
+
+- support for guards (required signers) in the credentials encoding (CIP-112)
+
+### Changed
+
+- `requiredSigners` has a `format` field and is either a set of key hashes or an ordered set of credentials (breaking)
+
+
 ## [3.0.2] - [December 21th 2023]
 
 ### Added
