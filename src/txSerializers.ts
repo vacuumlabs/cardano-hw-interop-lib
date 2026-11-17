@@ -37,6 +37,8 @@ import {
   Int,
   CddlSetBase,
   CredentialType,
+  RequiredSigners,
+  RequiredSignersFormat,
 } from './types'
 import {
   BabbageTransactionOutputKeys,
@@ -178,7 +180,7 @@ const serializePoolParams = (poolParams: PoolParams) => [
   poolParams.poolMetadata && serializePoolMetadata(poolParams.poolMetadata),
 ]
 
-const serializeCredential = (credential: Credential) => {
+export const serializeCredential = (credential: Credential) => {
   switch (credential.type) {
     case CredentialType.KEY_HASH:
       return [credential.type, credential.keyHash]
@@ -314,6 +316,17 @@ export const serializeCollateralInput = (collateralInput: TransactionInput) => [
   collateralInput.index,
 ]
 
+const serializeRequiredSigners = (requiredSigners: RequiredSigners) => {
+  switch (requiredSigners.format) {
+    case RequiredSignersFormat.KEY_HASHES:
+      return serializeCddlSetBase(requiredSigners, identity)
+    case RequiredSignersFormat.CREDENTIALS:
+      return serializeCddlSetBase(requiredSigners, serializeCredential)
+    default:
+      unreachable(requiredSigners)
+  }
+}
+
 const serializeVoter = (voter: Voter) => [voter.type, voter.hash]
 
 const serializeGovActionId = (govActionId: GovActionId) => [
@@ -386,7 +399,8 @@ export const serializeTxBody = (txBody: TransactionBody) =>
     ],
     [
       TransactionBodyKeys.REQUIRED_SIGNERS,
-      serializeCddlSetBaseOrUndefined(txBody.requiredSigners, identity),
+      txBody.requiredSigners &&
+        serializeRequiredSigners(txBody.requiredSigners),
     ],
     [TransactionBodyKeys.NETWORK_ID, identity(txBody.networkId)],
     [

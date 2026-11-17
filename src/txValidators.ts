@@ -6,7 +6,7 @@ import type {
   Int,
   Mint,
   Multiasset,
-  RequiredSigner,
+  RequiredSigners,
   TransactionBody,
   TransactionInput,
   TransactionOutput,
@@ -330,7 +330,7 @@ function* validateCollateralInputs(
 }
 
 function* validateRequiredSigners(
-  requiredSigners: CddlNonEmptySet<RequiredSigner>,
+  requiredSigners: RequiredSigners,
 ): ValidatorReturnType {
   yield* validateListConstraints(
     requiredSigners.items,

@@ -2,6 +2,7 @@ import {
   serializeTxInput,
   serializeCertificate,
   serializeCollateralInput,
+  serializeCredential,
   serializeProposalProcedure,
   identity,
 } from './txSerializers'
@@ -51,6 +52,8 @@ import {
   RelaySingleHostAddress,
   RelaySingleHostName,
   RequiredSigner,
+  RequiredSigners,
+  RequiredSignersFormat,
   KeyCredential,
   ScriptCredential,
   StakeDelegationCertificate,
@@ -926,12 +929,38 @@ export const parseRequiredSigner = (
     ParseErrorReason.INVALID_REQUIRED_SIGNERS,
   )
 
-export const parseRequiredSigners = createParser(
+const parseRequiredSignersKeyHashes = createParser(
   parseCddlNonEmptySet,
   parseRequiredSigner,
   identity,
   ParseErrorReason.INVALID_REQUIRED_SIGNERS,
 )
+
+const parseRequiredSignersCredentials = createParser(
+  parseCddlNonEmptyOrderedSet,
+  parseCredential,
+  serializeCredential,
+  ParseErrorReason.INVALID_REQUIRED_SIGNERS,
+)
+
+// The first element gives the form; mixed forms are rejected by the element parser.
+export const parseRequiredSigners = (
+  unparsedRequiredSigners: unknown,
+): RequiredSigners => {
+  const items =
+    unparsedRequiredSigners instanceof Tagged
+      ? unparsedRequiredSigners.value
+      : unparsedRequiredSigners
+  return isArray(items) && isArray(items[0])
+    ? {
+        ...parseRequiredSignersCredentials(unparsedRequiredSigners),
+        format: RequiredSignersFormat.CREDENTIALS,
+      }
+    : {
+        ...parseRequiredSignersKeyHashes(unparsedRequiredSigners),
+        format: RequiredSignersFormat.KEY_HASHES,
+      }
+}
 
 export const parseNetworkId = createParser(
   parseUint,
