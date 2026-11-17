@@ -36,6 +36,7 @@ import {
 import {
   Amount,
   BabbageTransactionOutput,
+  BlsKey,
   DatumHash,
   DatumInline,
   GenesisKeyDelegation,
@@ -103,6 +104,8 @@ import {
   TxOutputFormat,
   URL_MAX_LENGTH,
   VRF_KEY_HASH_LENGTH,
+  BLS_PUBLIC_KEY_LENGTH,
+  BLS_POSSESSION_PROOF_LENGTH,
   VoterVotes,
   VoterType,
   CommitteeKeyVoter,
@@ -502,7 +505,28 @@ const parsePoolMetadata = (unparsedPoolMetadata: unknown): PoolMetadata => {
   return {url, metadataHash}
 }
 
+const parseBlsKey = (unparsedBlsKey: unknown): BlsKey => {
+  const [publicKey, possessionProof] = parseTuple(
+    unparsedBlsKey,
+    ParseErrorReason.INVALID_BLS_KEY,
+    createParser(
+      parseBufferOfLength,
+      BLS_PUBLIC_KEY_LENGTH,
+      ParseErrorReason.INVALID_BLS_KEY,
+    ),
+    createParser(
+      parseBufferOfLength,
+      BLS_POSSESSION_PROOF_LENGTH,
+      ParseErrorReason.INVALID_BLS_KEY,
+    ),
+  )
+  return {publicKey, possessionProof}
+}
+
 const parsePoolParams = (unparsedPoolParams: unknown): PoolParams => {
+  validate(isArray(unparsedPoolParams), ParseErrorReason.INVALID_POOL_PARAMS)
+  const hasBlsKey =
+    isArray(unparsedPoolParams[2]) || unparsedPoolParams[2] === null
   const [
     operator,
     vrfKeyHash,
@@ -514,7 +538,9 @@ const parsePoolParams = (unparsedPoolParams: unknown): PoolParams => {
     relays,
     poolMetadata,
   ] = parseTuple(
-    unparsedPoolParams,
+    hasBlsKey
+      ? unparsedPoolParams.filter((_, i) => i !== 2)
+      : unparsedPoolParams,
     ParseErrorReason.INVALID_POOL_PARAMS,
     parsePoolKeyHash,
     createParser(
@@ -543,6 +569,9 @@ const parsePoolParams = (unparsedPoolParams: unknown): PoolParams => {
   return {
     operator,
     vrfKeyHash,
+    ...(hasBlsKey && {
+      blsKey: parseNullable(unparsedPoolParams[2], parseBlsKey),
+    }),
     pledge,
     cost,
     margin,

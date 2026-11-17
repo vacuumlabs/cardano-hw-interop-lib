@@ -1115,6 +1115,135 @@ export const ValidTransactionBodyTestCases: ValidTransactionBodyTestCase[] = [
       donation: undefined,
     },
   },
+  {
+    testName: 'Dijkstra tx body: pool registration certificates',
+    cbor: 'a40081825820ba638246bd9be05aa46e865320c354efea75cf5796e88b763faaa30c9fbb78de000180020004828b03581c4dfbc0559b2e1d6af62c447f0a0d6290a8b05e075ef08db38c1b81a8582067c5c0b45db55e8c82752263207b9a92c2d5fa6c671aceed9df451cad3fac7a3825860a57565542eaa01ef2b910bf0eaba4d98a1e5b8b79cc425db08f8780732d0ea9bc85fc6175f272b2344bb27bc572ebf14022e52689dcedfccf44a00e5bd1aa59db44517217d6b0f21b372169ee761938c28914ddcb9663de54db288e760a8e14f58308114c1b1ef41b6b826f612f6383989ccefc82fb4df4a49dbd828b8fd94db9d0e86a55e22861b585edf411a48374aa42a1a0001e2401a05f5e100d81e82031819581de1d7d8a321633b3d1ab1651eeb258ad898ebcef1d348b54148f18e15da81581c2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d818202781e616e6f746865722e616464726573732e76616375756d6c6162732e636f6df68b03581c4dfbc0559b2e1d6af62c447f0a0d6290a8b05e075ef08db38c1b81a8582067c5c0b45db55e8c82752263207b9a92c2d5fa6c671aceed9df451cad3fac7a3f61a0001e2401a05f5e100d81e82031819581de1d7d8a321633b3d1ab1651eeb258ad898ebcef1d348b54148f18e15da81581c2c049dfed8bc41edefbbc835ca0a739cac961557950262ef48bcff1d818202781e616e6f746865722e616464726573732e76616375756d6c6162732e636f6df6',
+    txBody: {
+      inputs: {
+        items: [
+          {
+            transactionId: toFixLenBuffer(
+              'ba638246bd9be05aa46e865320c354efea75cf5796e88b763faaa30c9fbb78de',
+              32,
+            ),
+            index: toUint(0),
+          },
+        ],
+        hasTag: false,
+      } as CddlSet<TransactionInput>,
+      outputs: [],
+      fee: toUint(0),
+      ttl: undefined,
+      certificates: {
+        items: [
+          {
+            type: CertificateType.POOL_REGISTRATION,
+            poolParams: {
+              operator: toFixLenBuffer(
+                '4DFBC0559B2E1D6AF62C447F0A0D6290A8B05E075EF08DB38C1B81A8',
+                28,
+              ),
+              vrfKeyHash: toFixLenBuffer(
+                '67C5C0B45DB55E8C82752263207B9A92C2D5FA6C671ACEED9DF451CAD3FAC7A3',
+                32,
+              ),
+              blsKey: {
+                publicKey: toFixLenBuffer(
+                  'a57565542eaa01ef2b910bf0eaba4d98a1e5b8b79cc425db08f8780732d0ea9bc85fc6175f272b2344bb27bc572ebf14022e52689dcedfccf44a00e5bd1aa59db44517217d6b0f21b372169ee761938c28914ddcb9663de54db288e760a8e14f',
+                  96,
+                ),
+                possessionProof: toFixLenBuffer(
+                  '8114c1b1ef41b6b826f612f6383989ccefc82fb4df4a49dbd828b8fd94db9d0e86a55e22861b585edf411a48374aa42a',
+                  48,
+                ),
+              },
+              pledge: toUint(123456),
+              cost: toUint(100000000),
+              margin: [toUint(3), toUint(25)],
+              rewardAccount: rewardAccount(
+                'stake1u8ta3gepvvan6x43v50wkfv2mzvwhnh36dyt2s2g7x8ptks528lzm',
+              ),
+              poolOwners: {
+                items: [
+                  toFixLenBuffer(
+                    '2C049DFED8BC41EDEFBBC835CA0A739CAC961557950262EF48BCFF1D',
+                    28,
+                  ),
+                ],
+                hasTag: false,
+              } as CddlSet<KeyHash>,
+              relays: [
+                {
+                  type: RelayType.MULTI_HOST_NAME,
+                  dnsName: toMaxLenString(
+                    'another.address.vacuumlabs.com',
+                    DNS_NAME_MAX_LENGTH,
+                  ),
+                },
+              ],
+              poolMetadata: null,
+            },
+          },
+          {
+            type: CertificateType.POOL_REGISTRATION,
+            poolParams: {
+              operator: toFixLenBuffer(
+                '4DFBC0559B2E1D6AF62C447F0A0D6290A8B05E075EF08DB38C1B81A8',
+                28,
+              ),
+              vrfKeyHash: toFixLenBuffer(
+                '67C5C0B45DB55E8C82752263207B9A92C2D5FA6C671ACEED9DF451CAD3FAC7A3',
+                32,
+              ),
+              blsKey: null,
+              pledge: toUint(123456),
+              cost: toUint(100000000),
+              margin: [toUint(3), toUint(25)],
+              rewardAccount: rewardAccount(
+                'stake1u8ta3gepvvan6x43v50wkfv2mzvwhnh36dyt2s2g7x8ptks528lzm',
+              ),
+              poolOwners: {
+                items: [
+                  toFixLenBuffer(
+                    '2C049DFED8BC41EDEFBBC835CA0A739CAC961557950262EF48BCFF1D',
+                    28,
+                  ),
+                ],
+                hasTag: false,
+              } as CddlSet<KeyHash>,
+              relays: [
+                {
+                  type: RelayType.MULTI_HOST_NAME,
+                  dnsName: toMaxLenString(
+                    'another.address.vacuumlabs.com',
+                    DNS_NAME_MAX_LENGTH,
+                  ),
+                },
+              ],
+              poolMetadata: null,
+            },
+          },
+        ],
+        hasTag: false,
+      } as CddlNonEmptyOrderedSet<Certificate>,
+      withdrawals: undefined,
+      update: undefined,
+      auxiliaryDataHash: undefined,
+      validityIntervalStart: undefined,
+      mint: undefined,
+      scriptDataHash: undefined,
+      collateralInputs: undefined,
+      requiredSigners: undefined,
+      networkId: undefined,
+      collateralReturnOutput: undefined,
+      totalCollateral: undefined,
+      referenceInputs: undefined,
+      votingProcedures: undefined,
+      proposalProcedures: undefined,
+      treasury: undefined,
+      donation: undefined,
+    },
+  },
 ]
 
 type TransformTransactionBodyTestCase = {
