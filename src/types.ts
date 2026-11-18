@@ -408,6 +408,23 @@ export type Mint = Multiasset<Int>
 // Required signer
 export type RequiredSigner = FixLenBuffer<typeof KEY_HASH_LENGTH>
 
+export enum RequiredSignersFormat {
+  KEY_HASHES,
+  CREDENTIALS,
+}
+
+export type RequiredSignersKeyHashes = CddlNonEmptySet<RequiredSigner> & {
+  format: RequiredSignersFormat.KEY_HASHES
+}
+
+export type RequiredSignersCredentials = CddlNonEmptyOrderedSet<Credential> & {
+  format: RequiredSignersFormat.CREDENTIALS
+}
+
+export type RequiredSigners =
+  | RequiredSignersKeyHashes
+  | RequiredSignersCredentials
+
 export enum VoterType {
   COMMITTEE_KEY = 0,
   COMMITTEE_SCRIPT = 1,
@@ -496,7 +513,7 @@ export type TransactionBody = {
   mint?: Mint
   scriptDataHash?: FixLenBuffer<typeof SCRIPT_DATA_HASH_LENGTH>
   collateralInputs?: CddlNonEmptySet<TransactionInput>
-  requiredSigners?: CddlNonEmptySet<RequiredSigner>
+  requiredSigners?: RequiredSigners
   networkId?: Uint
   collateralReturnOutput?: TransactionOutput
   totalCollateral?: Coin

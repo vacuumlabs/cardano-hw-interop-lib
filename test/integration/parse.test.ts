@@ -27,6 +27,28 @@ describe('Parse', () => {
   })
 
   describe('Invalid transaction bodies', () => {
+    it('Guards mix a credential and a key hash', () => {
+      expect(() =>
+        decodeTxBody(
+          Buffer.from(
+            // key 14: [[0, key hash], key hash]
+            'a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a0e828200581cfea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a581cfea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049b',
+            'hex',
+          ),
+        ),
+      ).to.throw(ParseError, ParseErrorReason.INVALID_CREDENTIAL)
+    })
+    it('Guards mix a key hash and a credential', () => {
+      expect(() =>
+        decodeTxBody(
+          Buffer.from(
+            // key 14: [key hash, [0, key hash]]
+            'a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a0e82581cfea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a8200581cfea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049b',
+            'hex',
+          ),
+        ),
+      ).to.throw(ParseError, ParseErrorReason.INVALID_REQUIRED_SIGNERS)
+    })
     it('Transaction body is not a map', () => {
       expect(() => decodeTxBody(Buffer.from('00', 'hex'))).to.throw(
         ParseError,
